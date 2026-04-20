@@ -26,6 +26,56 @@
       z-index: 100;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
+    /* ── Hamburger ── */
+    .nav-hamburger {
+      display: none;
+      background: rgba(255,255,255,0.12);
+      border: 1.5px solid rgba(255,255,255,0.7);
+      color: #fff;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 0;
+      flex-shrink: 0;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: #fff;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+    @media (max-width: 640px) {
+.nav-hamburger { display: flex; }
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: #1a56db;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 8px 16px 16px;
+        gap: 2px;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+        z-index: 99;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links button {
+        width: 100%;
+        text-align: left;
+        padding: 11px 14px;
+        font-size: 1rem;
+        border-radius: 8px;
+      }
+    }
     .nav-brand {
       font-size: 1.25rem;
       font-weight: 700;
@@ -35,25 +85,6 @@
     }
     .nav-brand span { color: #fbbf24; }
     .nav-links { display: flex; gap: 8px; align-items: center; }
-    .nav-arrows { display: flex; gap: 2px; align-items: center; margin-right: 8px; }
-    .nav-arrow {
-      background: rgba(255,255,255,0.22);
-      border: 1.5px solid rgba(255,255,255,0.7);
-      color: #fff;
-      cursor: pointer;
-      width: 30px;
-      height: 30px;
-      border-radius: 6px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s, opacity 0.15s;
-      line-height: 1;
-    }
-    .nav-arrow:hover:not(:disabled) { background: rgba(255,255,255,0.38); }
-    .nav-arrow:disabled { opacity: 0.28; cursor: default; }
     .nav-links button {
       background: transparent;
       border: none;
@@ -316,6 +347,24 @@
     }
     .breaker-desc-edit { font-size: 0.88rem; color: #374151; line-height: 1.5; }
     .breaker-desc-empty-edit { color: #9ca3af; font-style: italic; font-size: 0.85rem; }
+    .breaker-slot-edit.linked { border-left: 4px solid #f59e0b; }
+    .breaker-link-badge {
+      display: inline-block; margin-top: 5px;
+      font-size: 0.72rem; font-weight: 600;
+      color: #92400e; background: #fef3c7;
+      border-radius: 4px; padding: 1px 7px;
+    }
+    .link-pill {
+      background: #f3f4f6; border: 1.5px solid #d1d5db;
+      border-radius: 6px; padding: 4px 10px;
+      font-size: 0.78rem; cursor: pointer;
+      transition: all 0.15s; text-align: center; line-height: 1.4;
+    }
+    .link-pill.selected {
+      background: #fef3c7; border-color: #f59e0b;
+      color: #92400e; font-weight: 700;
+    }
+    .link-pill:hover:not(.selected) { border-color: #9ca3af; background: #e5e7eb; }
     .breaker-input { width: 100%; border: none; outline: none; font-size: 0.88rem; font-family: inherit; background: transparent; resize: none; color: #1f2937; }
 
     .edit-breaker-modal {
@@ -337,6 +386,12 @@
     }
     .modal-box h3 { font-size: 1.2rem; font-weight: 700; color: #1e3a8a; margin-bottom: 16px; }
     .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+    /* ── Autosave status ── */
+    .autosave-status { font-size: 0.82rem; margin-left: 10px; transition: color 0.2s; }
+    .autosave-status.saving  { color: #9ca3af; }
+    .autosave-status.saved   { color: #16a34a; font-weight: 600; }
+    .autosave-status.unsaved { color: #f59e0b; font-weight: 600; }
 
     /* ── Search bar ── */
     .search-bar {
@@ -433,6 +488,10 @@
       .page-header { padding: 20px 16px; }
       .card { margin: 24px 16px; padding: 24px; }
       .form-row { grid-template-columns: 1fr; }
+      .panel-container { padding: 16px; }
+      .panel-visual { min-width: 0; width: 100%; }
+      #vp-breakers-grid,
+      #setup-breakers-grid { grid-template-columns: 1fr !important; }
     }
 
     /* ── Print preview modal ── */
@@ -502,10 +561,10 @@
 ══════════════════════════════════════ -->
 <nav>
   <div class="nav-brand" onclick="showPage('landing')">⚡ <span>MyBreaker</span>Panel</div>
-  <div class="nav-arrows">
-    <button class="nav-arrow" id="nav-back" onclick="goBack()" disabled title="Back">&#8592;</button>
-    <button class="nav-arrow" id="nav-fwd"  onclick="goForward()" disabled title="Forward">&#8594;</button>
-  </div>
+
+  <button class="nav-hamburger" id="nav-hamburger" onclick="toggleNavMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
   <div class="nav-links" id="nav-links">
     <button onclick="showPage('landing')" title="Home">Home</button>
     <button onclick="showPage('contact')">Contact</button>
@@ -1810,8 +1869,9 @@
     <!-- Editable breaker grid -->
     <div id="vp-breakers-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:700px;"></div>
 
-    <div class="no-print" style="margin-top:24px;">
+    <div class="no-print" style="margin-top:24px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
       <button class="btn btn-blue" onclick="saveAllBreakers()">💾 Save All Changes</button>
+      <span id="vp-autosave-status" class="autosave-status"></span>
     </div>
   </div>
 
@@ -1906,7 +1966,7 @@
 <!-- ══════════════════════════════════════
      SAVE BREAKER MODAL (name/contact)
 ══════════════════════════════════════ -->
-<div id="save-modal" class="edit-breaker-modal" style="display:none">
+<div id="save-modal" class="edit-breaker-modal" style="display:none" onclick="if(event.target===this)closeSaveModal()">
   <div class="modal-box">
     <h3>💾 Save Changes</h3>
     <p style="font-size:0.9rem;color:#6b7280;margin-bottom:20px;">Please provide your contact information. This is recorded with the change history.</p>
@@ -1939,12 +1999,16 @@
 <!-- ══════════════════════════════════════
      EDIT SINGLE BREAKER MODAL
 ══════════════════════════════════════ -->
-<div id="edit-breaker-modal" class="edit-breaker-modal" style="display:none">
+<div id="edit-breaker-modal" class="edit-breaker-modal" style="display:none" onclick="if(event.target===this)closeEditBreakerModal()">
   <div class="modal-box">
     <h3 id="ebm-title">Edit Breaker</h3>
     <div class="form-group">
       <label>Description (unlimited length)</label>
       <textarea id="ebm-desc" style="min-height:100px" placeholder="e.g. Kitchen outlets, refrigerator, dishwasher"></textarea>
+    </div>
+    <div class="form-group" id="ebm-link-group">
+      <label>Linked breakers <span style="font-weight:400;color:#6b7280;font-size:0.82rem">— select breakers on the same multi-breaker circuit</span></label>
+      <div id="ebm-link-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-blue" onclick="saveEditBreaker()">Update</button>
@@ -2685,6 +2749,7 @@
     <p>Have questions, feedback, or partnership inquiries? We'd love to hear from you.</p>
     <div class="contact-form">
       <div id="contact-success" class="success-msg"></div>
+      <div id="ct-error" class="error-msg"></div>
       <div class="form-row">
         <div class="form-group">
           <label>Your Name</label>
@@ -2707,9 +2772,24 @@
 
 
 <!-- ══════════════════════════════════════
+     CONFIRM MODAL
+══════════════════════════════════════ -->
+<div id="app-confirm-modal" class="edit-breaker-modal" style="display:none"
+     onclick="if(event.target===this)closeConfirm(false)">
+  <div class="modal-box" style="max-width:420px">
+    <h3 id="app-confirm-title"></h3>
+    <p id="app-confirm-msg" style="color:#374151;font-size:0.95rem;line-height:1.5;margin-bottom:0"></p>
+    <div class="modal-actions">
+      <button id="app-confirm-ok" class="btn btn-danger" onclick="closeConfirm(true)">Confirm</button>
+      <button class="btn btn-outline" onclick="closeConfirm(false)">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
      PRINT PREVIEW MODAL
 ══════════════════════════════════════ -->
-<div id="print-preview-modal">
+<div id="print-preview-modal" onclick="if(event.target===this)closePrintPreview()">
   <div id="print-preview-inner">
     <div id="print-preview-toolbar">
       <button class="btn btn-primary" onclick="window.print()">🖨️ Print</button>
@@ -2738,7 +2818,14 @@ function setData(key, val) {
 
 function getUsers() { return getData('mbp_users', []); }
 function setUsers(u) { setData('mbp_users', u); }
-function getPanels() { return getData('mbp_panels', []); }
+function getPanels() {
+  const panels = getData('mbp_panels', []);
+  // Migration: ensure every breaker has a linkedTo array
+  panels.forEach(p => {
+    if (p.breakers) p.breakers.forEach(b => { if (!b.linkedTo) b.linkedTo = []; });
+  });
+  return panels;
+}
 function setPanels(p) { setData('mbp_panels', p); }
 function getCurrentUser() {
   const id = localStorage.getItem('mbp_currentUser');
@@ -2760,10 +2847,10 @@ let currentPage = 'landing';
 
 const PROTECTED_PAGES = ['dashboard', 'add-panel', 'your-panels', 'edit-user', 'panel-setup'];
 
-// ── Navigation history ──
-let pageHistory = [];
-let historyPos  = -1;
-let _navIgnore  = false; // prevent history push during goBack/goForward
+// ── In-app history stack (for ← → arrow buttons) ──
+let pageHistory    = [];
+let historyPos     = -1;
+let _historyIgnore = false; // set during goBack/goForward to skip push
 
 function updateNavArrows() {
   const back = document.getElementById('nav-back');
@@ -2772,7 +2859,32 @@ function updateNavArrows() {
   if (fwd)  fwd.disabled  = historyPos >= pageHistory.length - 1;
 }
 
+// ── Hamburger menu ──
+function toggleNavMenu() {
+  const links = document.getElementById('nav-links');
+  const btn   = document.getElementById('nav-hamburger');
+  const open  = links.classList.toggle('open');
+  const bars  = btn.querySelectorAll('span');
+  if (open) {
+    bars[0].style.cssText = 'transform:translateY(7px) rotate(45deg)';
+    bars[1].style.cssText = 'opacity:0';
+    bars[2].style.cssText = 'transform:translateY(-7px) rotate(-45deg)';
+  } else {
+    bars.forEach(b => b.style.cssText = '');
+  }
+}
+
+function closeNavMenu() {
+  const links = document.getElementById('nav-links');
+  const btn   = document.getElementById('nav-hamburger');
+  if (!links) return;
+  links.classList.remove('open');
+  if (btn) btn.querySelectorAll('span').forEach(b => b.style.cssText = '');
+}
+
+// ── Core renderer (only called from the hash router) ──
 function _renderPage(name) {
+  closeNavMenu();
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const el = document.getElementById('page-' + name);
   if (el) { el.classList.add('active'); currentPage = name; }
@@ -2780,37 +2892,53 @@ function _renderPage(name) {
   onPageLoad(name);
 }
 
+// ── Hash router: every page change flows through here ──
+function _setHash(name) {
+  const newHash = '#' + name;
+  if (window.location.hash === newHash) {
+    // Hash unchanged → hashchange won't fire → render directly
+    _renderPage(name);
+  } else {
+    window.location.hash = name; // triggers hashchange → _renderPage
+  }
+}
+
+window.addEventListener('hashchange', () => {
+  const name = window.location.hash.replace(/^#/, '') || 'landing';
+  _renderPage(name);
+});
+
+// ── Public API ──
 function showPage(name) {
   if (PROTECTED_PAGES.includes(name) && !getCurrentUser()) {
     document.getElementById('login-error').textContent = 'Please log in to access that page.';
     document.getElementById('login-error').style.display = 'block';
     name = 'login';
   }
-  if (!_navIgnore) {
-    // Trim forward history when navigating to a new page
+  if (!_historyIgnore) {
     pageHistory = pageHistory.slice(0, historyPos + 1);
     pageHistory.push(name);
     historyPos = pageHistory.length - 1;
     updateNavArrows();
   }
-  _renderPage(name);
+  _setHash(name);
 }
 
 function goBack() {
   if (historyPos <= 0) return;
   historyPos--;
-  _navIgnore = true;
-  _renderPage(pageHistory[historyPos]);
-  _navIgnore = false;
+  _historyIgnore = true;
+  _setHash(pageHistory[historyPos]);
+  _historyIgnore = false;
   updateNavArrows();
 }
 
 function goForward() {
   if (historyPos >= pageHistory.length - 1) return;
   historyPos++;
-  _navIgnore = true;
-  _renderPage(pageHistory[historyPos]);
-  _navIgnore = false;
+  _historyIgnore = true;
+  _setHash(pageHistory[historyPos]);
+  _historyIgnore = false;
   updateNavArrows();
 }
 
@@ -2842,13 +2970,10 @@ function onPageLoad(name) {
   }
 }
 
-// Initialize app on load — route to #access if QR code was scanned
+// Initialize — honour any hash in the URL (e.g. deep-link from QR code)
 window.addEventListener('DOMContentLoaded', () => {
-  if (window.location.hash === '#access') {
-    showPage('access');
-  } else {
-    showPage('landing');
-  }
+  const initial = window.location.hash.replace(/^#/, '') || 'landing';
+  showPage(initial);
 });
 
 // ─────────────────────────────────────
@@ -3018,7 +3143,7 @@ function saveNewPanel() {
   const user = getCurrentUser();
   const breakers = [];
   for (let i = 1; i <= numBreakers; i++) {
-    breakers.push({ number: i, description: '', history: [] });
+    breakers.push({ number: i, description: '', history: [], linkedTo: [] });
   }
 
   const panel = {
@@ -3193,11 +3318,17 @@ function openSetupQR(internalId) {
 }
 
 function deletePanel(internalId) {
-  if (!confirm('Delete this panel? This cannot be undone.')) return;
-  const panels = getPanels().filter(p => p.id !== internalId);
-  setPanels(panels);
-  renderPanelsList();
-  renderRecentPanels();
+  showConfirm(
+    'Delete Panel',
+    'Delete this panel? This cannot be undone.',
+    () => {
+      const panels = getPanels().filter(p => p.id !== internalId);
+      setPanels(panels);
+      renderPanelsList();
+      renderRecentPanels();
+    },
+    'Delete', 'btn-danger'
+  );
 }
 
 // ─────────────────────────────────────
@@ -3260,6 +3391,8 @@ function openPanelById_Internal(internalId, showBackBtn) {
   document.getElementById('print-date').textContent = 'Printed: ' + fmtDate(new Date().toISOString());
 
   renderEditGrid(panel);
+  captureEditBaseline(panel);
+  clearAutoSaveStatus();
   showPage('view-panel');
 }
 
@@ -3267,14 +3400,17 @@ function renderEditGrid(panel) {
   const grid = document.getElementById('vp-breakers-grid');
   grid.innerHTML = '';
   panel.breakers.forEach(br => {
+    const linked = br.linkedTo || [];
     const slot = document.createElement('div');
-    slot.className = 'breaker-slot-edit';
+    slot.className = 'breaker-slot-edit' + (linked.length ? ' linked' : '');
     slot.id = 'vp-slot-' + br.number;
     slot.innerHTML = `
       <div class="breaker-num-edit">${br.number}</div>
-      <div style="flex:1">
+      <div id="vp-slot-inner-${br.number}" style="flex:1">
         <textarea class="breaker-input" id="vp-br-${br.number}" rows="2"
-          placeholder="Click to describe breaker ${br.number}…">${br.description}</textarea>
+          placeholder="Click to describe breaker ${br.number}…"
+          oninput="scheduleAutoSave()">${br.description}</textarea>
+        ${linked.length ? `<span class="breaker-link-badge">🔗 Linked: ${linked.slice().sort((a,b)=>a-b).join(', ')}</span>` : ''}
       </div>`;
     grid.appendChild(slot);
   });
@@ -3299,6 +3435,47 @@ function searchBreakers() {
     slot.style.opacity = match ? '1' : '0.3';
     slot.style.borderColor = match ? '#1a56db' : '#e5e7eb';
   });
+}
+
+// ─────────────────────────────────────
+// AUTO-SAVE (debounced, no history entry)
+// ─────────────────────────────────────
+let _autoSaveTimer  = null;
+let _editBaseline   = {}; // descriptions at last explicit save (or panel open)
+
+function captureEditBaseline(panel) {
+  _editBaseline = {};
+  panel.breakers.forEach(br => { _editBaseline[br.number] = br.description; });
+}
+
+function clearAutoSaveStatus() {
+  const el = document.getElementById('vp-autosave-status');
+  if (el) { el.textContent = ''; el.className = 'autosave-status'; }
+}
+
+function scheduleAutoSave() {
+  const el = document.getElementById('vp-autosave-status');
+  if (el) { el.textContent = 'Unsaved changes…'; el.className = 'autosave-status unsaved'; }
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(autoSaveBreakers, 500);
+}
+
+function autoSaveBreakers() {
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+  panels[idx].breakers.forEach(br => {
+    const input = document.getElementById('vp-br-' + br.number);
+    if (input) br.description = input.value;
+  });
+  setPanels(panels);
+  const el = document.getElementById('vp-autosave-status');
+  if (el) {
+    el.textContent = '✓ Saved';
+    el.className = 'autosave-status saved';
+    clearTimeout(el._fadeTimer);
+    el._fadeTimer = setTimeout(() => clearAutoSaveStatus(), 3000);
+  }
 }
 
 // ─────────────────────────────────────
@@ -3335,29 +3512,30 @@ function confirmSaveBreakers() {
   if (idx === -1) return;
 
   const now = new Date().toISOString();
+  let changeCount = 0;
   panels[idx].breakers.forEach(br => {
     const input = document.getElementById('vp-br-' + br.number);
-    if (!input) return;
-    const newDesc = input.value.trim();
-    if (newDesc !== br.description) {
+    const currentDesc = input ? input.value.trim() : br.description;
+    const baselineDesc = _editBaseline[br.number] ?? '';
+    if (currentDesc !== baselineDesc) {
       br.history.push({
         date: now,
-        previousDescription: br.description,
-        newDescription: newDesc,
+        previousDescription: baselineDesc,
+        newDescription: currentDesc,
         contactName: name,
         contactPhone: phone,
         contactEmail: email,
         contactAddress: address
       });
-      br.description = newDesc;
+      br.description = currentDesc;
+      changeCount++;
     }
   });
   setPanels(panels);
+  // Reset baseline to current state
+  captureEditBaseline(panels[idx]);
   closeSaveModal();
-
-  // Flash success
-  const btn = document.querySelector('#page-view-panel .btn-blue');
-  if (btn) { btn.textContent = '✅ Saved!'; setTimeout(() => { btn.textContent = '💾 Save All Changes'; }, 2000); }
+  clearAutoSaveStatus();
 }
 
 // ─────────────────────────────────────
@@ -3417,20 +3595,38 @@ function saveEditPanelInfo() {
   const newCount = parseInt(document.getElementById('epi-numbreakers').value);
   const oldCount = panels[idx].numBreakers;
 
-  // If reducing, confirm before wiping breaker data
+  const doSave = () => _applyEditPanelInfo(newCount, address, panelId, manufacturer, location);
+
+  // If reducing with data loss, confirm first
   if (newCount < oldCount) {
     const affected = panels[idx].breakers
       .filter(b => b.number > newCount && (b.description || b.history.length > 0))
       .length;
     if (affected > 0) {
-      if (!confirm(`Reducing from ${oldCount} to ${newCount} breakers will permanently delete the descriptions and history for breakers ${newCount + 1}–${oldCount} (${affected} breaker${affected > 1 ? 's' : ''} with data). Continue?`)) return;
+      showConfirm(
+        'Reduce Breaker Count',
+        `Reducing from ${oldCount} to ${newCount} breakers will permanently delete the descriptions and history for breakers ${newCount + 1}–${oldCount} (${affected} breaker${affected > 1 ? 's' : ''} with data). Continue?`,
+        doSave,
+        'Continue', 'btn-danger'
+      );
+      return;
     }
-    // Trim the breakers array
+  }
+  doSave();
+}
+
+function _applyEditPanelInfo(newCount, address, panelId, manufacturer, location) {
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+  const suc = document.getElementById('epi-success');
+  const oldCount = panels[idx].numBreakers;
+
+  if (newCount < oldCount) {
     panels[idx].breakers = panels[idx].breakers.filter(b => b.number <= newCount);
   } else if (newCount > oldCount) {
-    // Add new empty breaker slots
     for (let i = oldCount + 1; i <= newCount; i++) {
-      panels[idx].breakers.push({ number: i, description: '', history: [] });
+      panels[idx].breakers.push({ number: i, description: '', history: [], linkedTo: [] });
     }
   }
 
@@ -3494,18 +3690,105 @@ let editingBreakerNum = null;
 
 function openEditBreakerModal(breakerNum, currentDesc, panelInternalId) {
   editingBreakerNum = breakerNum;
-  currentPanelId = panelInternalId;
+  currentPanelId    = panelInternalId;
   document.getElementById('ebm-title').textContent = 'Edit Breaker #' + breakerNum;
   document.getElementById('ebm-desc').value = currentDesc;
+
+  // Populate link pills
+  const panel    = getPanels().find(p => p.id === panelInternalId);
+  const list     = document.getElementById('ebm-link-list');
+  list.innerHTML = '';
+  if (panel && panel.breakers.length > 1) {
+    const thisBr   = panel.breakers.find(b => b.number === breakerNum);
+    const linked   = (thisBr && thisBr.linkedTo) || [];
+    panel.breakers.forEach(b => {
+      if (b.number === breakerNum) return;
+      const liveInput = document.getElementById('vp-br-' + b.number);
+      const label     = (liveInput ? liveInput.value : b.description).trim();
+      const pill      = document.createElement('button');
+      pill.type       = 'button';
+      pill.className  = 'link-pill' + (linked.includes(b.number) ? ' selected' : '');
+      pill.dataset.num = b.number;
+      pill.innerHTML  = `<strong>#${b.number}</strong>${label ? '<br><span style="font-weight:400;color:#6b7280">' + label.substring(0,28) + (label.length>28?'…':'') + '</span>' : ''}`;
+      pill.onclick    = () => pill.classList.toggle('selected');
+      list.appendChild(pill);
+    });
+  }
+
   document.getElementById('edit-breaker-modal').style.display = 'flex';
 }
 
 function saveEditBreaker() {
-  const desc = document.getElementById('ebm-desc').value.trim();
+  const desc  = document.getElementById('ebm-desc').value.trim();
   const input = document.getElementById('vp-br-' + editingBreakerNum) ||
                 document.getElementById('setup-br-' + editingBreakerNum);
   if (input) input.value = desc;
+
+  // Collect selected link pills and sync bidirectionally
+  const selected = Array.from(document.querySelectorAll('#ebm-link-list .link-pill.selected'))
+                        .map(p => parseInt(p.dataset.num));
+  _syncLinks(currentPanelId, editingBreakerNum, selected);
+
+  // Refresh badges on all visible slots
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (panel) _refreshAllLinkBadges(panel);
+
+  scheduleAutoSave();
   closeEditBreakerModal();
+}
+
+// ── Bidirectional link sync ──────────────────────────────
+function _syncLinks(panelId, breakerNum, newLinked) {
+  const panels = getPanels();
+  const panel  = panels.find(p => p.id === panelId);
+  if (!panel) return;
+  const br = panel.breakers.find(b => b.number === breakerNum);
+  if (!br) return;
+
+  const oldLinked = br.linkedTo || [];
+
+  // Remove this breaker from partners that are being unlinked
+  oldLinked.forEach(partnerNum => {
+    if (!newLinked.includes(partnerNum)) {
+      const partner = panel.breakers.find(b => b.number === partnerNum);
+      if (partner) partner.linkedTo = (partner.linkedTo || []).filter(n => n !== breakerNum);
+    }
+  });
+
+  // Add this breaker to any newly selected partners
+  newLinked.forEach(partnerNum => {
+    const partner = panel.breakers.find(b => b.number === partnerNum);
+    if (partner) {
+      if (!partner.linkedTo) partner.linkedTo = [];
+      if (!partner.linkedTo.includes(breakerNum)) partner.linkedTo.push(breakerNum);
+    }
+  });
+
+  br.linkedTo = newLinked;
+  setPanels(panels);
+}
+
+// ── Refresh link badges in the visible grid ──────────────
+function _refreshAllLinkBadges(panel) {
+  panel.breakers.forEach(br => {
+    const slot  = document.getElementById('vp-slot-' + br.number);
+    if (!slot) return;
+    const inner  = document.getElementById('vp-slot-inner-' + br.number);
+    const linked = br.linkedTo || [];
+
+    // Update linked class on slot
+    slot.classList.toggle('linked', linked.length > 0);
+
+    // Remove old badge and re-add if needed
+    const old = inner ? inner.querySelector('.breaker-link-badge') : null;
+    if (old) old.remove();
+    if (inner && linked.length > 0) {
+      const badge       = document.createElement('span');
+      badge.className   = 'breaker-link-badge';
+      badge.textContent = '🔗 Linked: ' + linked.slice().sort((a, b) => a - b).join(', ');
+      inner.appendChild(badge);
+    }
+  });
 }
 
 function closeEditBreakerModal() {
@@ -3520,7 +3803,13 @@ function submitContact() {
   const name = document.getElementById('ct-name').value.trim();
   const email = document.getElementById('ct-email').value.trim();
   const msg = document.getElementById('ct-message').value.trim();
-  if (!name || !email || !msg) { alert('Please fill in all fields.'); return; }
+  const ctErr = document.getElementById('ct-error');
+  ctErr.style.display = 'none';
+  if (!name || !email || !msg) {
+    ctErr.textContent = 'Please fill in all fields.';
+    ctErr.style.display = 'block';
+    return;
+  }
   const s = document.getElementById('contact-success');
   s.textContent = 'Thanks, ' + name + '! Your message has been received.';
   s.style.display = 'block';
@@ -3603,6 +3892,35 @@ function closePrintPreview() {
   document.getElementById('print-preview-modal').classList.remove('open');
   document.body.style.overflow = '';
 }
+
+// ── App confirm modal (replaces browser confirm()) ──
+let _confirmCallback = null;
+
+function showConfirm(title, message, onConfirm, confirmLabel = 'Confirm', confirmClass = 'btn-danger') {
+  document.getElementById('app-confirm-title').textContent = title;
+  document.getElementById('app-confirm-msg').textContent   = message;
+  const ok = document.getElementById('app-confirm-ok');
+  ok.textContent = confirmLabel;
+  ok.className   = 'btn ' + confirmClass;
+  _confirmCallback = onConfirm;
+  document.getElementById('app-confirm-modal').style.display = 'flex';
+}
+
+function closeConfirm(confirmed) {
+  document.getElementById('app-confirm-modal').style.display = 'none';
+  const cb = _confirmCallback;
+  _confirmCallback = null;
+  if (confirmed && cb) cb();
+}
+
+// ── Global Escape key: dismiss any open modal ──
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('save-modal').style.display !== 'none')         closeSaveModal();
+  if (document.getElementById('edit-breaker-modal').style.display !== 'none') closeEditBreakerModal();
+  if (document.getElementById('print-preview-modal').classList.contains('open')) closePrintPreview();
+  if (document.getElementById('app-confirm-modal').style.display !== 'none')  closeConfirm(false);
+});
 
 </script>
 </body>
