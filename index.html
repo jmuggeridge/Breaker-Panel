@@ -449,6 +449,28 @@
     .history-item .hist-breaker { font-weight: 700; color: #1e3a8a; font-size: 0.9rem; }
     .history-item .hist-desc { color: #374151; font-size: 0.88rem; margin-top: 4px; }
     .history-item .hist-contact { color: #6b7280; font-size: 0.82rem; margin-top: 6px; }
+    /* ── Comparison View ── */
+    .hist-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .hist-tab { padding: 8px 18px; border: 2px solid #bfdbfe; border-radius: 8px; background: white; cursor: pointer; font-size: 0.9rem; color: #374151; transition: background 0.15s, color 0.15s; }
+    .hist-tab.active { background: #1a56db; color: white; border-color: #1a56db; }
+    .compare-controls { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+    .compare-selects { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+    .compare-field { flex: 1; min-width: 160px; }
+    .compare-field label { display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 5px; }
+    .compare-field select { width: 100%; padding: 8px 10px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; }
+    .compare-arr { font-size: 1.4rem; color: #9ca3af; align-self: flex-end; padding-bottom: 10px; }
+    .compare-result-hdr { font-size: 1rem; font-weight: 700; color: #1e3a8a; margin-bottom: 8px; }
+    .compare-summary { color: #374151; margin-bottom: 14px; font-size: 0.9rem; }
+    .compare-item { display: flex; gap: 8px; align-items: baseline; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .compare-item.changed { background: #fef9c3; border-left: 4px solid #f59e0b; }
+    .compare-item.added   { background: #f0fdf4; border-left: 4px solid #22c55e; }
+    .compare-item.cleared { background: #fef2f2; border-left: 4px solid #ef4444; }
+    .compare-item.same    { background: #f8fafc; border-left: 4px solid #e2e8f0; }
+    .ci-num  { font-weight: 700; color: #1e3a8a; min-width: 36px; font-size: 0.85rem; }
+    .ci-old  { color: #9ca3af; text-decoration: line-through; font-size: 0.88rem; }
+    .ci-arr  { color: #9ca3af; font-size: 0.85rem; padding: 0 4px; }
+    .ci-new  { font-weight: 600; color: #111827; font-size: 0.9rem; }
+    .ci-same { color: #9ca3af; font-size: 0.88rem; }
 
     /* ── Section headings ── */
     .section-title {
@@ -1965,15 +1987,37 @@
 <div id="page-history" class="page">
   <div class="page-header">
     <h1 id="hist-title">Breaker History</h1>
-    <p>All additions and changes for this panel, newest first.</p>
   </div>
   <div class="page-content">
-    <div id="history-list" class="history-list"></div>
-    <button class="btn btn-outline" id="hist-back-btn" onclick="openPanelById_Internal(currentPanelId, true)">← Back to Panel</button>
+    <div class="hist-tabs">
+      <button class="hist-tab active" id="hist-tab-timeline" onclick="switchHistTab('timeline')">📋 Timeline</button>
+      <button class="hist-tab" id="hist-tab-compare" onclick="switchHistTab('compare')">🔍 Compare</button>
+    </div>
+    <div id="hist-timeline-view">
+      <p style="color:#9ca3af;font-size:0.88rem;margin-bottom:12px">All changes for this panel, newest first.</p>
+      <div id="history-list" class="history-list"></div>
+    </div>
+    <div id="hist-compare-view" style="display:none">
+      <div class="compare-controls">
+        <div class="compare-selects">
+          <div class="compare-field">
+            <label>From</label>
+            <select id="compare-from"></select>
+          </div>
+          <div class="compare-arr">→</div>
+          <div class="compare-field">
+            <label>To</label>
+            <select id="compare-to"></select>
+          </div>
+        </div>
+        <button class="btn btn-blue" onclick="runComparison()">Compare</button>
+      </div>
+      <div id="compare-results"></div>
+    </div>
+    <button class="btn btn-outline" id="hist-back-btn" onclick="showPage('view-panel')">← Back to Panel</button>
   </div>
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
 </div>
-
 <!-- ══════════════════════════════════════
      SAVE BREAKER MODAL (name/contact)
 ══════════════════════════════════════ -->
@@ -3662,6 +3706,7 @@ function openPanelHistory(internalId) {
   currentPanelId = internalId;
   document.getElementById('hist-title').textContent = 'History: ' + panel.panelId;
   renderHistory(panel);
+  switchHistTab('timeline');
   showPage('history');
 }
 
@@ -3670,6 +3715,7 @@ function viewBreakerHistory() {
 }
 
 function renderHistory(panel) {
+  _histPanel = panel;
   const el = document.getElementById('history-list');
   // Gather all history events across breakers
   const events = [];
@@ -3692,6 +3738,93 @@ function renderHistory(panel) {
       </div>
       <div class="hist-contact">By: ${h.contactName} · ${h.contactPhone} · ${h.contactEmail}${h.contactAddress ? ' · ' + h.contactAddress : ''}</div>
     </div>`).join('');
+}
+
+// ─────────────────────────────────────
+// COMPARISON VIEW
+// ─────────────────────────────────────
+let _histPanel = null;
+
+function switchHistTab(tab) {
+  document.getElementById('hist-tab-timeline').classList.toggle('active', tab === 'timeline');
+  document.getElementById('hist-tab-compare').classList.toggle('active', tab === 'compare');
+  document.getElementById('hist-timeline-view').style.display = tab === 'timeline' ? '' : 'none';
+  document.getElementById('hist-compare-view').style.display  = tab === 'compare'   ? '' : 'none';
+  if (tab === 'compare' && _histPanel) _populateCompareDates(_histPanel);
+}
+
+function _populateCompareDates(panel) {
+  const dates = [];
+  const seen = new Set();
+  panel.breakers.forEach(br => br.history.forEach(h => { if (!seen.has(h.date)) { seen.add(h.date); dates.push(h.date); } }));
+  dates.sort();
+  const fromSel = document.getElementById('compare-from');
+  const toSel   = document.getElementById('compare-to');
+  let fromOpts = '<option value="__initial__">Initial state (before any saves)</option>';
+  dates.forEach(d => { fromOpts += `<option value="${d}">${fmtDate(d)}</option>`; });
+  let toOpts = '';
+  dates.forEach(d => { toOpts += `<option value="${d}">${fmtDate(d)}</option>`; });
+  toOpts += '<option value="__current__" selected>Current state</option>';
+  fromSel.innerHTML = fromOpts;
+  toSel.innerHTML   = toOpts;
+  document.getElementById('compare-results').innerHTML = '';
+}
+
+function _buildSnapshot(panel, cutoff) {
+  // Returns { breakerNum: description } for state at/before cutoff
+  // cutoff = null → initial (before any history), '' → current
+  const snap = {};
+  panel.breakers.forEach(br => {
+    let desc = br.description;
+    if (cutoff !== '') {
+      const sorted = [...br.history].sort((a, b) => new Date(b.date) - new Date(a.date));
+      for (const h of sorted) {
+        if (cutoff === null || new Date(h.date) > new Date(cutoff)) desc = h.previousDescription || '';
+      }
+    }
+    snap[br.number] = desc || '';
+  });
+  return snap;
+}
+
+function runComparison() {
+  const panel = _histPanel;
+  if (!panel) return;
+  const fromVal = document.getElementById('compare-from').value;
+  const toVal   = document.getElementById('compare-to').value;
+  const snapA = _buildSnapshot(panel, fromVal === '__initial__' ? null : fromVal);
+  const snapB = _buildSnapshot(panel, toVal   === '__current__' ? ''   : toVal);
+  const fromLbl = fromVal === '__initial__' ? 'Initial state' : fmtDate(fromVal);
+  const toLbl   = toVal   === '__current__' ? 'Current state' : fmtDate(toVal);
+  let nChanged = 0, nAdded = 0, nCleared = 0;
+  const rows = panel.breakers.map(br => {
+    const a = snapA[br.number]; const b = snapB[br.number];
+    let cls = 'same';
+    if (a !== b) {
+      if (!a && b)  { cls = 'added';   nAdded++;   }
+      else if (a && !b) { cls = 'cleared'; nCleared++; }
+      else              { cls = 'changed'; nChanged++; }
+    }
+    return { num: br.number, a, b, cls };
+  });
+  const total = nChanged + nAdded + nCleared;
+  const changed = rows.filter(r => r.cls !== 'same');
+  const same    = rows.filter(r => r.cls === 'same');
+  const ri = r => {
+    let inner = '';
+    if      (r.cls === 'added')   inner = `<span class="ci-new">${escHtml(r.b)}</span><span class="ci-arr"> ← newly labelled</span>`;
+    else if (r.cls === 'cleared') inner = `<span class="ci-old">${escHtml(r.a)}</span><span class="ci-arr"> → </span><span style="color:#ef4444;font-style:italic">cleared</span>`;
+    else if (r.cls === 'changed') inner = `<span class="ci-old">${escHtml(r.a)}</span><span class="ci-arr">→</span><span class="ci-new">${escHtml(r.b)}</span>`;
+    else                          inner = `<span class="ci-same">${escHtml(r.b) || '<em>empty</em>'}</span>`;
+    return `<div class="compare-item ${r.cls}"><span class="ci-num">#${r.num}</span>${inner}</div>`;
+  };
+  const summaryTxt = total === 0 ? 'No differences between these snapshots.'
+    : `${total} change${total !== 1 ? 's' : ''} — ${nChanged} updated, ${nAdded} newly labelled, ${nCleared} cleared.`;
+  document.getElementById('compare-results').innerHTML =
+    `<p class="compare-result-hdr">Comparing: <em>${escHtml(fromLbl)}</em> → <em>${escHtml(toLbl)}</em></p>
+    <p class="compare-summary">${summaryTxt}</p>
+    ${changed.map(ri).join('')}
+    ${same.length && total > 0 ? `<details style="margin-top:14px"><summary style="cursor:pointer;color:#6b7280;font-size:0.88rem">${same.length} unchanged breaker${same.length !== 1 ? 's' : ''}</summary><div style="margin-top:8px">${same.map(ri).join('')}</div></details>` : ''}`;
 }
 
 // ─────────────────────────────────────
