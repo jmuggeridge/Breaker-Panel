@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MyBreakerPanel</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <style>
     /* ── Reset & Base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -2861,6 +2863,36 @@
 <script>
 
 // ─────────────────────────────────────
+// FIREBASE CLOUD SYNC
+// ─────────────────────────────────────
+const _fbCfg={apiKey:"AIzaSyArh-1SBLVDFnBGVml0do-LgSJGrpZVAM4",authDomain:"mybreakerpanel.firebaseapp.com",projectId:"mybreakerpanel",storageBucket:"mybreakerpanel.firebasestorage.app",messagingSenderId:"594886339510",appId:"1:594886339510:web:34fa0a4d0c59d179c2af17"};
+let _db=null;
+try{if(typeof firebase!=="undefined"){firebase.initializeApp(_fbCfg);_db=firebase.firestore();}}
+catch(e){console.warn("Firebase init:",e);}
+
+function syncToCloud(p){
+  if(!_db||!p||!p.panelId)return;
+  _db.collection("panels").doc(p.panelId).set(p).catch(e=>console.warn("sync:",e));
+}
+function deleteFromCloud(id){
+  if(!_db||!id)return;
+  _db.collection("panels").doc(id).delete().catch(e=>console.warn("del:",e));
+}
+async function fetchFromCloud(id){
+  if(!_db)return null;
+  try{const d=await _db.collection("panels").doc(id.toUpperCase()).get();return d.exists?d.data():null;}
+  catch(e){console.warn("fetch:",e);return null;}
+}
+function migrateLocalToCloud(){
+  if(!_db||localStorage.getItem("bp_synced"))return;
+  const ps=getPanels();
+  if(!ps.length){localStorage.setItem("bp_synced","1");return;}
+  Promise.all(ps.map(p=>_db.collection("panels").doc(p.panelId).set(p)))
+    .then(()=>localStorage.setItem("bp_synced","1"))
+    .catch(e=>console.warn("migrate:",e));
+}
+
+// ─────────────────────────────────────
 // DATA LAYER
 // ─────────────────────────────────────
 function getData(key, fallback) {
@@ -3027,6 +3059,7 @@ function onPageLoad(name) {
 
 // Initialize — honour any hash in the URL (e.g. deep-link from QR code)
 window.addEventListener('DOMContentLoaded', () => {
+  migrateLocalToCloud();
   const initial = window.location.hash.replace(/^#/, '') || 'landing';
   showPage(initial);
 });
@@ -3288,7 +3321,7 @@ function showQRPage(panel) {
   document.getElementById('qr-panel-id-text').textContent = panel.panelId;
 
   // QR code links to the app homepage only — user enters Panel ID once they arrive
-  const appUrl = window.location.href.split('?')[0];
+  const url = window.location.href.split('?')[0] + '?panel=' + encodeURIComponent(panel.panelId);
 
   const container = document.getElementById('qr-code-display');
   container.innerHTML = '';
@@ -3377,8 +3410,10 @@ function deletePanel(internalId) {
     'Delete Panel',
     'Delete this panel? This cannot be undone.',
     () => {
+    const _del = getPanels().find(p=>p.id===internalId);
       const panels = getPanels().filter(p => p.id !== internalId);
       setPanels(panels);
+    if(_del)deleteFromCloud(_del.panelId);
       renderPanelsList();
       renderRecentPanels();
     },
@@ -3389,43 +3424,41 @@ function deletePanel(internalId) {
 // ─────────────────────────────────────
 // VIEW / EDIT PANEL
 // ─────────────────────────────────────
-function openPanelById(panelId, showBackBtn) {
-  // lookup by panelId string
-  const panel = getPanels().find(p => p.panelId === panelId.toUpperCase());
+async function openPanelById(panelId, showBackBtn) {
+  const KEY = panelId.toUpperCase();
+  let panel = getPanels().find(p => p.panelId === KEY);
+  if (!panel && _db) {
+    panel = await fetchFromCloud(KEY);
+    if (panel) { const ps=getPanels(); if(!ps.find(p=>p.panelId===KEY)){ps.push(panel);setPanels(ps);} }
+  }
   if (!panel) {
     const err = document.getElementById('landing-panel-error');
-    if (err) { err.style.display = 'block'; }
+    if (err) err.style.display = 'block';
     showPage('landing');
     return;
   }
   currentPanelId = panel.id;
   openPanelById_Internal(panel.id, showBackBtn);
 }
-
-function lookupPanelId() {
-  const val = document.getElementById('landing-panel-id') ? document.getElementById('landing-panel-id').value.trim() : '';
+async function lookupPanelId() {
+  const inputEl = document.getElementById('landing-panel-id');
+  const val = inputEl ? inputEl.value.trim() : '';
   if (!val) return;
   const err = document.getElementById('landing-panel-error');
   if (err) err.style.display = 'none';
-  const panel = getPanels().find(p => p.panelId === val.toUpperCase());
-  if (!panel) { if (err) err.style.display = 'block'; return; }
+  const KEY = val.toUpperCase();
+  let panel = getPanels().find(p => p.panelId === KEY);
+  if (!panel && _db) {
+    if (err) { err.textContent = 'Looking up panel…'; err.style.color='#1a56db'; err.style.display='block'; }
+    panel = await fetchFromCloud(KEY);
+    if (panel) { const ps=getPanels(); if(!ps.find(p=>p.panelId===KEY)){ps.push(panel);setPanels(ps);} }
+    if (err) { err.style.color=''; err.textContent='Panel ID not found. Check the ID and try again.'; }
+  }
+  if (!panel) { if(err)err.style.display='block'; return; }
+  if (err) err.style.display = 'none';
   currentPanelId = panel.id;
   openPanelById_Internal(panel.id, false);
 }
-
-function lookupAccessPanel() {
-  const input = document.getElementById('access-panel-id');
-  const err   = document.getElementById('access-panel-error');
-  if (!input) return;
-  const val = input.value.trim().toUpperCase();
-  err.style.display = 'none';
-  if (!val) return;
-  const panel = getPanels().find(p => p.panelId === val);
-  if (!panel) { err.style.display = 'block'; return; }
-  currentPanelId = panel.id;
-  openPanelById_Internal(panel.id, false);
-}
-
 function openPanelById_Internal(internalId, showBackBtn) {
   const panel = getPanels().find(p => p.id === internalId);
   if (!panel) return;
@@ -3587,6 +3620,7 @@ function confirmSaveBreakers() {
     }
   });
   setPanels(panels);
+  syncToCloud(panels[idx]);
   // Reset baseline to current state
   captureEditBaseline(panels[idx]);
   closeSaveModal();
@@ -3691,6 +3725,7 @@ function _applyEditPanelInfo(newCount, address, panelId, manufacturer, location)
   panels[idx].manufacturer = manufacturer;
   panels[idx].locationDescription = location;
   setPanels(panels);
+    syncToCloud(panels[idx]);
 
   suc.textContent = 'Panel info updated!';
   suc.style.display = 'block';
