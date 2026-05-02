@@ -8,13 +8,13 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <style>
-    /* ── Reset & Base ── */
+    /* ââ Reset & Base ââ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #ffffff; color: #1f2937; min-height: 100vh; }
     a { color: #1a56db; text-decoration: none; }
     a:hover { text-decoration: underline; }
 
-    /* ── Nav ── */
+    /* ââ Nav ââ */
     nav {
       background: #1a56db;
       color: #fff;
@@ -28,7 +28,7 @@
       z-index: 100;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
-    /* ── Hamburger ── */
+    /* ââ Hamburger ââ */
     .nav-hamburger {
       display: none;
       background: rgba(255,255,255,0.12);
@@ -105,11 +105,11 @@
     }
     .nav-links .btn-nav-accent:hover { background: #f59e0b; }
 
-    /* ── Pages ── */
+    /* ââ Pages ââ */
     .page { display: none; min-height: calc(100vh - 56px); }
     .page.active { display: block; }
 
-    /* ── Hero / Landing ── */
+    /* ââ Hero / Landing ââ */
     .hero {
       background: linear-gradient(135deg, #1e3a8a 0%, #1a56db 60%, #3b82f6 100%);
       color: #fff;
@@ -180,7 +180,7 @@
     }
     .qr-entry input:focus { border-color: #1a56db; }
 
-    /* ── Forms / Cards ── */
+    /* ââ Forms / Cards ââ */
     .card {
       background: #fff;
       border-radius: 14px;
@@ -212,7 +212,7 @@
     .error-msg { background: #fee2e2; color: #b91c1c; border-radius: 6px; padding: 10px 14px; font-size: 0.9rem; margin-bottom: 16px; display: none; }
     .success-msg { background: #d1fae5; color: #065f46; border-radius: 6px; padding: 10px 14px; font-size: 0.9rem; margin-bottom: 16px; display: none; }
 
-    /* ── Dashboard ── */
+    /* ââ Dashboard ââ */
     .page-header {
       background: #f8fafc;
       border-bottom: 1px solid #e5e7eb;
@@ -237,7 +237,7 @@
     .dash-card h3 { font-size: 1rem; font-weight: 700; color: #1e3a8a; margin-bottom: 6px; }
     .dash-card p { font-size: 0.85rem; color: #6b7280; }
 
-    /* ── Panel List ── */
+    /* ââ Panel List ââ */
     .panel-list { margin-top: 20px; }
     .panel-item {
       background: #fff;
@@ -266,7 +266,7 @@
     .badge-blue { background: #dbeafe; color: #1e40af; }
     .badge-green { background: #d1fae5; color: #065f46; }
 
-    /* ── Panel Visual ── */
+    /* ââ Panel Visual ââ */
     .panel-container {
       background: #fff;
       padding: 24px 32px;
@@ -389,13 +389,13 @@
     .modal-box h3 { font-size: 1.2rem; font-weight: 700; color: #1e3a8a; margin-bottom: 16px; }
     .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
 
-    /* ── Autosave status ── */
+    /* ââ Autosave status ââ */
     .autosave-status { font-size: 0.82rem; margin-left: 10px; transition: color 0.2s; }
     .autosave-status.saving  { color: #9ca3af; }
     .autosave-status.saved   { color: #16a34a; font-weight: 600; }
     .autosave-status.unsaved { color: #f59e0b; font-weight: 600; }
 
-    /* ── Search bar ── */
+    /* ââ Search bar ââ */
     .search-bar {
       display: flex;
       gap: 10px;
@@ -414,7 +414,7 @@
     .search-bar input:focus { border-color: #1a56db; }
     .search-highlight { background: #fef08a; border-radius: 2px; }
 
-    /* ── QR Code ── */
+    /* ââ QR Code ââ */
     .qr-result-box {
       background: #f0f9ff;
       border: 2px solid #bae6fd;
@@ -438,7 +438,7 @@
       margin-bottom: 10px;
     }
 
-    /* ── History ── */
+    /* ââ History ââ */
     .history-list { margin-top: 8px; }
     .history-item {
       background: #f9fafb;
@@ -451,7 +451,7 @@
     .history-item .hist-breaker { font-weight: 700; color: #1e3a8a; font-size: 0.9rem; }
     .history-item .hist-desc { color: #374151; font-size: 0.88rem; margin-top: 4px; }
     .history-item .hist-contact { color: #6b7280; font-size: 0.82rem; margin-top: 6px; }
-    /* ── Comparison View ── */
+    /* ââ Comparison View ââ */
     .hist-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
     .hist-tab { padding: 8px 18px; border: 2px solid #bfdbfe; border-radius: 8px; background: white; cursor: pointer; font-size: 0.9rem; color: #374151; transition: background 0.15s, color 0.15s; }
     .hist-tab.active { background: #1a56db; color: white; border-color: #1a56db; }
@@ -474,7 +474,7 @@
     .ci-new  { font-weight: 600; color: #111827; font-size: 0.9rem; }
     .ci-same { color: #9ca3af; font-size: 0.88rem; }
 
-    /* ── Section headings ── */
+    /* ââ Section headings ââ */
     .section-title {
       font-size: 1.1rem;
       font-weight: 700;
@@ -484,14 +484,14 @@
       border-bottom: 2px solid #e5e7eb;
     }
 
-    /* ── Contact / About ── */
+    /* ââ Contact / About ââ */
     .info-page { max-width: 700px; margin: 48px auto; padding: 0 24px; }
     .info-page h1 { font-size: 2rem; font-weight: 800; color: #1e3a8a; margin-bottom: 16px; }
     .info-page p { color: #374151; line-height: 1.8; margin-bottom: 16px; }
     .info-page h2 { font-size: 1.3rem; font-weight: 700; color: #1e3a8a; margin: 28px 0 10px; }
     .contact-form { background: #f8fafc; border-radius: 12px; padding: 28px; border: 1px solid #e5e7eb; margin-top: 20px; }
 
-    /* ── Footer ── */
+    /* ââ Footer ââ */
     footer {
       background: #1e3a8a;
       color: rgba(255,255,255,0.7);
@@ -502,10 +502,10 @@
     }
     footer span { color: #fbbf24; font-weight: 600; }
 
-    /* ── Divider ── */
+    /* ââ Divider ââ */
     .divider { border: none; border-top: 1px solid #e5e7eb; margin: 28px 0; }
 
-    /* ── Responsive ── */
+    /* ââ Responsive ââ */
     @media (max-width: 600px) {
       .hero h1 { font-size: 1.9rem; }
       .page-content { padding: 20px 16px; }
@@ -518,7 +518,7 @@
       #setup-breakers-grid { grid-template-columns: 1fr !important; }
     }
 
-    /* ── Print preview modal ── */
+    /* ââ Print preview modal ââ */
     #print-preview-modal {
       display: none;
       position: fixed;
@@ -565,7 +565,7 @@
     .pp-table td.pp-desc { min-height: 26px; color: #111; }
     .pp-empty { color: #bbb; }
 
-    /* ── Print styles — only print the preview content ── */
+    /* ââ Print styles â only print the preview content ââ */
     @media print {
       body > *:not(#print-preview-modal) { display: none !important; }
       #print-preview-modal { display: block !important; position: static !important; background: none !important; padding: 0 !important; overflow: visible !important; }
@@ -580,11 +580,11 @@
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      NAVIGATION
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <nav>
-  <div class="nav-brand" onclick="showPage('landing')">⚡ <span>MyBreaker</span>Panel</div>
+  <div class="nav-brand" onclick="showPage('landing')">â¡ <span>MyBreaker</span>Panel</div>
 
   <button class="nav-hamburger" id="nav-hamburger" onclick="toggleNavMenu()" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -600,31 +600,31 @@
   </div>
 </nav>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      LANDING PAGE
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-landing" class="page active">
   <div class="hero">
     <h1>Your Panel.<br><span>Organized. Accessible. Safe.</span></h1>
-    <p>Stop guessing which breaker controls which circuit. MyBreakerPanel gives every electrical panel a digital, QR-code-accessible register — always accurate, always available.</p>
+    <p>Stop guessing which breaker controls which circuit. MyBreakerPanel gives every electrical panel a digital, QR-code-accessible register â always accurate, always available.</p>
     <div class="hero-btns">
       <button class="btn btn-primary" onclick="showPage('signup')">Get Started Free</button>
       <button class="btn btn-secondary" onclick="showPage('login')">Log In</button>
     </div>
   </div>
 
-  <!-- ── Access Your Panel ── -->
+  <!-- ââ Access Your Panel ââ -->
   <div class="qr-section">
-    <h2>🔍 Access Your Panel</h2>
-    <p>Have a Panel ID? Enter it below to view that panel — no account required.</p>
+    <h2>ð Access Your Panel</h2>
+    <p>Have a Panel ID? Enter it below to view that panel â no account required.</p>
     <div class="qr-entry">
-      <input type="text" id="landing-panel-id" placeholder="Enter Panel ID…" onkeydown="if(event.key==='Enter')lookupPanelId()" />
+      <input type="text" id="landing-panel-id" placeholder="Enter Panel IDâ¦" onkeydown="if(event.key==='Enter')lookupPanelId()" />
       <button class="btn btn-blue" onclick="lookupPanelId()">View Panel</button>
     </div>
     <div id="landing-panel-error" class="error-msg" style="display:none;max-width:340px;margin:12px auto 0;">Panel ID not found. Check the ID and try again.</div>
   </div>
 
-  <!-- ══ Problem / Solution ══ -->
+  <!-- ââ Problem / Solution ââ -->
   <div style="max-width:860px;margin:0 auto;padding:52px 24px 48px;">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:48px;" class="about-two-col">
 
@@ -683,7 +683,7 @@
             <text x="27" y="155" font-size="6.8" fill="#2a2a2a" transform="rotate(1.3,27,155)">Wtr htr</text>
             <text x="158" y="154" font-size="6.5" fill="#3a3a3a" font-weight="600">10</text>
             <text x="174" y="154" font-size="6.8" fill="#2a2a2a" transform="rotate(0.4,174,154)">Office</text>
-            <text x="200" y="153" font-size="5.5" fill="#cc0000" transform="rotate(-1.2,200,153)">←NO! gst rm</text>
+            <text x="200" y="153" font-size="5.5" fill="#cc0000" transform="rotate(-1.2,200,153)">âNO! gst rm</text>
             <line x1="5" y1="186" x2="295" y2="186" stroke="#ddd0a0" stroke-width="0.5"/>
             <text x="14" y="178" font-size="6.5" fill="#3a3a3a" font-weight="600">11</text>
             <text x="27" y="179" font-size="6.5" fill="#2a2a2a" transform="rotate(-0.6,27,179)">Outdr lgts</text>
@@ -704,13 +704,13 @@
             <text x="213" y="226" font-size="6.5" fill="#cc0000" transform="rotate(-1,213,226)">??</text>
             <ellipse cx="240" cy="102" rx="18" ry="16" fill="none" stroke="#b8843a" stroke-width="2.2" opacity="0.2"/>
             <ellipse cx="240" cy="102" rx="15" ry="13" fill="none" stroke="#b8843a" stroke-width="1" opacity="0.12"/>
-            <text x="9" y="246" font-size="5.5" fill="#666" font-style="italic" transform="rotate(-0.4,9,246)">* Updated 2019 — call Mike w/ questions  555-0142</text>
+            <text x="9" y="246" font-size="5.5" fill="#666" font-style="italic" transform="rotate(-0.4,9,246)">* Updated 2019 â call Mike w/ questions  555-0142</text>
             <polygon points="272,258 295,234 295,258" fill="#e8ddb0" stroke="#c8b97a" stroke-width="0.5"/>
             <polygon points="272,258 295,234 272,234" fill="#f5f0d8" stroke="#c8b97a" stroke-width="0.5"/>
           </svg>
         </div>
         <h2 style="font-size:1.15rem;font-weight:700;color:#b91c1c;margin-bottom:10px;">The Problem</h2>
-        <p style="color:#374151;line-height:1.75;font-size:0.95rem;">Circuit breaker panels are plagued by inaccurate, outdated descriptions. The most common solution — a penciled-in paper register on the panel door — is cramped, hard to read, and almost never updated. There's no record of who made changes or when.</p>
+        <p style="color:#374151;line-height:1.75;font-size:0.95rem;">Circuit breaker panels are plagued by inaccurate, outdated descriptions. The most common solution â a penciled-in paper register on the panel door â is cramped, hard to read, and almost never updated. There's no record of who made changes or when.</p>
       </div>
 
       <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:14px;padding:28px;">
@@ -726,10 +726,10 @@
             <rect x="5" y="18" width="370" height="14" fill="#1e3a8a"/>
             <text x="155" y="21" text-anchor="middle" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="0.8">CIRCUIT BREAKER PANEL DIRECTORY</text>
             <text x="14" y="42" font-size="9" font-weight="800" fill="#1e3a8a">Panel ID: MAIN-01</text>
-            <text x="14" y="53" font-size="7" fill="#444">Main Electrical Panel  ·  Garage, North Wall  ·  200A Service</text>
-            <text x="14" y="63" font-size="6.5" fill="#666">Installed by: R. Kowalski Electric  ·  Permit #2019-4821</text>
-            <text x="14" y="73" font-size="6" fill="#999">Contact: James Mugg  ·  (555) 204-7731  ·  mugg@muggventures.com</text>
-            <text x="14" y="83" font-size="6" fill="#bbb">Printed: March 18, 2026  ·  Last updated: March 15, 2026</text>
+            <text x="14" y="53" font-size="7" fill="#444">Main Electrical Panel  Â·  Garage, North Wall  Â·  200A Service</text>
+            <text x="14" y="63" font-size="6.5" fill="#666">Installed by: R. Kowalski Electric  Â·  Permit #2019-4821</text>
+            <text x="14" y="73" font-size="6" fill="#999">Contact: James Mugg  Â·  (555) 204-7731  Â·  mugg@muggventures.com</text>
+            <text x="14" y="83" font-size="6" fill="#bbb">Printed: March 18, 2026  Â·  Last updated: March 15, 2026</text>
             <rect x="310" y="34" width="57" height="57" rx="2" fill="#f9f9f9" stroke="#e0e0e0" stroke-width="0.8"/>
             <rect x="313" y="37" width="14" height="14" rx="1" fill="#1e3a8a"/>
             <rect x="315" y="39" width="10" height="10" rx="0.5" fill="#f9f9f9"/>
@@ -764,70 +764,70 @@
             <line x1="5" y1="126" x2="375" y2="126" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="104" width="23" height="22" fill="#f0f4ff"/><rect x="192" y="104" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="119" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">1</text>
-            <text x="32" y="113" font-size="6.5" fill="#111">Kitchen outlets — GFCI countertop</text>
+            <text x="32" y="113" font-size="6.5" fill="#111">Kitchen outlets â GFCI countertop</text>
             <text x="32" y="122" font-size="6" fill="#555">receptacles, island, under-cabinet lighting</text>
             <text x="204" y="119" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">2</text>
-            <text x="219" y="113" font-size="6.5" fill="#111">Living room &amp; dining — overhead</text>
+            <text x="219" y="113" font-size="6.5" fill="#111">Living room &amp; dining â overhead</text>
             <text x="219" y="122" font-size="6" fill="#555">lights, wall sconces, switched outlets</text>
             <line x1="5" y1="148" x2="375" y2="148" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="126" width="23" height="22" fill="#f0f4ff"/><rect x="192" y="126" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="141" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">3</text>
-            <text x="32" y="135" font-size="6.5" fill="#111">Master bedroom — all outlets north</text>
+            <text x="32" y="135" font-size="6.5" fill="#111">Master bedroom â all outlets north</text>
             <text x="32" y="144" font-size="6" fill="#555">&amp; east walls, ceiling fan, bedside lamps</text>
             <text x="204" y="141" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">4</text>
-            <text x="219" y="135" font-size="6.5" fill="#111">Washer / Dryer — 240V dedicated</text>
+            <text x="219" y="135" font-size="6.5" fill="#111">Washer / Dryer â 240V dedicated</text>
             <text x="219" y="144" font-size="6" fill="#555">30A laundry room, both units on circuit</text>
             <line x1="5" y1="170" x2="375" y2="170" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="148" width="23" height="22" fill="#f0f4ff"/><rect x="192" y="148" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="163" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">5</text>
-            <text x="32" y="157" font-size="6.5" fill="#111">Basement — overhead fixtures,</text>
+            <text x="32" y="157" font-size="6.5" fill="#111">Basement â overhead fixtures,</text>
             <text x="32" y="166" font-size="6" fill="#555">workshop fluorescents, utility outlets</text>
             <text x="204" y="163" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">6</text>
-            <text x="219" y="157" font-size="6.5" fill="#111">A/C condenser — 240V outdoor unit,</text>
+            <text x="219" y="157" font-size="6.5" fill="#111">A/C condenser â 240V outdoor unit,</text>
             <text x="219" y="166" font-size="6" fill="#555">40A dedicated double-pole breaker</text>
             <line x1="5" y1="192" x2="375" y2="192" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="170" width="23" height="22" fill="#f0f4ff"/><rect x="192" y="170" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="185" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">7</text>
-            <text x="32" y="179" font-size="6.5" fill="#111">Garage — door opener, exterior</text>
+            <text x="32" y="179" font-size="6.5" fill="#111">Garage â door opener, exterior</text>
             <text x="32" y="188" font-size="6" fill="#555">flood lights, workbench side outlets</text>
             <text x="204" y="185" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">8</text>
-            <text x="219" y="179" font-size="6.5" fill="#111">Office &amp; guest room — all outlets,</text>
+            <text x="219" y="179" font-size="6.5" fill="#111">Office &amp; guest room â all outlets,</text>
             <text x="219" y="188" font-size="6" fill="#555">ceiling fixtures, east wing circuits</text>
             <line x1="5" y1="214" x2="375" y2="214" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="192" width="23" height="22" fill="#f0f4ff"/><rect x="192" y="192" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="207" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">9</text>
-            <text x="32" y="201" font-size="6.5" fill="#111">Water heater — 240V dedicated 30A</text>
+            <text x="32" y="201" font-size="6.5" fill="#111">Water heater â 240V dedicated 30A</text>
             <text x="32" y="210" font-size="6" fill="#555">double-pole, utility room east wall</text>
             <text x="204" y="207" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">10</text>
-            <text x="219" y="201" font-size="6.5" fill="#111">Bathrooms 1 &amp; 2 — GFCI outlets,</text>
+            <text x="219" y="201" font-size="6.5" fill="#111">Bathrooms 1 &amp; 2 â GFCI outlets,</text>
             <text x="219" y="210" font-size="6" fill="#555">exhaust fans, vanity &amp; mirror lighting</text>
             <line x1="5" y1="236" x2="375" y2="236" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="214" width="23" height="22" fill="#f0f4ff"/><rect x="192" y="214" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="229" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">11</text>
-            <text x="32" y="223" font-size="6.5" fill="#111">Outdoor lighting — front porch,</text>
+            <text x="32" y="223" font-size="6.5" fill="#111">Outdoor lighting â front porch,</text>
             <text x="32" y="232" font-size="6" fill="#555">backyard string lights, driveway post</text>
             <text x="204" y="229" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">12</text>
-            <text x="219" y="223" font-size="6.5" fill="#111">Master bath &amp; closet — GFCI,</text>
+            <text x="219" y="223" font-size="6.5" fill="#111">Master bath &amp; closet â GFCI,</text>
             <text x="219" y="232" font-size="6" fill="#555">heat lamp, exhaust fan, vanity lights</text>
             <line x1="5" y1="258" x2="375" y2="258" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="236" width="23" height="22" fill="#f0f4ff"/><rect x="192" y="236" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="251" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">13</text>
-            <text x="32" y="245" font-size="6.5" fill="#111">Refrigerator — dedicated 20A circuit,</text>
+            <text x="32" y="245" font-size="6.5" fill="#111">Refrigerator â dedicated 20A circuit,</text>
             <text x="32" y="254" font-size="6" fill="#555">kitchen north wall, GFCI protected</text>
             <text x="204" y="251" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">14</text>
-            <text x="219" y="245" font-size="6.5" fill="#111">Upstairs hall &amp; stairs — lighting,</text>
+            <text x="219" y="245" font-size="6.5" fill="#111">Upstairs hall &amp; stairs â lighting,</text>
             <text x="219" y="254" font-size="6" fill="#555">smoke detectors, closet outlets (3)</text>
             <rect x="5" y="258" width="23" height="23" fill="#f0f4ff"/><rect x="192" y="258" width="23" height="23" fill="#f0f4ff"/>
             <text x="17" y="273" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">15</text>
-            <text x="32" y="267" font-size="6.5" fill="#111">HVAC blower — air handler fan</text>
+            <text x="32" y="267" font-size="6.5" fill="#111">HVAC blower â air handler fan</text>
             <text x="32" y="276" font-size="6" fill="#555">motor &amp; thermostat control, 15A</text>
             <text x="204" y="273" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">16</text>
-            <text x="219" y="267" font-size="6.5" fill="#111">Spare — unused circuit, available</text>
+            <text x="219" y="267" font-size="6.5" fill="#111">Spare â unused circuit, available</text>
             <text x="219" y="276" font-size="6" fill="#555">for future kitchen island expansion</text>
           </svg>
         </div>
         <h2 style="font-size:1.15rem;font-weight:700;color:#15803d;margin-bottom:10px;">The Solution</h2>
-        <p style="color:#374151;line-height:1.75;font-size:0.95rem;">MyBreakerPanel gives every panel a digital register — unlimited description space per breaker, a full change history, and instant access via a QR code and Panel ID. No more guesswork. No more illegible pencil marks.</p>
+        <p style="color:#374151;line-height:1.75;font-size:0.95rem;">MyBreakerPanel gives every panel a digital register â unlimited description space per breaker, a full change history, and instant access via a QR code and Panel ID. No more guesswork. No more illegible pencil marks.</p>
       </div>
 
     </div>
@@ -837,7 +837,7 @@
 
   <div class="features">
 
-    <!-- ── Card 1: Digital Panel Register ── -->
+    <!-- ââ Card 1: Digital Panel Register ââ -->
     <div class="feature-card">
       <div class="feature-img">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 160" font-family="'Segoe UI',Arial,sans-serif">
@@ -899,7 +899,7 @@
           <text x="47" y="102" font-size="5" fill="#2a2a2a">Wtr htr</text>
           <text x="145" y="102" font-size="5.5" fill="#3a3a3a" font-weight="600">10</text>
           <text x="159" y="102" font-size="5" fill="#2a2a2a">Office</text>
-          <text x="183" y="101" font-size="4.5" fill="#cc0000">←NO! gst rm</text>
+          <text x="183" y="101" font-size="4.5" fill="#cc0000">âNO! gst rm</text>
           <!-- Row 6 -->
           <line x1="28" y1="117" x2="252" y2="117" stroke="#ddd0a0" stroke-width="0.4"/>
           <text x="36" y="114" font-size="5.5" fill="#3a3a3a" font-weight="600">11</text>
@@ -926,10 +926,10 @@
         </svg>
       </div>
       <h3>Digital Panel Register</h3>
-      <p>Label every breaker with unlimited text — no more pencil scrawls or cramped paper registers.</p>
+      <p>Label every breaker with unlimited text â no more pencil scrawls or cramped paper registers.</p>
     </div>
 
-    <!-- ── Card 2: QR Code Access ── -->
+    <!-- ââ Card 2: QR Code Access ââ -->
     <div class="feature-card">
       <div class="feature-img">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 160" font-family="'Segoe UI',Arial,sans-serif">
@@ -989,7 +989,7 @@
           <!-- Panel info -->
           <rect x="171" y="38" width="90" height="20" rx="3" fill="#eff6ff"/>
           <text x="176" y="47" font-size="5.5" font-weight="700" fill="#1e3a8a">MAIN-01</text>
-          <text x="176" y="55" font-size="4.5" fill="#6b7280">Main Panel · Garage, N. Wall</text>
+          <text x="176" y="55" font-size="4.5" fill="#6b7280">Main Panel Â· Garage, N. Wall</text>
           <!-- Table header -->
           <rect x="171" y="61" width="90" height="8" fill="#1e3a8a"/>
           <text x="175" y="67" font-size="4.5" font-weight="700" fill="#fff"># Circuit Description</text>
@@ -1012,14 +1012,14 @@
           <line x1="171" y1="113" x2="261" y2="113" stroke="#e5e7eb" stroke-width="0.5"/>
           <rect x="171" y="113" width="11" height="11" fill="#f0f4ff"/>
           <text x="177" y="121" text-anchor="middle" font-size="5.5" font-weight="700" fill="#1e3a8a">9</text>
-          <text x="184" y="121" font-size="4.5" fill="#111">Water heater — 240V</text>
+          <text x="184" y="121" font-size="4.5" fill="#111">Water heater â 240V</text>
         </svg>
       </div>
       <h3>QR Code Access</h3>
       <p>Scan the QR code on your panel door to open the app, then enter your Panel ID to access the register from any phone, tablet, or laptop.</p>
     </div>
 
-    <!-- ── Card 3: Full Change History ── -->
+    <!-- ââ Card 3: Full Change History ââ -->
     <div class="feature-card">
       <div class="feature-img">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 160" font-family="'Segoe UI',Arial,sans-serif">
@@ -1027,11 +1027,11 @@
           <rect width="280" height="160" fill="#f8fafc"/>
           <!-- App top bar -->
           <rect width="280" height="22" fill="#1e3a8a"/>
-          <text x="140" y="15" text-anchor="middle" font-size="7" font-weight="700" fill="#fff">Breaker History — MAIN-01</text>
+          <text x="140" y="15" text-anchor="middle" font-size="7" font-weight="700" fill="#fff">Breaker History â MAIN-01</text>
           <!-- Context header: which breaker -->
           <rect x="0" y="22" width="280" height="16" fill="#eff6ff"/>
           <rect x="0" y="22" width="4" height="16" fill="#1e3a8a"/>
-          <text x="13" y="33" font-size="6.5" font-weight="700" fill="#1e3a8a">Breaker #7  —  Garage + outside outlets + flood lights</text>
+          <text x="13" y="33" font-size="6.5" font-weight="700" fill="#1e3a8a">Breaker #7  â  Garage + outside outlets + flood lights</text>
           <!-- Entry 1 (most recent) -->
           <rect x="0" y="38" width="280" height="29" fill="#fff"/>
           <line x1="0" y1="38" x2="280" y2="38" stroke="#e5e7eb" stroke-width="0.6"/>
@@ -1040,7 +1040,7 @@
           <text x="28" y="47" font-size="6" font-weight="700" fill="#111">James Mugg</text>
           <text x="100" y="47" font-size="5.5" fill="#9ca3af">Mar 15, 2026</text>
           <text x="28" y="57" font-size="5.5" fill="#374151">"Garage + outside outlets + front flood lights (20A)"</text>
-          <text x="28" y="65" font-size="5" fill="#9ca3af">mugg@muggventures.com · (555) 204-7731</text>
+          <text x="28" y="65" font-size="5" fill="#9ca3af">mugg@muggventures.com Â· (555) 204-7731</text>
           <!-- Entry 2 -->
           <rect x="0" y="67" width="280" height="26" fill="#f9fafb"/>
           <line x1="0" y1="67" x2="280" y2="67" stroke="#e5e7eb" stroke-width="0.6"/>
@@ -1048,7 +1048,7 @@
           <text x="16" y="83" text-anchor="middle" font-size="5.5" font-weight="700" fill="#fff">KR</text>
           <text x="28" y="75" font-size="6" font-weight="700" fill="#111">K. Rodriguez</text>
           <text x="100" y="75" font-size="5.5" fill="#9ca3af">Nov 4, 2024</text>
-          <text x="28" y="85" font-size="5.5" fill="#374151">"Garage + side door outlet — double-pole 20A"</text>
+          <text x="28" y="85" font-size="5.5" fill="#374151">"Garage + side door outlet â double-pole 20A"</text>
           <text x="28" y="92" font-size="5" fill="#9ca3af">k.rodriguez@email.com</text>
           <!-- Entry 3 -->
           <rect x="0" y="93" width="280" height="26" fill="#fff"/>
@@ -1073,10 +1073,10 @@
         </svg>
       </div>
       <h3>Full Change History</h3>
-      <p>Every update is logged with a date and contact info — know who changed what and when.</p>
+      <p>Every update is logged with a date and contact info â know who changed what and when.</p>
     </div>
 
-    <!-- ── Card 4: Printable Layout ── -->
+    <!-- ââ Card 4: Printable Layout ââ -->
     <div class="feature-card">
       <div class="feature-img">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 160" font-family="'Segoe UI',Arial,sans-serif">
@@ -1095,7 +1095,7 @@
           <text x="139" y="20" text-anchor="middle" font-size="5.5" font-weight="700" fill="#fff" letter-spacing="0.4">CIRCUIT BREAKER PANEL DIRECTORY</text>
           <!-- Panel info + QR -->
           <text x="34" y="32" font-size="5.5" font-weight="800" fill="#1e3a8a">Panel ID: MAIN-01</text>
-          <text x="34" y="40" font-size="5" fill="#555">Main Electrical Panel  ·  Garage, North Wall  ·  200A</text>
+          <text x="34" y="40" font-size="5" fill="#555">Main Electrical Panel  Â·  Garage, North Wall  Â·  200A</text>
           <!-- Mini QR code -->
           <rect x="210" y="27" width="32" height="32" rx="1.5" fill="#f9f9f9" stroke="#e0e0e0" stroke-width="0.5"/>
           <rect x="212" y="29" width="8" height="8" rx="0.5" fill="#1e3a8a"/>
@@ -1123,62 +1123,62 @@
           <text x="36" y="52" font-size="5" font-weight="700" fill="#fff"># Circuit Description</text>
           <text x="146" y="52" font-size="5" font-weight="700" fill="#fff"># Circuit Description</text>
           <!-- 8 rows, 13px each, starting y=54 -->
-          <!-- Row 1 (y=54–67) -->
+          <!-- Row 1 (y=54â67) -->
           <line x1="29" y1="67" x2="249" y2="67" stroke="#e5e7eb" stroke-width="0.4"/>
           <rect x="29" y="54" width="13" height="13" fill="#f0f4ff"/>
           <rect x="139" y="54" width="13" height="13" fill="#f0f4ff"/>
           <text x="36" y="63.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">1</text>
-          <text x="44" y="63" font-size="4.8" fill="#111">Kitchen — GFCI outlets &amp; island</text>
+          <text x="44" y="63" font-size="4.8" fill="#111">Kitchen â GFCI outlets &amp; island</text>
           <text x="146" y="63.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">2</text>
-          <text x="154" y="63" font-size="4.8" fill="#111">Living room &amp; dining — lights</text>
-          <!-- Row 2 (y=67–80) -->
+          <text x="154" y="63" font-size="4.8" fill="#111">Living room &amp; dining â lights</text>
+          <!-- Row 2 (y=67â80) -->
           <line x1="29" y1="80" x2="249" y2="80" stroke="#e5e7eb" stroke-width="0.4"/>
           <rect x="29" y="67" width="13" height="13" fill="#f0f4ff"/>
           <rect x="139" y="67" width="13" height="13" fill="#f0f4ff"/>
           <text x="36" y="76.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">3</text>
-          <text x="44" y="76" font-size="4.8" fill="#111">Master bedroom — outlets &amp; fan</text>
+          <text x="44" y="76" font-size="4.8" fill="#111">Master bedroom â outlets &amp; fan</text>
           <text x="146" y="76.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">4</text>
-          <text x="154" y="76" font-size="4.8" fill="#111">Washer / Dryer — 240V, 30A</text>
-          <!-- Row 3 (y=80–93) -->
+          <text x="154" y="76" font-size="4.8" fill="#111">Washer / Dryer â 240V, 30A</text>
+          <!-- Row 3 (y=80â93) -->
           <line x1="29" y1="93" x2="249" y2="93" stroke="#e5e7eb" stroke-width="0.4"/>
           <rect x="29" y="80" width="13" height="13" fill="#f0f4ff"/>
           <rect x="139" y="80" width="13" height="13" fill="#f0f4ff"/>
           <text x="36" y="89.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">5</text>
-          <text x="44" y="89" font-size="4.8" fill="#111">Basement — fixtures &amp; workshop</text>
+          <text x="44" y="89" font-size="4.8" fill="#111">Basement â fixtures &amp; workshop</text>
           <text x="146" y="89.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">6</text>
-          <text x="154" y="89" font-size="4.8" fill="#111">A/C condenser — 240V 40A</text>
-          <!-- Row 4 (y=93–106) -->
+          <text x="154" y="89" font-size="4.8" fill="#111">A/C condenser â 240V 40A</text>
+          <!-- Row 4 (y=93â106) -->
           <line x1="29" y1="106" x2="249" y2="106" stroke="#e5e7eb" stroke-width="0.4"/>
           <rect x="29" y="93" width="13" height="13" fill="#f0f4ff"/>
           <rect x="139" y="93" width="13" height="13" fill="#f0f4ff"/>
           <text x="36" y="102.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">7</text>
-          <text x="44" y="102" font-size="4.8" fill="#111">Garage — door opener &amp; floods</text>
+          <text x="44" y="102" font-size="4.8" fill="#111">Garage â door opener &amp; floods</text>
           <text x="146" y="102.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">8</text>
-          <text x="154" y="102" font-size="4.8" fill="#111">Office &amp; guest room — all circuits</text>
-          <!-- Row 5 (y=106–119) -->
+          <text x="154" y="102" font-size="4.8" fill="#111">Office &amp; guest room â all circuits</text>
+          <!-- Row 5 (y=106â119) -->
           <line x1="29" y1="119" x2="249" y2="119" stroke="#e5e7eb" stroke-width="0.4"/>
           <rect x="29" y="106" width="13" height="13" fill="#f0f4ff"/>
           <rect x="139" y="106" width="13" height="13" fill="#f0f4ff"/>
           <text x="36" y="115.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">9</text>
-          <text x="44" y="115" font-size="4.8" fill="#111">Water heater — 240V 30A dbl-pole</text>
+          <text x="44" y="115" font-size="4.8" fill="#111">Water heater â 240V 30A dbl-pole</text>
           <text x="146" y="115.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">10</text>
-          <text x="154" y="115" font-size="4.8" fill="#111">Bathrooms 1 &amp; 2 — GFCI, fans</text>
-          <!-- Row 6 (y=119–132) -->
+          <text x="154" y="115" font-size="4.8" fill="#111">Bathrooms 1 &amp; 2 â GFCI, fans</text>
+          <!-- Row 6 (y=119â132) -->
           <line x1="29" y1="132" x2="249" y2="132" stroke="#e5e7eb" stroke-width="0.4"/>
           <rect x="29" y="119" width="13" height="13" fill="#f0f4ff"/>
           <rect x="139" y="119" width="13" height="13" fill="#f0f4ff"/>
           <text x="36" y="128.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">11</text>
-          <text x="44" y="128" font-size="4.8" fill="#111">Outdoor lighting — porch &amp; yard</text>
+          <text x="44" y="128" font-size="4.8" fill="#111">Outdoor lighting â porch &amp; yard</text>
           <text x="146" y="128.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">12</text>
-          <text x="154" y="128" font-size="4.8" fill="#111">Master bath — GFCI &amp; heat lamp</text>
-          <!-- Row 7 (y=132–145) -->
+          <text x="154" y="128" font-size="4.8" fill="#111">Master bath â GFCI &amp; heat lamp</text>
+          <!-- Row 7 (y=132â145) -->
           <line x1="29" y1="145" x2="249" y2="145" stroke="#e5e7eb" stroke-width="0.4"/>
           <rect x="29" y="132" width="13" height="13" fill="#f0f4ff"/>
           <rect x="139" y="132" width="13" height="13" fill="#f0f4ff"/>
           <text x="36" y="141.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">13</text>
-          <text x="44" y="141" font-size="4.8" fill="#111">Refrigerator — dedicated 20A GFCI</text>
+          <text x="44" y="141" font-size="4.8" fill="#111">Refrigerator â dedicated 20A GFCI</text>
           <text x="146" y="141.5" text-anchor="middle" font-size="6" font-weight="700" fill="#1e3a8a">14</text>
-          <text x="154" y="141" font-size="4.8" fill="#111">Upstairs hall — lights &amp; detectors</text>
+          <text x="154" y="141" font-size="4.8" fill="#111">Upstairs hall â lights &amp; detectors</text>
         </svg>
       </div>
       <h3>Printable Layout</h3>
@@ -1187,7 +1187,7 @@
 
   </div>
 
-  <!-- ══ How It Works · Who Is This For · CTA ══ -->
+  <!-- ââ How It Works Â· Who Is This For Â· CTA ââ -->
   <div style="max-width:860px;margin:0 auto;padding:52px 24px 0;">
 
     <!-- How It Works -->
@@ -1197,7 +1197,7 @@
 
         <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:2px solid #e5e7eb;">
           <div style="width:44px;height:44px;background:#1a56db;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;margin:0 auto 14px;">1</div>
-          <div style="font-size:1.8rem;margin-bottom:10px;">📝</div>
+          <div style="font-size:1.8rem;margin-bottom:10px;">ð</div>
           <h3 style="font-size:0.92rem;font-weight:700;color:#1e3a8a;margin-bottom:6px;">Register Your Panel</h3>
           <p style="font-size:0.83rem;color:#6b7280;line-height:1.6;">Create an account and enter your panel's address, manufacturer, and number of breakers.</p>
         </div>
@@ -1224,16 +1224,16 @@
 
         <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:2px solid #e5e7eb;">
           <div style="width:44px;height:44px;background:#1a56db;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;margin:0 auto 14px;">3</div>
-          <div style="font-size:1.8rem;margin-bottom:10px;">🖨️</div>
+          <div style="font-size:1.8rem;margin-bottom:10px;">ð¨ï¸</div>
           <h3 style="font-size:0.92rem;font-weight:700;color:#1e3a8a;margin-bottom:6px;">Print &amp; Affix</h3>
           <p style="font-size:0.83rem;color:#6b7280;line-height:1.6;">Print the QR code and Panel ID card and affix it to the inside of your panel door.</p>
         </div>
 
         <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:2px solid #e5e7eb;">
           <div style="width:44px;height:44px;background:#1a56db;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;margin:0 auto 14px;">4</div>
-          <div style="font-size:1.8rem;margin-bottom:10px;">📱</div>
+          <div style="font-size:1.8rem;margin-bottom:10px;">ð±</div>
           <h3 style="font-size:0.92rem;font-weight:700;color:#1e3a8a;margin-bottom:6px;">Access Anywhere</h3>
-          <p style="font-size:0.83rem;color:#6b7280;line-height:1.6;">Anyone scans the QR code to open the app, enters the Panel ID, and instantly sees the register — no password needed.</p>
+          <p style="font-size:0.83rem;color:#6b7280;line-height:1.6;">Anyone scans the QR code to open the app, enters the Panel ID, and instantly sees the register â no password needed.</p>
         </div>
 
       </div>
@@ -1269,7 +1269,7 @@
             </svg>
           </div>
           <h3 style="font-size:0.95rem;font-weight:700;color:#1e3a8a;">Homeowners</h3>
-          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Finally know which breaker controls which room — and share it with family or contractors instantly.</p>
+          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Finally know which breaker controls which room â and share it with family or contractors instantly.</p>
         </div>
 
         <!-- Electricians -->
@@ -1367,7 +1367,7 @@
             </svg>
           </div>
           <h3 style="font-size:0.95rem;font-weight:700;color:#1e3a8a;">Electricians</h3>
-          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Leave a complete, timestamped record of every panel you service — your contact info included.</p>
+          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Leave a complete, timestamped record of every panel you service â your contact info included.</p>
         </div>
 
         <!-- Commercial Facility Managers -->
@@ -1468,7 +1468,7 @@
             </svg>
           </div>
           <h3 style="font-size:0.95rem;font-weight:700;color:#1e3a8a;">Residential Property Managers</h3>
-          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Provide tenants and maintenance staff with accurate panel information — without handing over account access.</p>
+          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Provide tenants and maintenance staff with accurate panel information â without handing over account access.</p>
         </div>
 
       </div>
@@ -1487,19 +1487,19 @@
   </div>
 
   <footer>
-    &copy; 2026 <span>MyBreakerPanel</span> · mybreakerpanel.com &nbsp;|&nbsp; myelectricalpanel.com
+    &copy; 2026 <span>MyBreakerPanel</span> Â· mybreakerpanel.com &nbsp;|&nbsp; myelectricalpanel.com
   </footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      ACCESS YOUR PANEL PAGE
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-access" class="page">
   <div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;background:#f0f9ff;">
     <div style="max-width:500px;width:100%;text-align:center;">
 
       <!-- Icon -->
-      <div style="width:72px;height:72px;background:#1e3a8a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:2rem;">📲</div>
+      <div style="width:72px;height:72px;background:#1e3a8a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:2rem;">ð²</div>
 
       <h1 style="font-size:1.9rem;font-weight:800;color:#1e3a8a;margin-bottom:10px;">Access Your Panel</h1>
       <p style="color:#4b5563;line-height:1.75;margin-bottom:32px;font-size:1rem;">
@@ -1536,12 +1536,12 @@
 
     </div>
   </div>
-  <footer>&copy; 2026 <span>MyBreakerPanel</span> · mybreakerpanel.com &nbsp;|&nbsp; myelectricalpanel.com</footer>
+  <footer>&copy; 2026 <span>MyBreakerPanel</span> Â· mybreakerpanel.com &nbsp;|&nbsp; myelectricalpanel.com</footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      LOGIN PAGE
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-login" class="page">
   <div class="card">
     <h2>Welcome Back</h2>
@@ -1566,9 +1566,9 @@
   </footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      ACCOUNT RECOVERY PAGE
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-recover" class="page">
   <div class="card" style="max-width:520px">
     <h2>Recover Your Account</h2>
@@ -1609,15 +1609,15 @@
     </div>
 
     <div class="form-link" style="margin-top:16px;">
-      <a href="#" onclick="showPage('login')">← Back to Login</a>
+      <a href="#" onclick="showPage('login')">â Back to Login</a>
     </div>
   </div>
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      SIGN UP PAGE
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-signup" class="page">
   <div class="card">
     <h2>Create Your Account</h2>
@@ -1649,9 +1649,9 @@
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      DASHBOARD
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-dashboard" class="page">
   <div class="page-header">
     <h1 id="dash-greeting">Dashboard</h1>
@@ -1660,17 +1660,17 @@
   <div class="page-content">
     <div class="dashboard-grid">
       <div class="dash-card" onclick="showPage('add-panel')">
-        <div class="dash-icon">➕</div>
+        <div class="dash-icon">â</div>
         <h3>Add New Panel</h3>
         <p>Register a new electrical panel and generate its QR code.</p>
       </div>
       <div class="dash-card" onclick="showPage('your-panels')">
-        <div class="dash-icon">🗂️</div>
+        <div class="dash-icon">ðï¸</div>
         <h3>Your Panels</h3>
         <p>View and manage all panels in your account.</p>
       </div>
       <div class="dash-card" onclick="showPage('edit-user')">
-        <div class="dash-icon">👤</div>
+        <div class="dash-icon">ð¤</div>
         <h3>Edit Profile</h3>
         <p>Update your name, email, and account details.</p>
       </div>
@@ -1678,15 +1678,15 @@
     <hr class="divider" />
     <div class="section-title">Your Recent Panels</div>
     <div id="dash-recent-panels">
-      <p style="color:#9ca3af;font-size:0.92rem;">No panels yet. <a href="#" onclick="showPage('add-panel')">Add your first panel →</a></p>
+      <p style="color:#9ca3af;font-size:0.92rem;">No panels yet. <a href="#" onclick="showPage('add-panel')">Add your first panel â</a></p>
     </div>
   </div>
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      EDIT USER
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-edit-user" class="page">
   <div class="card" style="max-width:520px">
     <h2>Edit Profile</h2>
@@ -1702,7 +1702,7 @@
     </div>
     <div class="form-group">
       <label>New Password <span style="font-weight:400;color:#9ca3af">(leave blank to keep current)</span></label>
-      <input type="password" id="eu-password" placeholder="New password…" />
+      <input type="password" id="eu-password" placeholder="New passwordâ¦" />
     </div>
     <div class="form-actions">
       <button class="btn btn-blue" onclick="saveUserEdits()">Save Changes</button>
@@ -1712,9 +1712,9 @@
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      ADD NEW PANEL
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-add-panel" class="page">
   <div class="page-header">
     <h1>Add New Panel</h1>
@@ -1735,7 +1735,7 @@
         <div class="form-group">
           <label>Panel Manufacturer</label>
           <select id="ap-manufacturer">
-            <option value="">Select manufacturer…</option>
+            <option value="">Select manufacturerâ¦</option>
             <option value="Square D (Schneider Electric)">Square D (Schneider Electric)</option>
             <option value="Siemens">Siemens</option>
             <option value="Eaton / Cutler-Hammer">Eaton / Cutler-Hammer</option>
@@ -1759,7 +1759,7 @@
       <div class="form-group">
         <label>Number of Breakers</label>
         <select id="ap-numbreakers">
-          <option value="">Select…</option>
+          <option value="">Selectâ¦</option>
           <option value="12">12</option>
           <option value="16">16</option>
           <option value="20">20</option>
@@ -1798,9 +1798,9 @@
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      PANEL SETUP (after adding, fill breakers)
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-panel-setup" class="page">
   <div class="page-header">
     <h1 id="setup-title">Label Your Breakers</h1>
@@ -1813,16 +1813,16 @@
       <p style="color:#6b7280;font-size:0.9rem;">When done, confirm your panel looks correct.</p>
     </div>
     <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
-      <button class="btn btn-blue" onclick="confirmPanelSetup()">✅ Looks Correct — Generate QR Code</button>
+      <button class="btn btn-blue" onclick="confirmPanelSetup()">â Looks Correct â Generate QR Code</button>
       <button class="btn btn-outline" onclick="savePanelSetupDraft()">Save & Finish Later</button>
     </div>
   </div>
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      QR CODE PAGE
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-qr" class="page">
   <div class="page-header">
     <h1>Your Panel QR Code</h1>
@@ -1832,9 +1832,9 @@
     <div class="qr-result-box" style="max-width:500px">
       <h3 id="qr-panel-name">Panel</h3>
 
-      <!-- Panel ID — displayed prominently for manual entry -->
+      <!-- Panel ID â displayed prominently for manual entry -->
       <div style="margin-bottom:20px;">
-        <p style="font-size:0.85rem;color:#374151;margin-bottom:6px;font-weight:600;">Panel ID — enter this at the app:</p>
+        <p style="font-size:0.85rem;color:#374151;margin-bottom:6px;font-weight:600;">Panel ID â enter this at the app:</p>
         <div class="panel-id-display" id="qr-panel-id-text" style="font-size:1.4rem;padding:12px 24px;letter-spacing:2px;"></div>
       </div>
 
@@ -1845,8 +1845,8 @@
       <p style="font-size:0.82rem;color:#6b7280;margin-top:12px;">Scan the QR code to open the app, then enter the Panel ID above to access this panel's register.</p>
     </div>
     <div class="form-actions no-print">
-      <button class="btn btn-blue" onclick="window.print()">🖨️ Print QR Code</button>
-      <button class="btn btn-outline" onclick="goToPanelView()">Go to Panel →</button>
+      <button class="btn btn-blue" onclick="window.print()">ð¨ï¸ Print QR Code</button>
+      <button class="btn btn-outline" onclick="goToPanelView()">Go to Panel â</button>
       <button class="btn btn-outline" onclick="showPage('add-panel')">Add Another Panel</button>
       <button class="btn btn-outline" onclick="showPage('dashboard')">Dashboard</button>
     </div>
@@ -1854,9 +1854,9 @@
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      YOUR PANELS
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-your-panels" class="page">
   <div class="page-header">
     <h1>Your Panels</h1>
@@ -1864,7 +1864,7 @@
   </div>
   <div class="page-content">
     <div class="search-bar">
-      <input type="text" id="panels-search" placeholder="Search panels by address, ID, or breaker description…" oninput="filterPanelsList()" />
+      <input type="text" id="panels-search" placeholder="Search panels by address, ID, or breaker descriptionâ¦" oninput="filterPanelsList()" />
       <button class="btn btn-blue" onclick="showPage('add-panel')">+ Add Panel</button>
     </div>
     <div id="panels-list" class="panel-list"></div>
@@ -1872,9 +1872,9 @@
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      VIEW / EDIT PANEL
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-view-panel" class="page">
   <div class="page-header no-print">
     <h1 id="vp-title">Panel Register</h1>
@@ -1893,19 +1893,19 @@
     <!-- Toolbar -->
     <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center;">
       <div class="search-bar" style="margin:0;flex:1;">
-        <input type="text" id="vp-search" placeholder="Search breaker descriptions…" oninput="searchBreakers()" />
+        <input type="text" id="vp-search" placeholder="Search breaker descriptionsâ¦" oninput="searchBreakers()" />
       </div>
-      <button class="btn btn-sm btn-blue" onclick="printPanel()">🖨️ Print / Preview</button>
-      <button class="btn btn-sm btn-outline" onclick="viewBreakerHistory()">🕐 History</button>
-      <button class="btn btn-sm btn-outline" id="vp-edit-info-btn" onclick="openEditPanelInfo()" style="display:none">✏️ Edit Panel Info</button>
-      <button id="vp-back-btn" class="btn btn-sm btn-outline" onclick="showPage('your-panels')" style="display:none">← Back to Panels</button>
+      <button class="btn btn-sm btn-blue" onclick="printPanel()">ð¨ï¸ Print / Preview</button>
+      <button class="btn btn-sm btn-outline" onclick="viewBreakerHistory()">ð History</button>
+      <button class="btn btn-sm btn-outline" id="vp-edit-info-btn" onclick="openEditPanelInfo()" style="display:none">âï¸ Edit Panel Info</button>
+      <button id="vp-back-btn" class="btn btn-sm btn-outline" onclick="showPage('your-panels')" style="display:none">â Back to Panels</button>
     </div>
 
     <!-- Editable breaker grid -->
     <div id="vp-breakers-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:700px;"></div>
 
     <div class="no-print" style="margin-top:24px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
-      <button class="btn btn-blue" onclick="saveAllBreakers()">💾 Save All Changes</button>
+      <button class="btn btn-blue" onclick="saveAllBreakers()">ð¾ Save All Changes</button>
       <span id="vp-autosave-status" class="autosave-status"></span>
     </div>
   </div>
@@ -1913,9 +1913,9 @@
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      EDIT PANEL INFO
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-edit-panel-info" class="page">
   <div class="page-header">
     <h1>Edit Panel Info</h1>
@@ -1937,7 +1937,7 @@
         <div class="form-group">
           <label>Panel Manufacturer</label>
           <select id="epi-manufacturer">
-            <option value="">Select manufacturer…</option>
+            <option value="">Select manufacturerâ¦</option>
             <option value="Square D (Schneider Electric)">Square D (Schneider Electric)</option>
             <option value="Siemens">Siemens</option>
             <option value="Eaton / Cutler-Hammer">Eaton / Cutler-Hammer</option>
@@ -1971,7 +1971,7 @@
           <option value="60">60</option>
         </select>
         <p id="epi-breaker-warning" style="display:none;margin-top:6px;font-size:0.85rem;color:#b45309;background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:8px 12px;">
-          ⚠️ Reducing the number of breakers will permanently delete the descriptions and history for the removed breakers.
+          â ï¸ Reducing the number of breakers will permanently delete the descriptions and history for the removed breakers.
         </p>
       </div>
       <div class="form-actions">
@@ -1983,17 +1983,17 @@
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      BREAKER HISTORY
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-history" class="page">
   <div class="page-header">
     <h1 id="hist-title">Breaker History</h1>
   </div>
   <div class="page-content">
     <div class="hist-tabs">
-      <button class="hist-tab active" id="hist-tab-timeline" onclick="switchHistTab('timeline')">📋 Timeline</button>
-      <button class="hist-tab" id="hist-tab-compare" onclick="switchHistTab('compare')">🔍 Compare</button>
+      <button class="hist-tab active" id="hist-tab-timeline" onclick="switchHistTab('timeline')">ð Timeline</button>
+      <button class="hist-tab" id="hist-tab-compare" onclick="switchHistTab('compare')">ð Compare</button>
     </div>
     <div id="hist-timeline-view">
       <p style="color:#9ca3af;font-size:0.88rem;margin-bottom:12px">All changes for this panel, newest first.</p>
@@ -2006,7 +2006,7 @@
             <label>From</label>
             <select id="compare-from"></select>
           </div>
-          <div class="compare-arr">→</div>
+          <div class="compare-arr">â</div>
           <div class="compare-field">
             <label>To</label>
             <select id="compare-to"></select>
@@ -2016,16 +2016,16 @@
       </div>
       <div id="compare-results"></div>
     </div>
-    <button class="btn btn-outline" id="hist-back-btn" onclick="showPage('view-panel')">← Back to Panel</button>
+    <button class="btn btn-outline" id="hist-back-btn" onclick="showPage('view-panel')">â Back to Panel</button>
   </div>
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
 </div>
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      SAVE BREAKER MODAL (name/contact)
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="save-modal" class="edit-breaker-modal" style="display:none" onclick="if(event.target===this)closeSaveModal()">
   <div class="modal-box">
-    <h3>💾 Save Changes</h3>
+    <h3>ð¾ Save Changes</h3>
     <p style="font-size:0.9rem;color:#6b7280;margin-bottom:20px;">Please provide your contact information. This is recorded with the change history.</p>
     <div id="save-modal-error" class="error-msg"></div>
     <div class="form-group">
@@ -2044,7 +2044,7 @@
     </div>
     <div class="form-group">
       <label>Street Address</label>
-      <input type="text" id="sm-address" placeholder="123 Main St…" />
+      <input type="text" id="sm-address" placeholder="123 Main Stâ¦" />
     </div>
     <div class="modal-actions">
       <button class="btn btn-blue" onclick="confirmSaveBreakers()">Save</button>
@@ -2053,9 +2053,9 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      EDIT SINGLE BREAKER MODAL
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="edit-breaker-modal" class="edit-breaker-modal" style="display:none" onclick="if(event.target===this)closeEditBreakerModal()">
   <div class="modal-box">
     <h3 id="ebm-title">Edit Breaker</h3>
@@ -2064,7 +2064,7 @@
       <textarea id="ebm-desc" style="min-height:100px" placeholder="e.g. Kitchen outlets, refrigerator, dishwasher"></textarea>
     </div>
     <div class="form-group" id="ebm-link-group">
-      <label>Linked breakers <span style="font-weight:400;color:#6b7280;font-size:0.82rem">— select breakers on the same multi-breaker circuit</span></label>
+      <label>Linked breakers <span style="font-weight:400;color:#6b7280;font-size:0.82rem">â select breakers on the same multi-breaker circuit</span></label>
       <div id="ebm-link-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
     </div>
     <div class="modal-actions">
@@ -2074,17 +2074,17 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      ABOUT PAGE (merged into landing page)
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-about" class="page" style="display:none!important">
 
   <!-- Hero Banner -->
   <div style="background:linear-gradient(135deg,#1e3a8a 0%,#1a56db 60%,#3b82f6 100%);color:#fff;padding:64px 24px 56px;text-align:center;">
-    <div style="font-size:3rem;margin-bottom:16px;">⚡</div>
+    <div style="font-size:3rem;margin-bottom:16px;">â¡</div>
     <h1 style="font-size:2.4rem;font-weight:800;margin-bottom:14px;">About <span style="color:#fbbf24;">MyBreakerPanel</span></h1>
     <p style="font-size:1.1rem;max-width:620px;margin:0 auto;opacity:0.92;line-height:1.75;">
-      A smarter way to label, manage, and share electrical panel information — built for homeowners, electricians, and facility professionals.
+      A smarter way to label, manage, and share electrical panel information â built for homeowners, electricians, and facility professionals.
     </p>
   </div>
 
@@ -2126,7 +2126,7 @@
             <line x1="23" y1="42" x2="23" y2="237" stroke="#c8b97a" stroke-width="0.6"/>
             <line x1="170" y1="42" x2="170" y2="237" stroke="#c8b97a" stroke-width="0.6"/>
 
-            <!-- ── ROW 1 (y 42–66) ── -->
+            <!-- ââ ROW 1 (y 42â66) ââ -->
             <line x1="5" y1="66" x2="295" y2="66" stroke="#ddd0a0" stroke-width="0.5"/>
             <!-- Breaker 1: clean-ish -->
             <text x="14" y="58" font-size="7" fill="#3a3a3a" font-weight="600" transform="rotate(-0.3,14,58)">1</text>
@@ -2135,7 +2135,7 @@
             <text x="161" y="58" font-size="7" fill="#3a3a3a" font-weight="600" transform="rotate(0.2,161,58)">2</text>
             <text x="174" y="59" font-size="6.8" fill="#2a2a2a" transform="rotate(0.4,174,59)">Liv rm lights</text>
 
-            <!-- ── ROW 2 (y 66–90) ── -->
+            <!-- ââ ROW 2 (y 66â90) ââ -->
             <line x1="5" y1="90" x2="295" y2="90" stroke="#ddd0a0" stroke-width="0.5"/>
             <!-- Breaker 3: crossed out + blue correction -->
             <text x="14" y="82" font-size="7" fill="#3a3a3a" font-weight="600">3</text>
@@ -2146,7 +2146,7 @@
             <text x="161" y="82" font-size="7" fill="#3a3a3a" font-weight="600" transform="rotate(-0.3,161,82)">4</text>
             <text x="174" y="82" font-size="6.8" fill="#2a2a2a" transform="rotate(0.5,174,82)">Wshr / Dryr</text>
 
-            <!-- ── ROW 3 (y 90–114) ── -->
+            <!-- ââ ROW 3 (y 90â114) ââ -->
             <line x1="5" y1="114" x2="295" y2="114" stroke="#ddd0a0" stroke-width="0.5"/>
             <!-- Breaker 5: faded mess -->
             <text x="14" y="106" font-size="7" fill="#555" font-weight="600" transform="rotate(0.5,14,106)">5</text>
@@ -2157,7 +2157,7 @@
             <line x1="172" y1="104" x2="218" y2="104" stroke="#555" stroke-width="1.1"/>
             <text x="174" y="100" font-size="6" fill="#1a1a9a" transform="rotate(-1.1,174,100)">A/C + heat??</text>
 
-            <!-- ── ROW 4 (y 114–138) ── -->
+            <!-- ââ ROW 4 (y 114â138) ââ -->
             <line x1="5" y1="138" x2="295" y2="138" stroke="#ddd0a0" stroke-width="0.5"/>
             <!-- Breaker 7: crossed out + scrawled correction -->
             <text x="14" y="130" font-size="7" fill="#3a3a3a" font-weight="600" transform="rotate(-0.4,14,130)">7</text>
@@ -2170,7 +2170,7 @@
             <line x1="172" y1="128" x2="218" y2="128" stroke="#555" stroke-width="1.1"/>
             <text x="174" y="124" font-size="6" fill="#1a1a9a" transform="rotate(-0.9,174,124)">Din + Den??</text>
 
-            <!-- ── ROW 5 (y 138–162) ── -->
+            <!-- ââ ROW 5 (y 138â162) ââ -->
             <line x1="5" y1="162" x2="295" y2="162" stroke="#ddd0a0" stroke-width="0.5"/>
             <!-- Breaker 9: abbreviated, tilted -->
             <text x="14" y="154" font-size="7" fill="#3a3a3a" font-weight="600" transform="rotate(-0.5,14,154)">9</text>
@@ -2178,9 +2178,9 @@
             <!-- Breaker 10: conflicting notes -->
             <text x="158" y="154" font-size="6.5" fill="#3a3a3a" font-weight="600">10</text>
             <text x="174" y="154" font-size="6.8" fill="#2a2a2a" transform="rotate(0.4,174,154)">Office</text>
-            <text x="200" y="153" font-size="5.5" fill="#cc0000" transform="rotate(-1.2,200,153)">←NO! gst rm</text>
+            <text x="200" y="153" font-size="5.5" fill="#cc0000" transform="rotate(-1.2,200,153)">âNO! gst rm</text>
 
-            <!-- ── ROW 6 (y 162–186) ── -->
+            <!-- ââ ROW 6 (y 162â186) ââ -->
             <line x1="5" y1="186" x2="295" y2="186" stroke="#ddd0a0" stroke-width="0.5"/>
             <!-- Breaker 11: with red note -->
             <text x="14" y="178" font-size="6.5" fill="#3a3a3a" font-weight="600">11</text>
@@ -2190,7 +2190,7 @@
             <text x="158" y="178" font-size="6.5" fill="#555" font-weight="600">12</text>
             <text x="174" y="179" font-size="8" fill="#888" font-style="italic" transform="rotate(0.9,174,179)">?</text>
 
-            <!-- ── ROW 7 (y 186–210) ── -->
+            <!-- ââ ROW 7 (y 186â210) ââ -->
             <line x1="5" y1="210" x2="295" y2="210" stroke="#ddd0a0" stroke-width="0.5"/>
             <!-- Breaker 13: barely legible -->
             <text x="14" y="202" font-size="6.5" fill="#555" font-weight="600" transform="rotate(0.5,14,202)">13</text>
@@ -2199,7 +2199,7 @@
             <text x="158" y="202" font-size="6.5" fill="#666" font-weight="600">14</text>
             <text x="174" y="203" font-size="6.2" fill="#777" transform="rotate(1.8,174,203)" opacity="0.65">Bath 2 / hall??</text>
 
-            <!-- ── ROW 8 (y 210–234) ── -->
+            <!-- ââ ROW 8 (y 210â234) ââ -->
             <line x1="5" y1="234" x2="295" y2="234" stroke="#ddd0a0" stroke-width="0.5"/>
             <!-- Breaker 15: normal -->
             <text x="14" y="226" font-size="6.5" fill="#3a3a3a" font-weight="600" transform="rotate(-0.3,14,226)">15</text>
@@ -2215,7 +2215,7 @@
             <ellipse cx="240" cy="102" rx="15" ry="13" fill="none" stroke="#b8843a" stroke-width="1" opacity="0.12"/>
 
             <!-- Footer note -->
-            <text x="9" y="246" font-size="5.5" fill="#666" font-style="italic" transform="rotate(-0.4,9,246)">* Updated 2019 — call Mike w/ questions  555-0142</text>
+            <text x="9" y="246" font-size="5.5" fill="#666" font-style="italic" transform="rotate(-0.4,9,246)">* Updated 2019 â call Mike w/ questions  555-0142</text>
 
             <!-- Folded corner -->
             <polygon points="272,258 295,234 295,258" fill="#e8ddb0" stroke="#c8b97a" stroke-width="0.5"/>
@@ -2223,7 +2223,7 @@
           </svg>
         </div>
         <h2 style="font-size:1.15rem;font-weight:700;color:#b91c1c;margin-bottom:10px;">The Problem</h2>
-        <p style="color:#374151;line-height:1.75;font-size:0.95rem;">Circuit breaker panels are plagued by inaccurate, outdated descriptions. The most common solution — a penciled-in paper register on the panel door — is cramped, hard to read, and almost never updated. There's no record of who made changes or when.</p>
+        <p style="color:#374151;line-height:1.75;font-size:0.95rem;">Circuit breaker panels are plagued by inaccurate, outdated descriptions. The most common solution â a penciled-in paper register on the panel door â is cramped, hard to read, and almost never updated. There's no record of who made changes or when.</p>
       </div>
 
       <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:14px;padding:28px;">
@@ -2245,10 +2245,10 @@
 
             <!-- Panel info -->
             <text x="14" y="42" font-size="9" font-weight="800" fill="#1e3a8a">Panel ID: MAIN-01</text>
-            <text x="14" y="53" font-size="7" fill="#444">Main Electrical Panel  ·  Garage, North Wall  ·  200A Service</text>
-            <text x="14" y="63" font-size="6.5" fill="#666">Installed by: R. Kowalski Electric  ·  Permit #2019-4821</text>
-            <text x="14" y="73" font-size="6" fill="#999">Contact: James Mugg  ·  (555) 204-7731  ·  mugg@muggventures.com</text>
-            <text x="14" y="83" font-size="6" fill="#bbb">Printed: March 18, 2026  ·  Last updated: March 15, 2026</text>
+            <text x="14" y="53" font-size="7" fill="#444">Main Electrical Panel  Â·  Garage, North Wall  Â·  200A Service</text>
+            <text x="14" y="63" font-size="6.5" fill="#666">Installed by: R. Kowalski Electric  Â·  Permit #2019-4821</text>
+            <text x="14" y="73" font-size="6" fill="#999">Contact: James Mugg  Â·  (555) 204-7731  Â·  mugg@muggventures.com</text>
+            <text x="14" y="83" font-size="6" fill="#bbb">Printed: March 18, 2026  Â·  Last updated: March 15, 2026</text>
 
             <!-- QR code placeholder -->
             <rect x="310" y="34" width="57" height="57" rx="2" fill="#f9f9f9" stroke="#e0e0e0" stroke-width="0.8"/>
@@ -2295,96 +2295,96 @@
             <text x="204" y="101" text-anchor="middle" font-size="6.5" font-weight="700" fill="#fff">#</text>
             <text x="219" y="101" font-size="6.5" font-weight="700" fill="#fff">Circuit Description</text>
 
-            <!-- ── Row 1 (y=104–126) ── -->
+            <!-- ââ Row 1 (y=104â126) ââ -->
             <line x1="5" y1="126" x2="375" y2="126" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="104" width="23" height="22" fill="#f0f4ff"/>
             <rect x="192" y="104" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="119" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">1</text>
-            <text x="32" y="113" font-size="6.5" fill="#111">Kitchen outlets — GFCI countertop</text>
+            <text x="32" y="113" font-size="6.5" fill="#111">Kitchen outlets â GFCI countertop</text>
             <text x="32" y="122" font-size="6" fill="#555">receptacles, island, under-cabinet lighting</text>
             <text x="204" y="119" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">2</text>
-            <text x="219" y="113" font-size="6.5" fill="#111">Living room &amp; dining — overhead</text>
+            <text x="219" y="113" font-size="6.5" fill="#111">Living room &amp; dining â overhead</text>
             <text x="219" y="122" font-size="6" fill="#555">lights, wall sconces, switched outlets</text>
 
-            <!-- ── Row 2 (y=126–148) ── -->
+            <!-- ââ Row 2 (y=126â148) ââ -->
             <line x1="5" y1="148" x2="375" y2="148" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="126" width="23" height="22" fill="#f0f4ff"/>
             <rect x="192" y="126" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="141" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">3</text>
-            <text x="32" y="135" font-size="6.5" fill="#111">Master bedroom — all outlets north</text>
+            <text x="32" y="135" font-size="6.5" fill="#111">Master bedroom â all outlets north</text>
             <text x="32" y="144" font-size="6" fill="#555">&amp; east walls, ceiling fan, bedside lamps</text>
             <text x="204" y="141" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">4</text>
-            <text x="219" y="135" font-size="6.5" fill="#111">Washer / Dryer — 240V dedicated</text>
+            <text x="219" y="135" font-size="6.5" fill="#111">Washer / Dryer â 240V dedicated</text>
             <text x="219" y="144" font-size="6" fill="#555">30A laundry room, both units on circuit</text>
 
-            <!-- ── Row 3 (y=148–170) ── -->
+            <!-- ââ Row 3 (y=148â170) ââ -->
             <line x1="5" y1="170" x2="375" y2="170" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="148" width="23" height="22" fill="#f0f4ff"/>
             <rect x="192" y="148" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="163" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">5</text>
-            <text x="32" y="157" font-size="6.5" fill="#111">Basement — overhead fixtures,</text>
+            <text x="32" y="157" font-size="6.5" fill="#111">Basement â overhead fixtures,</text>
             <text x="32" y="166" font-size="6" fill="#555">workshop fluorescents, utility outlets</text>
             <text x="204" y="163" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">6</text>
-            <text x="219" y="157" font-size="6.5" fill="#111">A/C condenser — 240V outdoor unit,</text>
+            <text x="219" y="157" font-size="6.5" fill="#111">A/C condenser â 240V outdoor unit,</text>
             <text x="219" y="166" font-size="6" fill="#555">40A dedicated double-pole breaker</text>
 
-            <!-- ── Row 4 (y=170–192) ── -->
+            <!-- ââ Row 4 (y=170â192) ââ -->
             <line x1="5" y1="192" x2="375" y2="192" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="170" width="23" height="22" fill="#f0f4ff"/>
             <rect x="192" y="170" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="185" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">7</text>
-            <text x="32" y="179" font-size="6.5" fill="#111">Garage — door opener, exterior</text>
+            <text x="32" y="179" font-size="6.5" fill="#111">Garage â door opener, exterior</text>
             <text x="32" y="188" font-size="6" fill="#555">flood lights, workbench side outlets</text>
             <text x="204" y="185" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">8</text>
-            <text x="219" y="179" font-size="6.5" fill="#111">Office &amp; guest room — all outlets,</text>
+            <text x="219" y="179" font-size="6.5" fill="#111">Office &amp; guest room â all outlets,</text>
             <text x="219" y="188" font-size="6" fill="#555">ceiling fixtures, east wing circuits</text>
 
-            <!-- ── Row 5 (y=192–214) ── -->
+            <!-- ââ Row 5 (y=192â214) ââ -->
             <line x1="5" y1="214" x2="375" y2="214" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="192" width="23" height="22" fill="#f0f4ff"/>
             <rect x="192" y="192" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="207" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">9</text>
-            <text x="32" y="201" font-size="6.5" fill="#111">Water heater — 240V dedicated 30A</text>
+            <text x="32" y="201" font-size="6.5" fill="#111">Water heater â 240V dedicated 30A</text>
             <text x="32" y="210" font-size="6" fill="#555">double-pole, utility room east wall</text>
             <text x="204" y="207" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">10</text>
-            <text x="219" y="201" font-size="6.5" fill="#111">Bathrooms 1 &amp; 2 — GFCI outlets,</text>
+            <text x="219" y="201" font-size="6.5" fill="#111">Bathrooms 1 &amp; 2 â GFCI outlets,</text>
             <text x="219" y="210" font-size="6" fill="#555">exhaust fans, vanity &amp; mirror lighting</text>
 
-            <!-- ── Row 6 (y=214–236) ── -->
+            <!-- ââ Row 6 (y=214â236) ââ -->
             <line x1="5" y1="236" x2="375" y2="236" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="214" width="23" height="22" fill="#f0f4ff"/>
             <rect x="192" y="214" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="229" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">11</text>
-            <text x="32" y="223" font-size="6.5" fill="#111">Outdoor lighting — front porch,</text>
+            <text x="32" y="223" font-size="6.5" fill="#111">Outdoor lighting â front porch,</text>
             <text x="32" y="232" font-size="6" fill="#555">backyard string lights, driveway post</text>
             <text x="204" y="229" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">12</text>
-            <text x="219" y="223" font-size="6.5" fill="#111">Master bath &amp; closet — GFCI,</text>
+            <text x="219" y="223" font-size="6.5" fill="#111">Master bath &amp; closet â GFCI,</text>
             <text x="219" y="232" font-size="6" fill="#555">heat lamp, exhaust fan, vanity lights</text>
 
-            <!-- ── Row 7 (y=236–258) ── -->
+            <!-- ââ Row 7 (y=236â258) ââ -->
             <line x1="5" y1="258" x2="375" y2="258" stroke="#e5e7eb" stroke-width="0.5"/>
             <rect x="5" y="236" width="23" height="22" fill="#f0f4ff"/>
             <rect x="192" y="236" width="23" height="22" fill="#f0f4ff"/>
             <text x="17" y="251" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">13</text>
-            <text x="32" y="245" font-size="6.5" fill="#111">Refrigerator — dedicated 20A circuit,</text>
+            <text x="32" y="245" font-size="6.5" fill="#111">Refrigerator â dedicated 20A circuit,</text>
             <text x="32" y="254" font-size="6" fill="#555">kitchen north wall, GFCI protected</text>
             <text x="204" y="251" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">14</text>
-            <text x="219" y="245" font-size="6.5" fill="#111">Upstairs hall &amp; stairs — lighting,</text>
+            <text x="219" y="245" font-size="6.5" fill="#111">Upstairs hall &amp; stairs â lighting,</text>
             <text x="219" y="254" font-size="6" fill="#555">smoke detectors, closet outlets (3)</text>
 
-            <!-- ── Row 8 (y=258–281) ── -->
+            <!-- ââ Row 8 (y=258â281) ââ -->
             <rect x="5" y="258" width="23" height="23" fill="#f0f4ff"/>
             <rect x="192" y="258" width="23" height="23" fill="#f0f4ff"/>
             <text x="17" y="273" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">15</text>
-            <text x="32" y="267" font-size="6.5" fill="#111">HVAC blower — air handler fan</text>
+            <text x="32" y="267" font-size="6.5" fill="#111">HVAC blower â air handler fan</text>
             <text x="32" y="276" font-size="6" fill="#555">motor &amp; thermostat control, 15A</text>
             <text x="204" y="273" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">16</text>
-            <text x="219" y="267" font-size="6.5" fill="#111">Spare — unused circuit, available</text>
+            <text x="219" y="267" font-size="6.5" fill="#111">Spare â unused circuit, available</text>
             <text x="219" y="276" font-size="6" fill="#555">for future kitchen island expansion</text>
           </svg>
         </div>
         <h2 style="font-size:1.15rem;font-weight:700;color:#15803d;margin-bottom:10px;">The Solution</h2>
-        <p style="color:#374151;line-height:1.75;font-size:0.95rem;">MyBreakerPanel gives every panel a digital register — unlimited description space per breaker, a full change history, and instant access via a QR code and Panel ID. No more guesswork. No more illegible pencil marks.</p>
+        <p style="color:#374151;line-height:1.75;font-size:0.95rem;">MyBreakerPanel gives every panel a digital register â unlimited description space per breaker, a full change history, and instant access via a QR code and Panel ID. No more guesswork. No more illegible pencil marks.</p>
       </div>
 
     </div>
@@ -2396,7 +2396,7 @@
 
         <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:2px solid #e5e7eb;">
           <div style="width:44px;height:44px;background:#1a56db;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;margin:0 auto 14px;">1</div>
-          <div style="font-size:1.8rem;margin-bottom:10px;">📝</div>
+          <div style="font-size:1.8rem;margin-bottom:10px;">ð</div>
           <h3 style="font-size:0.92rem;font-weight:700;color:#1e3a8a;margin-bottom:6px;">Register Your Panel</h3>
           <p style="font-size:0.83rem;color:#6b7280;line-height:1.6;">Create an account and enter your panel's address, manufacturer, and number of breakers.</p>
         </div>
@@ -2429,16 +2429,16 @@
 
         <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:2px solid #e5e7eb;">
           <div style="width:44px;height:44px;background:#1a56db;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;margin:0 auto 14px;">3</div>
-          <div style="font-size:1.8rem;margin-bottom:10px;">🖨️</div>
+          <div style="font-size:1.8rem;margin-bottom:10px;">ð¨ï¸</div>
           <h3 style="font-size:0.92rem;font-weight:700;color:#1e3a8a;margin-bottom:6px;">Print &amp; Affix</h3>
           <p style="font-size:0.83rem;color:#6b7280;line-height:1.6;">Print the QR code and Panel ID card and affix it to the inside of your panel door.</p>
         </div>
 
         <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:2px solid #e5e7eb;">
           <div style="width:44px;height:44px;background:#1a56db;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;margin:0 auto 14px;">4</div>
-          <div style="font-size:1.8rem;margin-bottom:10px;">📱</div>
+          <div style="font-size:1.8rem;margin-bottom:10px;">ð±</div>
           <h3 style="font-size:0.92rem;font-weight:700;color:#1e3a8a;margin-bottom:6px;">Access Anywhere</h3>
-          <p style="font-size:0.83rem;color:#6b7280;line-height:1.6;">Anyone scans the QR code to open the app, enters the Panel ID, and instantly sees the register — no password needed.</p>
+          <p style="font-size:0.83rem;color:#6b7280;line-height:1.6;">Anyone scans the QR code to open the app, enters the Panel ID, and instantly sees the register â no password needed.</p>
         </div>
 
       </div>
@@ -2484,7 +2484,7 @@
             </svg>
           </div>
           <h3 style="font-size:0.95rem;font-weight:700;color:#1e3a8a;">Homeowners</h3>
-          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Finally know which breaker controls which room — and share it with family or contractors instantly.</p>
+          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Finally know which breaker controls which room â and share it with family or contractors instantly.</p>
         </div>
 
         <!-- Electricians -->
@@ -2495,7 +2495,7 @@
               <!-- Ground -->
               <rect x="0" y="62" width="82" height="4" fill="#dcfce7"/>
 
-              <!-- ══ Left figure: man ══ -->
+              <!-- ââ Left figure: man ââ -->
               <!-- Hard hat -->
               <ellipse cx="22" cy="8" rx="8" ry="3.5" fill="#f59e0b"/>
               <rect x="13" y="11" width="18" height="2" rx="1" fill="#d97706"/>
@@ -2506,7 +2506,7 @@
               <!-- Ear -->
               <ellipse cx="15" cy="19.5" rx="1.3" ry="2" fill="#b8844a"/>
               <ellipse cx="29" cy="19.5" rx="1.3" ry="2" fill="#b8844a"/>
-              <!-- Eyes — whites + iris + pupil -->
+              <!-- Eyes â whites + iris + pupil -->
               <ellipse cx="19.2" cy="19" rx="1.6" ry="1.5" fill="#fff"/>
               <circle cx="19.4" cy="19.1" r="0.9" fill="#5c3d1e"/>
               <circle cx="19.5" cy="19.1" r="0.42" fill="#0a0500"/>
@@ -2557,7 +2557,7 @@
               <rect x="13.5" y="60.5" width="9" height="4" rx="2" fill="#111827"/>
               <rect x="21.5" y="60.5" width="9" height="4" rx="2" fill="#111827"/>
 
-              <!-- ══ Right figure: woman ══ -->
+              <!-- ââ Right figure: woman ââ -->
               <!-- Ponytail (behind, right side) -->
               <path d="M64,17 Q67,22 67,32 Q65,36 63,33 Q62,27 63,20Z" fill="#2d1f0e"/>
               <!-- Hard hat -->
@@ -2568,7 +2568,7 @@
               <!-- Ear -->
               <ellipse cx="51" cy="19.5" rx="1.3" ry="2" fill="#b8844a"/>
               <ellipse cx="65" cy="19.5" rx="1.3" ry="2" fill="#b8844a"/>
-              <!-- Eyes — whites + iris + pupil -->
+              <!-- Eyes â whites + iris + pupil -->
               <ellipse cx="55.2" cy="19" rx="1.6" ry="1.5" fill="#fff"/>
               <circle cx="55.4" cy="19.1" r="0.9" fill="#5c3d1e"/>
               <circle cx="55.5" cy="19.1" r="0.42" fill="#0a0500"/>
@@ -2631,7 +2631,7 @@
             </svg>
           </div>
           <h3 style="font-size:0.95rem;font-weight:700;color:#1e3a8a;">Electricians</h3>
-          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Leave a complete, timestamped record of every panel you service — your contact info included.</p>
+          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Leave a complete, timestamped record of every panel you service â your contact info included.</p>
         </div>
 
         <!-- Commercial Facility Managers -->
@@ -2766,7 +2766,7 @@
             </svg>
           </div>
           <h3 style="font-size:0.95rem;font-weight:700;color:#1e3a8a;">Residential Property Managers</h3>
-          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Provide tenants and maintenance staff with accurate panel information — without handing over account access.</p>
+          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Provide tenants and maintenance staff with accurate panel information â without handing over account access.</p>
         </div>
 
       </div>
@@ -2794,12 +2794,12 @@
     }
   </style>
 
-  <footer>&copy; 2026 <span>MyBreakerPanel</span> · mybreakerpanel.com &nbsp;|&nbsp; myelectricalpanel.com</footer>
+  <footer>&copy; 2026 <span>MyBreakerPanel</span> Â· mybreakerpanel.com &nbsp;|&nbsp; myelectricalpanel.com</footer>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      CONTACT PAGE
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="page-contact" class="page">
   <div class="info-page">
     <h1>Contact Us</h1>
@@ -2819,7 +2819,7 @@
       </div>
       <div class="form-group">
         <label>Message</label>
-        <textarea id="ct-message" style="min-height:120px" placeholder="Your message…"></textarea>
+        <textarea id="ct-message" style="min-height:120px" placeholder="Your messageâ¦"></textarea>
       </div>
       <button class="btn btn-blue" onclick="submitContact()">Send Message</button>
     </div>
@@ -2828,9 +2828,9 @@
 </div>
 
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      CONFIRM MODAL
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="app-confirm-modal" class="edit-breaker-modal" style="display:none"
      onclick="if(event.target===this)closeConfirm(false)">
   <div class="modal-box" style="max-width:420px">
@@ -2843,28 +2843,28 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      PRINT PREVIEW MODAL
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <div id="print-preview-modal" onclick="if(event.target===this)closePrintPreview()">
   <div id="print-preview-inner">
     <div id="print-preview-toolbar">
-      <button class="btn btn-primary" onclick="window.print()">🖨️ Print</button>
-      <button class="btn btn-secondary" onclick="closePrintPreview()">✕ Close</button>
+      <button class="btn btn-primary" onclick="window.print()">ð¨ï¸ Print</button>
+      <button class="btn btn-secondary" onclick="closePrintPreview()">â Close</button>
       <span>Review your panel register below, then click Print.</span>
     </div>
     <div id="print-preview-content"></div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ââââââââââââââââââââââââââââââââââââââ
      JAVASCRIPT
-══════════════════════════════════════ -->
+ââââââââââââââââââââââââââââââââââââââ -->
 <script>
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // FIREBASE CLOUD SYNC
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 const _fbCfg={apiKey:"AIzaSyArh-1SBLVDFnBGVml0do-LgSJGrpZVAM4",authDomain:"mybreakerpanel.firebaseapp.com",projectId:"mybreakerpanel",storageBucket:"mybreakerpanel.firebasestorage.app",messagingSenderId:"594886339510",appId:"1:594886339510:web:34fa0a4d0c59d179c2af17"};
 let _db=null;
 try{if(typeof firebase!=="undefined"){firebase.initializeApp(_fbCfg);_db=firebase.firestore();}}
@@ -2892,9 +2892,9 @@ function migrateLocalToCloud(){
     .catch(e=>console.warn("migrate:",e));
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // DATA LAYER
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 function getData(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) || fallback; }
   catch { return fallback; }
@@ -2927,14 +2927,14 @@ function fmtDate(iso) {
   return d.toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // PAGE ROUTING
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 let currentPage = 'landing';
 
 const PROTECTED_PAGES = ['dashboard', 'add-panel', 'your-panels', 'edit-user', 'panel-setup'];
 
-// ── In-app history stack (for ← → arrow buttons) ──
+// ââ In-app history stack (for â â arrow buttons) ââ
 let pageHistory    = [];
 let historyPos     = -1;
 let _historyIgnore = false; // set during goBack/goForward to skip push
@@ -2946,7 +2946,7 @@ function updateNavArrows() {
   if (fwd)  fwd.disabled  = historyPos >= pageHistory.length - 1;
 }
 
-// ── Hamburger menu ──
+// ââ Hamburger menu ââ
 function toggleNavMenu() {
   const links = document.getElementById('nav-links');
   const btn   = document.getElementById('nav-hamburger');
@@ -2969,7 +2969,7 @@ function closeNavMenu() {
   if (btn) btn.querySelectorAll('span').forEach(b => b.style.cssText = '');
 }
 
-// ── Core renderer (only called from the hash router) ──
+// ââ Core renderer (only called from the hash router) ââ
 function _renderPage(name) {
   closeNavMenu();
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2979,14 +2979,14 @@ function _renderPage(name) {
   onPageLoad(name);
 }
 
-// ── Hash router: every page change flows through here ──
+// ââ Hash router: every page change flows through here ââ
 function _setHash(name) {
   const newHash = '#' + name;
   if (window.location.hash === newHash) {
-    // Hash unchanged → hashchange won't fire → render directly
+    // Hash unchanged â hashchange won't fire â render directly
     _renderPage(name);
   } else {
-    window.location.hash = name; // triggers hashchange → _renderPage
+    window.location.hash = name; // triggers hashchange â _renderPage
   }
 }
 
@@ -2995,7 +2995,7 @@ window.addEventListener('hashchange', () => {
   _renderPage(name);
 });
 
-// ── Public API ──
+// ââ Public API ââ
 function showPage(name) {
   if (PROTECTED_PAGES.includes(name) && !getCurrentUser()) {
     document.getElementById('login-error').textContent = 'Please log in to access that page.';
@@ -3057,16 +3057,16 @@ function onPageLoad(name) {
   }
 }
 
-// Initialize — honour any hash in the URL (e.g. deep-link from QR code)
+// Initialize â honour any hash in the URL (e.g. deep-link from QR code)
 window.addEventListener('DOMContentLoaded', () => {
   migrateLocalToCloud();
   const initial = window.location.hash.replace(/^#/, '') || 'landing';
   showPage(initial);
 });
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // AUTH
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 function doSignUp() {
   const name = document.getElementById('signup-name').value.trim();
   const username = document.getElementById('signup-username').value.trim();
@@ -3105,9 +3105,9 @@ function logOut() {
   showPage('landing');
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // ACCOUNT RECOVERY
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 let recoverUserId = null;
 
 function resetRecoverPage() {
@@ -3140,7 +3140,7 @@ function lookupByEmail() {
     errEl.style.display = 'block'; return;
   }
 
-  // Found — show username and move to step 2
+  // Found â show username and move to step 2
   recoverUserId = user.id;
   document.getElementById('recover-step1').style.display = 'none';
   document.getElementById('recover-step2').style.display = 'block';
@@ -3201,9 +3201,9 @@ function saveUserEdits() {
   document.getElementById('edituser-success').style.display = 'block';
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // ADD NEW PANEL
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 let currentPanelId = null; // the panel being worked on
 
 function saveNewPanel() {
@@ -3264,7 +3264,7 @@ function openPanelSetup(panelInternalId) {
   const panel = getPanels().find(p => p.id === panelInternalId);
   if (!panel) return;
   currentPanelId = panelInternalId;
-  document.getElementById('setup-title').textContent = 'Label Breakers — ' + panel.panelId;
+  document.getElementById('setup-title').textContent = 'Label Breakers â ' + panel.panelId;
   renderSetupGrid(panel);
   showPage('panel-setup');
 }
@@ -3280,7 +3280,7 @@ function renderSetupGrid(panel) {
       <div class="breaker-num-edit">${br.number}</div>
       <div style="flex:1">
         <textarea class="breaker-input" id="setup-br-${br.number}" rows="2"
-          placeholder="Click to describe this breaker…">${br.description}</textarea>
+          placeholder="Click to describe this breakerâ¦">${br.description}</textarea>
       </div>`;
     grid.appendChild(slot);
   });
@@ -3313,14 +3313,14 @@ function savePanelSetupDraft() {
   showPage('dashboard');
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // QR CODE
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 function showQRPage(panel) {
-  document.getElementById('qr-panel-name').textContent = panel.panelId + ' — ' + panel.streetAddress;
+  document.getElementById('qr-panel-name').textContent = panel.panelId + ' â ' + panel.streetAddress;
   document.getElementById('qr-panel-id-text').textContent = panel.panelId;
 
-  // QR code links to the app homepage only — user enters Panel ID once they arrive
+  // QR code links to the app homepage only â user enters Panel ID once they arrive
   const url = window.location.href.split('?')[0] + '?panel=' + encodeURIComponent(panel.panelId);
 
   const container = document.getElementById('qr-code-display');
@@ -3347,15 +3347,15 @@ function showQRForCurrentPanel() {
   if (panel) showQRPage(panel);
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // YOUR PANELS
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 function renderRecentPanels() {
   const user = getCurrentUser();
   const panels = getPanels().filter(p => p.ownerId === (user ? user.id : null));
   const el = document.getElementById('dash-recent-panels');
   if (panels.length === 0) {
-    el.innerHTML = '<p style="color:#9ca3af;font-size:0.92rem;">No panels yet. <a href="#" onclick="showPage(\'add-panel\')">Add your first panel →</a></p>';
+    el.innerHTML = '<p style="color:#9ca3af;font-size:0.92rem;">No panels yet. <a href="#" onclick="showPage(\'add-panel\')">Add your first panel â</a></p>';
     return;
   }
   el.innerHTML = panels.slice(-3).reverse().map(p => panelItemHTML(p, false)).join('');
@@ -3375,7 +3375,7 @@ function renderPanelsList() {
   }
   const el = document.getElementById('panels-list');
   if (panels.length === 0) {
-    el.innerHTML = '<p style="color:#9ca3af;font-size:0.92rem;">' + (search ? 'No panels match your search.' : 'No panels yet. <a href="#" onclick="showPage(\'add-panel\')">Add your first panel →</a>') + '</p>';
+    el.innerHTML = '<p style="color:#9ca3af;font-size:0.92rem;">' + (search ? 'No panels match your search.' : 'No panels yet. <a href="#" onclick="showPage(\'add-panel\')">Add your first panel â</a>') + '</p>';
     return;
   }
   el.innerHTML = panels.map(p => panelItemHTML(p)).join('');
@@ -3385,8 +3385,8 @@ function panelItemHTML(p, showQR = true) {
   return `
     <div class="panel-item">
       <div class="panel-item-info">
-        <h3>${p.panelId} <span class="badge badge-blue">${p.numBreakers} breakers</span> ${p.qrCodeGenerated ? '<span class="badge badge-green">QR ✓</span>' : ''}</h3>
-        <p>${p.streetAddress}${p.locationDescription ? ' · ' + p.locationDescription : ''}</p>
+        <h3>${p.panelId} <span class="badge badge-blue">${p.numBreakers} breakers</span> ${p.qrCodeGenerated ? '<span class="badge badge-green">QR â</span>' : ''}</h3>
+        <p>${p.streetAddress}${p.locationDescription ? ' Â· ' + p.locationDescription : ''}</p>
         <p style="margin-top:2px;font-size:0.8rem;color:#9ca3af">Added ${fmtDate(p.createdDate)}</p>
       </div>
       <div class="panel-item-actions">
@@ -3421,9 +3421,9 @@ function deletePanel(internalId) {
   );
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // VIEW / EDIT PANEL
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 async function openPanelById(panelId, showBackBtn) {
   const KEY = panelId.toUpperCase();
   let panel = getPanels().find(p => p.panelId === KEY);
@@ -3449,6 +3449,25 @@ async function lookupPanelId() {
   const KEY = val.toUpperCase();
   let panel = getPanels().find(p => p.panelId === KEY);
   if (!panel && _db) {
+    if (err) { err.textContent = 'Looking up panelâ¦'; err.style.color='#1a56db'; err.style.display='block'; }
+    panel = await fetchFromCloud(KEY);
+    if (panel) { const ps=getPanels(); if(!ps.find(p=>p.panelId===KEY)){ps.push(panel);setPanels(ps);} }
+    if (err) { err.style.color=''; err.textContent='Panel ID not found. Check the ID and try again.'; }
+  }
+  if (!panel) { if(err)err.style.display='block'; return; }
+  if (err) err.style.display = 'none';
+  currentPanelId = panel.id;
+  openPanelById_Internal(panel.id, false);
+}
+async function lookupAccessPanel() {
+  const inputEl = document.getElementById('access-panel-id');
+  const val = inputEl ? inputEl.value.trim() : '';
+  if (!val) return;
+  const err = document.getElementById('access-panel-error');
+  if (err) err.style.display = 'none';
+  const KEY = val.toUpperCase();
+  let panel = getPanels().find(p => p.panelId === KEY);
+  if (!panel && _db) {
     if (err) { err.textContent = 'Looking up panel…'; err.style.color='#1a56db'; err.style.display='block'; }
     panel = await fetchFromCloud(KEY);
     if (panel) { const ps=getPanels(); if(!ps.find(p=>p.panelId===KEY)){ps.push(panel);setPanels(ps);} }
@@ -3465,7 +3484,7 @@ function openPanelById_Internal(internalId, showBackBtn) {
   currentPanelId = internalId;
 
   document.getElementById('vp-title').textContent = 'Panel: ' + panel.panelId;
-  document.getElementById('vp-subtitle').textContent = panel.streetAddress + (panel.locationDescription ? ' · ' + panel.locationDescription : '');
+  document.getElementById('vp-subtitle').textContent = panel.streetAddress + (panel.locationDescription ? ' Â· ' + panel.locationDescription : '');
   document.getElementById('vp-back-btn').style.display = showBackBtn ? '' : 'none';
 
   // Show "Edit Panel Info" only to the panel owner
@@ -3474,8 +3493,8 @@ function openPanelById_Internal(internalId, showBackBtn) {
   document.getElementById('vp-edit-info-btn').style.display = isOwner ? '' : 'none';
 
   // Print header
-  document.getElementById('print-panel-title').textContent = 'Panel ID: ' + panel.panelId + ' — ' + panel.streetAddress;
-  document.getElementById('print-panel-meta').textContent = (panel.manufacturer ? 'Manufacturer: ' + panel.manufacturer + '  ·  ' : '') + panel.numBreakers + ' breakers';
+  document.getElementById('print-panel-title').textContent = 'Panel ID: ' + panel.panelId + ' â ' + panel.streetAddress;
+  document.getElementById('print-panel-meta').textContent = (panel.manufacturer ? 'Manufacturer: ' + panel.manufacturer + '  Â·  ' : '') + panel.numBreakers + ' breakers';
   document.getElementById('print-date').textContent = 'Printed: ' + fmtDate(new Date().toISOString());
 
   renderEditGrid(panel);
@@ -3496,9 +3515,9 @@ function renderEditGrid(panel) {
       <div class="breaker-num-edit">${br.number}</div>
       <div id="vp-slot-inner-${br.number}" style="flex:1">
         <textarea class="breaker-input" id="vp-br-${br.number}" rows="2"
-          placeholder="Click to describe breaker ${br.number}…"
+          placeholder="Click to describe breaker ${br.number}â¦"
           oninput="scheduleAutoSave()">${br.description}</textarea>
-        ${linked.length ? `<span class="breaker-link-badge">🔗 Linked: ${linked.slice().sort((a,b)=>a-b).join(', ')}</span>` : ''}
+        ${linked.length ? `<span class="breaker-link-badge">ð Linked: ${linked.slice().sort((a,b)=>a-b).join(', ')}</span>` : ''}
       </div>`;
     grid.appendChild(slot);
   });
@@ -3525,9 +3544,9 @@ function searchBreakers() {
   });
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // AUTO-SAVE (debounced, no history entry)
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 let _autoSaveTimer  = null;
 let _editBaseline   = {}; // descriptions at last explicit save (or panel open)
 
@@ -3543,7 +3562,7 @@ function clearAutoSaveStatus() {
 
 function scheduleAutoSave() {
   const el = document.getElementById('vp-autosave-status');
-  if (el) { el.textContent = 'Unsaved changes…'; el.className = 'autosave-status unsaved'; }
+  if (el) { el.textContent = 'Unsaved changesâ¦'; el.className = 'autosave-status unsaved'; }
   clearTimeout(_autoSaveTimer);
   _autoSaveTimer = setTimeout(autoSaveBreakers, 500);
 }
@@ -3559,16 +3578,16 @@ function autoSaveBreakers() {
   setPanels(panels);
   const el = document.getElementById('vp-autosave-status');
   if (el) {
-    el.textContent = '✓ Saved';
+    el.textContent = 'â Saved';
     el.className = 'autosave-status saved';
     clearTimeout(el._fadeTimer);
     el._fadeTimer = setTimeout(() => clearAutoSaveStatus(), 3000);
   }
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // SAVE BREAKERS (with contact info modal)
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 function saveAllBreakers() {
   const user = getCurrentUser();
   if (user) {
@@ -3627,9 +3646,9 @@ function confirmSaveBreakers() {
   clearAutoSaveStatus();
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // EDIT PANEL INFO
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 function openEditPanelInfo() {
   const panel = getPanels().find(p => p.id === currentPanelId);
   if (!panel) return;
@@ -3648,7 +3667,7 @@ function openEditPanelInfo() {
     const warning = document.getElementById('epi-breaker-warning');
     warning.style.display = newCount < panel.numBreakers ? 'block' : 'none';
   };
-  // epi page is not in the protected list but user must be owner — already gated by the button visibility
+  // epi page is not in the protected list but user must be owner â already gated by the button visibility
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-edit-panel-info').classList.add('active');
   currentPage = 'edit-panel-info';
@@ -3694,7 +3713,7 @@ function saveEditPanelInfo() {
     if (affected > 0) {
       showConfirm(
         'Reduce Breaker Count',
-        `Reducing from ${oldCount} to ${newCount} breakers will permanently delete the descriptions and history for breakers ${newCount + 1}–${oldCount} (${affected} breaker${affected > 1 ? 's' : ''} with data). Continue?`,
+        `Reducing from ${oldCount} to ${newCount} breakers will permanently delete the descriptions and history for breakers ${newCount + 1}â${oldCount} (${affected} breaker${affected > 1 ? 's' : ''} with data). Continue?`,
         doSave,
         'Continue', 'btn-danger'
       );
@@ -3732,9 +3751,9 @@ function _applyEditPanelInfo(newCount, address, panelId, manufacturer, location)
   setTimeout(() => openPanelById_Internal(currentPanelId, true), 1200);
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // HISTORY
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 function openPanelHistory(internalId) {
   const panel = getPanels().find(p => p.id === internalId);
   if (!panel) return;
@@ -3768,16 +3787,16 @@ function renderHistory(panel) {
       <div class="hist-date">${fmtDate(h.date)}</div>
       <div class="hist-breaker">Breaker #${h.breakerNumber}</div>
       <div class="hist-desc">
-        ${h.previousDescription ? `<span style="color:#9ca3af;text-decoration:line-through">${h.previousDescription}</span> → ` : ''}
+        ${h.previousDescription ? `<span style="color:#9ca3af;text-decoration:line-through">${h.previousDescription}</span> â ` : ''}
         <strong>${h.newDescription || '<em>cleared</em>'}</strong>
       </div>
-      <div class="hist-contact">By: ${h.contactName} · ${h.contactPhone} · ${h.contactEmail}${h.contactAddress ? ' · ' + h.contactAddress : ''}</div>
+      <div class="hist-contact">By: ${h.contactName} Â· ${h.contactPhone} Â· ${h.contactEmail}${h.contactAddress ? ' Â· ' + h.contactAddress : ''}</div>
     </div>`).join('');
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // COMPARISON VIEW
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 let _histPanel = null;
 
 function switchHistTab(tab) {
@@ -3807,7 +3826,7 @@ function _populateCompareDates(panel) {
 
 function _buildSnapshot(panel, cutoff) {
   // Returns { breakerNum: description } for state at/before cutoff
-  // cutoff = null → initial (before any history), '' → current
+  // cutoff = null â initial (before any history), '' â current
   const snap = {};
   panel.breakers.forEach(br => {
     let desc = br.description;
@@ -3847,24 +3866,24 @@ function runComparison() {
   const same    = rows.filter(r => r.cls === 'same');
   const ri = r => {
     let inner = '';
-    if      (r.cls === 'added')   inner = `<span class="ci-new">${escHtml(r.b)}</span><span class="ci-arr"> ← newly labelled</span>`;
-    else if (r.cls === 'cleared') inner = `<span class="ci-old">${escHtml(r.a)}</span><span class="ci-arr"> → </span><span style="color:#ef4444;font-style:italic">cleared</span>`;
-    else if (r.cls === 'changed') inner = `<span class="ci-old">${escHtml(r.a)}</span><span class="ci-arr">→</span><span class="ci-new">${escHtml(r.b)}</span>`;
+    if      (r.cls === 'added')   inner = `<span class="ci-new">${escHtml(r.b)}</span><span class="ci-arr"> â newly labelled</span>`;
+    else if (r.cls === 'cleared') inner = `<span class="ci-old">${escHtml(r.a)}</span><span class="ci-arr"> â </span><span style="color:#ef4444;font-style:italic">cleared</span>`;
+    else if (r.cls === 'changed') inner = `<span class="ci-old">${escHtml(r.a)}</span><span class="ci-arr">â</span><span class="ci-new">${escHtml(r.b)}</span>`;
     else                          inner = `<span class="ci-same">${escHtml(r.b) || '<em>empty</em>'}</span>`;
     return `<div class="compare-item ${r.cls}"><span class="ci-num">#${r.num}</span>${inner}</div>`;
   };
   const summaryTxt = total === 0 ? 'No differences between these snapshots.'
-    : `${total} change${total !== 1 ? 's' : ''} — ${nChanged} updated, ${nAdded} newly labelled, ${nCleared} cleared.`;
+    : `${total} change${total !== 1 ? 's' : ''} â ${nChanged} updated, ${nAdded} newly labelled, ${nCleared} cleared.`;
   document.getElementById('compare-results').innerHTML =
-    `<p class="compare-result-hdr">Comparing: <em>${escHtml(fromLbl)}</em> → <em>${escHtml(toLbl)}</em></p>
+    `<p class="compare-result-hdr">Comparing: <em>${escHtml(fromLbl)}</em> â <em>${escHtml(toLbl)}</em></p>
     <p class="compare-summary">${summaryTxt}</p>
     ${changed.map(ri).join('')}
     ${same.length && total > 0 ? `<details style="margin-top:14px"><summary style="cursor:pointer;color:#6b7280;font-size:0.88rem">${same.length} unchanged breaker${same.length !== 1 ? 's' : ''}</summary><div style="margin-top:8px">${same.map(ri).join('')}</div></details>` : ''}`;
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // EDIT SINGLE BREAKER MODAL
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 let editingBreakerNum = null;
 
 function openEditBreakerModal(breakerNum, currentDesc, panelInternalId) {
@@ -3888,7 +3907,7 @@ function openEditBreakerModal(breakerNum, currentDesc, panelInternalId) {
       pill.type       = 'button';
       pill.className  = 'link-pill' + (linked.includes(b.number) ? ' selected' : '');
       pill.dataset.num = b.number;
-      pill.innerHTML  = `<strong>#${b.number}</strong>${label ? '<br><span style="font-weight:400;color:#6b7280">' + label.substring(0,28) + (label.length>28?'…':'') + '</span>' : ''}`;
+      pill.innerHTML  = `<strong>#${b.number}</strong>${label ? '<br><span style="font-weight:400;color:#6b7280">' + label.substring(0,28) + (label.length>28?'â¦':'') + '</span>' : ''}`;
       pill.onclick    = () => pill.classList.toggle('selected');
       list.appendChild(pill);
     });
@@ -3916,7 +3935,7 @@ function saveEditBreaker() {
   closeEditBreakerModal();
 }
 
-// ── Bidirectional link sync ──────────────────────────────
+// ââ Bidirectional link sync ââââââââââââââââââââââââââââââ
 function _syncLinks(panelId, breakerNum, newLinked) {
   const panels = getPanels();
   const panel  = panels.find(p => p.id === panelId);
@@ -3947,7 +3966,7 @@ function _syncLinks(panelId, breakerNum, newLinked) {
   setPanels(panels);
 }
 
-// ── Refresh link badges in the visible grid ──────────────
+// ââ Refresh link badges in the visible grid ââââââââââââââ
 function _refreshAllLinkBadges(panel) {
   panel.breakers.forEach(br => {
     const slot  = document.getElementById('vp-slot-' + br.number);
@@ -3964,7 +3983,7 @@ function _refreshAllLinkBadges(panel) {
     if (inner && linked.length > 0) {
       const badge       = document.createElement('span');
       badge.className   = 'breaker-link-badge';
-      badge.textContent = '🔗 Linked: ' + linked.slice().sort((a, b) => a - b).join(', ');
+      badge.textContent = 'ð Linked: ' + linked.slice().sort((a, b) => a - b).join(', ');
       inner.appendChild(badge);
     }
   });
@@ -3975,9 +3994,9 @@ function closeEditBreakerModal() {
   editingBreakerNum = null;
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // CONTACT FORM
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 function submitContact() {
   const name = document.getElementById('ct-name').value.trim();
   const email = document.getElementById('ct-email').value.trim();
@@ -3997,9 +4016,9 @@ function submitContact() {
   document.getElementById('ct-message').value = '';
 }
 
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 // PRINT PREVIEW (in-page modal)
-// ─────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââ
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
@@ -4020,7 +4039,7 @@ function printPanel() {
 
   const row = br => `<tr>
     <td class="pp-num">${br.number}</td>
-    <td class="pp-desc">${br.description ? escHtml(br.description) : '<span class="pp-empty">—</span>'}</td>
+    <td class="pp-desc">${br.description ? escHtml(br.description) : '<span class="pp-empty">â</span>'}</td>
   </tr>`;
 
   document.getElementById('print-preview-content').innerHTML = `
@@ -4029,9 +4048,9 @@ function printPanel() {
         <h2>Panel ID: ${escHtml(panel.panelId)}</h2>
         <div class="pp-meta">
           ${escHtml(panel.streetAddress)}
-          ${panel.locationDescription ? ' &nbsp;·&nbsp; ' + escHtml(panel.locationDescription) : ''}
-          ${panel.manufacturer ? ' &nbsp;·&nbsp; ' + escHtml(panel.manufacturer) : ''}
-          &nbsp;·&nbsp; ${panel.numBreakers} breakers
+          ${panel.locationDescription ? ' &nbsp;Â·&nbsp; ' + escHtml(panel.locationDescription) : ''}
+          ${panel.manufacturer ? ' &nbsp;Â·&nbsp; ' + escHtml(panel.manufacturer) : ''}
+          &nbsp;Â·&nbsp; ${panel.numBreakers} breakers
         </div>
         <div class="pp-date">Printed: ${printDate}</div>
       </div>
@@ -4072,7 +4091,7 @@ function closePrintPreview() {
   document.body.style.overflow = '';
 }
 
-// ── App confirm modal (replaces browser confirm()) ──
+// ââ App confirm modal (replaces browser confirm()) ââ
 let _confirmCallback = null;
 
 function showConfirm(title, message, onConfirm, confirmLabel = 'Confirm', confirmClass = 'btn-danger') {
@@ -4092,7 +4111,7 @@ function closeConfirm(confirmed) {
   if (confirmed && cb) cb();
 }
 
-// ── Global Escape key: dismiss any open modal ──
+// ââ Global Escape key: dismiss any open modal ââ
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   if (document.getElementById('save-modal').style.display !== 'none')         closeSaveModal();
