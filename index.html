@@ -608,9 +608,12 @@
   <div class="hero">
     <h1>Your Panel.<br><span>Organized. Accessible. Safe.</span></h1>
     <p>Stop guessing which breaker controls which circuit. MyBreakerPanel gives every electrical panel a digital, QR-code-accessible register — always accurate, always available.</p>
-    <div class="hero-btns">
+    <div class="hero-btns" id="landing-hero-btns">
       <button class="btn btn-primary" onclick="showPage('signup')">Get Started Free</button>
       <button class="btn btn-secondary" onclick="showPage('login')">Log In</button>
+    </div>
+    <div class="hero-btns" id="landing-hero-user" style="display:none">
+      <button class="btn btn-primary" onclick="showPage('dashboard')">Go to Dashboard</button>
     </div>
   </div>
 
@@ -3040,6 +3043,11 @@ function onPageLoad(name) {
   document.getElementById('nav-signup').style.display = user ? 'none' : '';
   document.getElementById('nav-dashboard').style.display = user ? '' : 'none';
   document.getElementById('nav-logout').style.display = user ? '' : 'none';
+    // Landing hero buttons
+    const _heroBtns = document.getElementById('landing-hero-btns');
+    const _heroUser = document.getElementById('landing-hero-user');
+    if (_heroBtns) _heroBtns.style.display = user ? 'none' : '';
+    if (_heroUser) _heroUser.style.display = user ? '' : 'none';
 
   if (name === 'dashboard' && user) {
     document.getElementById('dash-greeting').textContent = 'Welcome, ' + user.name.split(' ')[0] + '!';
@@ -3095,6 +3103,1033 @@ async function doSignUp() {
   if (password.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.style.display = 'block'; return; }
   if (!_auth) { err.textContent = 'Service unavailable. Please try again.'; err.style.display = 'block'; return; }
   try {
+    const cred = await _auth.createUserWithEmailAndPassword(email, password);
+    const profile = { id: cred.user.uid, name, username, email, createdDate: new Date().toISOString() };
+    if (_db) await _db.collection('users').doc(cred.user.uid).set(profile);
+    _currentUserProfile = profile;
+    showPage('dashboard');
+  } catch(e) {
+    const msgs = { 'auth/email-already-in-use': 'That email is already registered.', 'auth/invalid-email': 'Invalid email address.', 'auth/weak-password': 'Password must be at least 6 characters.' };
+    err.textContent = msgs[e.code] || e.message;
+    err.style.display = 'block';
+  }
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-username').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  const err = document.getElementById('login-error');
+  err.style.display = 'none';
+  if (!_auth) { err.textContent = 'Service unavailable. Please try again.'; err.style.display = 'block'; return; }
+  try {
+    await _auth.signInWithEmailAndPassword(email, password);
+    showPage('dashboard');
+  } catch(e) {
+    err.textContent = 'Invalid email or password.';
+    err.style.display = 'block';
+  }
+}
+
+function logOut() {
+  if (_auth) _auth.signOut();
+  _currentUserProfile = null;
+  showPage('landing');
+}
+
+// ─────────────────────────────────────
+// ACCOUNT RECOVERY
+// ─────────────────────────────────────
+let recoverUserId = null;
+
+function resetRecoverPage() {
+  recoverUserId = null;
+  document.getElementById('recover-step1').style.display = 'block';
+  document.getElementById('recover-step2').style.display = 'none';
+  document.getElementById('recover-email').value = '';
+  document.getElementById('recover-newpw').value = '';
+  document.getElementById('recover-confirmpw').value = '';
+  document.getElementById('recover-error').style.display = 'none';
+  document.getElementById('recover-success').style.display = 'none';
+  document.getElementById('recover-pw-error').style.display = 'none';
+}
+
+async function lookupByEmail() {
+  const email = document.getElementById('recover-email').value.trim().toLowerCase();
+  const errEl = document.getElementById('recover-error');
+  const sucEl = document.getElementById('recover-success');
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+
+  if (!email) {
+    errEl.textContent = 'Please enter your email address.';
+    errEl.style.display = 'block'; return;
+  }
+  if (!_auth) {
+    errEl.textContent = 'Service unavailable. Please try again.';
+    errEl.style.display = 'block'; return;
+  }
+  try {
+    await _auth.sendPasswordResetEmail(email);
+    document.getElementById('recover-step1').style.display = 'none';
+    document.getElementById('recover-step2').style.display = 'block';
+    document.getElementById('recover-step2-msg').textContent =
+      'A password reset link has been sent to ' + email + '. Check your inbox and follow the link to set a new password.';
+    document.getElementById('recover-pw-error').style.display = 'none';
+  } catch(e) {
+    const msgs = { 'auth/user-not-found': 'No account found with that email address.', 'auth/invalid-email': 'Invalid email address.' };
+    errEl.textContent = msgs[e.code] || 'Could not send reset email. Please try again.';
+    errEl.style.display = 'block';
+  }
+}
+
+function resetPassword() {
+  // Password reset is handled via Firebase email link (see lookupByEmail)
+  showPage('login');
+}
+
+async function saveUserEdits() {
+  const fbUser = _auth ? _auth.currentUser : null;
+  if (!fbUser) return;
+  const name = document.getElementById('eu-name').value.trim();
+  const email = document.getElementById('eu-email').value.trim();
+  const pw = document.getElementById('eu-password').value;
+  const updates = {};
+  if (name) { updates.name = name; if (_currentUserProfile) _currentUserProfile.name = name; }
+  if (email) updates.email = email;
+  try {
+    if (pw && pw.length >= 6) await fbUser.updatePassword(pw);
+    if (_db && Object.keys(updates).length) await _db.collection('users').doc(fbUser.uid).update(updates);
+    document.getElementById('edituser-success').textContent = 'Profile updated successfully!';
+    document.getElementById('edituser-success').style.display = 'block';
+  } catch(e) {
+    document.getElementById('edituser-success').textContent = 'Error: ' + e.message;
+    document.getElementById('edituser-success').style.display = 'block';
+  }
+}
+
+// ─────────────────────────────────────
+// ADD NEW PANEL
+// ─────────────────────────────────────
+let currentPanelId = null; // the panel being worked on
+
+function saveNewPanel() {
+  const address = document.getElementById('ap-address').value.trim();
+  const panelId = document.getElementById('ap-panelid').value.trim().toUpperCase();
+  const manufacturer = document.getElementById('ap-manufacturer').value.trim();
+  const location = document.getElementById('ap-location').value.trim();
+  const numBreakers = parseInt(document.getElementById('ap-numbreakers').value);
+  const cname = document.getElementById('ap-cname').value.trim();
+  const cphone = document.getElementById('ap-cphone').value.trim();
+  const cemail = document.getElementById('ap-cemail').value.trim();
+  const err = document.getElementById('addpanel-error');
+  err.style.display = 'none';
+
+  if (!address || !panelId || !numBreakers) {
+    err.textContent = 'Street address, Panel ID, and number of breakers are required.';
+    err.style.display = 'block'; return;
+  }
+  const panels = getPanels();
+  if (panels.find(p => p.panelId === panelId)) {
+    err.textContent = 'Panel ID "' + panelId + '" already exists. Choose a unique ID.';
+    err.style.display = 'block'; return;
+  }
+
+  const user = getCurrentUser();
+  const breakers = [];
+  for (let i = 1; i <= numBreakers; i++) {
+    breakers.push({ number: i, description: '', history: [], linkedTo: [] });
+  }
+
+  const panel = {
+    id: uid(),
+    panelId,
+    streetAddress: address,
+    locationDescription: location,
+    manufacturer,
+    numBreakers,
+    breakers,
+    createdDate: new Date().toISOString(),
+    createdBy: { name: cname, phone: cphone, email: cemail },
+    ownerId: user ? user.id : null,
+    qrCodeGenerated: false
+  };
+  panels.push(panel);
+  setPanels(panels);
+  currentPanelId = panel.id;
+
+  // Clear form
+  ['ap-address','ap-panelid','ap-manufacturer','ap-location','ap-cname','ap-cphone','ap-cemail'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('ap-numbreakers').value = '';
+
+  openPanelSetup(panel.id);
+}
+
+function openPanelSetup(panelInternalId) {
+  const panel = getPanels().find(p => p.id === panelInternalId);
+  if (!panel) return;
+  currentPanelId = panelInternalId;
+  document.getElementById('setup-title').textContent = 'Label Breakers — ' + panel.panelId;
+  renderSetupGrid(panel);
+  showPage('panel-setup');
+}
+
+function renderSetupGrid(panel) {
+  const grid = document.getElementById('setup-breakers-grid');
+  grid.innerHTML = '';
+  panel.breakers.forEach(br => {
+    const slot = document.createElement('div');
+    slot.className = 'breaker-slot-edit';
+    slot.id = 'setup-slot-' + br.number;
+    slot.innerHTML = `
+      <div class="breaker-num-edit">${br.number}</div>
+      <div style="flex:1">
+        <textarea class="breaker-input" id="setup-br-${br.number}" rows="2"
+          placeholder="Click to describe this breaker…">${br.description}</textarea>
+      </div>`;
+    grid.appendChild(slot);
+  });
+}
+
+function confirmPanelSetup() {
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+  panels[idx].breakers.forEach(br => {
+    const input = document.getElementById('setup-br-' + br.number);
+    if (input) br.description = input.value.trim();
+  });
+  panels[idx].qrCodeGenerated = true;
+  setPanels(panels);
+  showQRPage(panels[idx]);
+}
+
+function savePanelSetupDraft() {
+  // Save current textarea values before leaving
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx !== -1) {
+    panels[idx].breakers.forEach(br => {
+      const input = document.getElementById('setup-br-' + br.number);
+      if (input) br.description = input.value.trim();
+    });
+    setPanels(panels);
+  }
+  showPage('dashboard');
+}
+
+// ─────────────────────────────────────
+// QR CODE
+// ─────────────────────────────────────
+function showQRPage(panel) {
+  document.getElementById('qr-panel-name').textContent = panel.panelId + ' — ' + panel.streetAddress;
+  document.getElementById('qr-panel-id-text').textContent = panel.panelId;
+
+  // QR code links to the app homepage only — user enters Panel ID once they arrive
+  const url = window.location.href.split('?')[0] + '?panel=' + encodeURIComponent(panel.panelId);
+
+  const container = document.getElementById('qr-code-display');
+  container.innerHTML = '';
+  new QRCode(container, {
+    text: url,
+    width: 200,
+    height: 200,
+    colorDark: '#1e3a8a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  currentPanelId = panel.id;
+  showPage('qr');
+}
+
+function goToPanelView() {
+  openPanelById_Internal(currentPanelId, true);
+}
+
+function showQRForCurrentPanel() {
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (panel) showQRPage(panel);
+}
+
+// ─────────────────────────────────────
+// YOUR PANELS
+// ─────────────────────────────────────
+function renderRecentPanels() {
+  const user = getCurrentUser();
+  const panels = getPanels().filter(p => p.ownerId === (user ? user.id : null));
+  const el = document.getElementById('dash-recent-panels');
+  if (panels.length === 0) {
+    el.innerHTML = '<p style="color:#9ca3af;font-size:0.92rem;">No panels yet. <a href="#" onclick="showPage(\'add-panel\')">Add your first panel →</a></p>';
+    return;
+  }
+  el.innerHTML = panels.slice(-3).reverse().map(p => panelItemHTML(p, false)).join('');
+}
+
+function renderPanelsList() {
+  const user = getCurrentUser();
+  const search = (document.getElementById('panels-search')?.value || '').toLowerCase();
+  let panels = getPanels().filter(p => p.ownerId === (user ? user.id : null));
+
+  if (search) {
+    panels = panels.filter(p =>
+      p.panelId.toLowerCase().includes(search) ||
+      p.streetAddress.toLowerCase().includes(search) ||
+      p.breakers.some(b => b.description.toLowerCase().includes(search))
+    );
+  }
+  const el = document.getElementById('panels-list');
+  if (panels.length === 0) {
+    el.innerHTML = '<p style="color:#9ca3af;font-size:0.92rem;">' + (search ? 'No panels match your search.' : 'No panels yet. <a href="#" onclick="showPage(\'add-panel\')">Add your first panel →</a>') + '</p>';
+    return;
+  }
+  el.innerHTML = panels.map(p => panelItemHTML(p)).join('');
+}
+
+function panelItemHTML(p, showQR = true) {
+  return `
+    <div class="panel-item">
+      <div class="panel-item-info">
+        <h3>${p.panelId} <span class="badge badge-blue">${p.numBreakers} breakers</span> ${p.qrCodeGenerated ? '<span class="badge badge-green">QR ✓</span>' : ''}</h3>
+        <p>${p.streetAddress}${p.locationDescription ? ' · ' + p.locationDescription : ''}</p>
+        <p style="margin-top:2px;font-size:0.8rem;color:#9ca3af">Added ${fmtDate(p.createdDate)}</p>
+      </div>
+      <div class="panel-item-actions">
+        <button class="btn btn-sm btn-blue" onclick="openPanelById_Internal('${p.id}', true)">View/Edit</button>
+        <button class="btn btn-sm btn-outline" onclick="openPanelHistory('${p.id}')">History</button>
+        <button class="btn btn-sm btn-outline" onclick="currentPanelId='${p.id}';openEditPanelInfo()">Edit Info</button>
+        <button class="btn btn-sm btn-danger" onclick="deletePanel('${p.id}')">Delete</button>
+      </div>
+    </div>`;
+}
+
+function filterPanelsList() { renderPanelsList(); }
+
+function openSetupQR(internalId) {
+  const panel = getPanels().find(p => p.id === internalId);
+  if (panel) showQRPage(panel);
+}
+
+function deletePanel(internalId) {
+  showConfirm(
+    'Delete Panel',
+    'Delete this panel? This cannot be undone.',
+    () => {
+    const _del = getPanels().find(p=>p.id===internalId);
+      const panels = getPanels().filter(p => p.id !== internalId);
+      setPanels(panels);
+    if(_del)deleteFromCloud(_del.panelId);
+      renderPanelsList();
+      renderRecentPanels();
+    },
+    'Delete', 'btn-danger'
+  );
+}
+
+// ─────────────────────────────────────
+// VIEW / EDIT PANEL
+// ─────────────────────────────────────
+async function openPanelById(panelId, showBackBtn) {
+  const KEY = panelId.toUpperCase();
+  let panel = getPanels().find(p => p.panelId === KEY);
+  if (!panel && _db) {
+    panel = await fetchFromCloud(KEY);
+    if (panel) { const ps=getPanels(); if(!ps.find(p=>p.panelId===KEY)){ps.push(panel);setPanels(ps);} }
+  }
+  if (!panel) {
+    const err = document.getElementById('landing-panel-error');
+    if (err) err.style.display = 'block';
+    showPage('landing');
+    return;
+  }
+  currentPanelId = panel.id;
+  openPanelById_Internal(panel.id, showBackBtn);
+}
+async function lookupPanelId() {
+  const inputEl = document.getElementById('landing-panel-id');
+  const val = inputEl ? inputEl.value.trim() : '';
+  if (!val) return;
+  const err = document.getElementById('landing-panel-error');
+  if (err) err.style.display = 'none';
+  const KEY = val.toUpperCase();
+  let panel = getPanels().find(p => p.panelId === KEY);
+  if (!panel && _db) {
+    if (err) { err.textContent = 'Looking up panel…'; err.style.color='#1a56db'; err.style.display='block'; }
+    panel = await fetchFromCloud(KEY);
+    if (panel) { const ps=getPanels(); if(!ps.find(p=>p.panelId===KEY)){ps.push(panel);setPanels(ps);} }
+    if (err) { err.style.color=''; err.textContent='Panel ID not found. Check the ID and try again.'; }
+  }
+  if (!panel) { if(err)err.style.display='block'; return; }
+  if (err) err.style.display = 'none';
+  currentPanelId = panel.id;
+  openPanelById_Internal(panel.id, false);
+}
+async function lookupAccessPanel() {
+  const inputEl = document.getElementById('access-panel-id');
+  const val = inputEl ? inputEl.value.trim() : '';
+  if (!val) return;
+  const err = document.getElementById('access-panel-error');
+  if (err) err.style.display = 'none';
+  const KEY = val.toUpperCase();
+  let panel = getPanels().find(p => p.panelId === KEY);
+  if (!panel && _db) {
+    if (err) { err.textContent = 'Looking up panel…'; err.style.color='#1a56db'; err.style.display='block'; }
+    panel = await fetchFromCloud(KEY);
+    if (panel) { const ps=getPanels(); if(!ps.find(p=>p.panelId===KEY)){ps.push(panel);setPanels(ps);} }
+    if (err) { err.style.color=''; err.textContent='Panel ID not found. Check the ID and try again.'; }
+  }
+  if (!panel) { if(err)err.style.display='block'; return; }
+  if (err) err.style.display = 'none';
+  currentPanelId = panel.id;
+  openPanelById_Internal(panel.id, false);
+}
+function openPanelById_Internal(internalId, showBackBtn) {
+  const panel = getPanels().find(p => p.id === internalId);
+  if (!panel) return;
+  currentPanelId = internalId;
+
+  document.getElementById('vp-title').textContent = 'Panel: ' + panel.panelId;
+  document.getElementById('vp-subtitle').textContent = panel.streetAddress + (panel.locationDescription ? ' · ' + panel.locationDescription : '');
+  document.getElementById('vp-back-btn').style.display = showBackBtn ? '' : 'none';
+
+  // Show "Edit Panel Info" only to the panel owner
+  const user = getCurrentUser();
+  const isOwner = user && panel.ownerId === user.id;
+  document.getElementById('vp-edit-info-btn').style.display = isOwner ? '' : 'none';
+
+  // Print header
+  document.getElementById('print-panel-title').textContent = 'Panel ID: ' + panel.panelId + ' — ' + panel.streetAddress;
+  document.getElementById('print-panel-meta').textContent = (panel.manufacturer ? 'Manufacturer: ' + panel.manufacturer + '  ·  ' : '') + panel.numBreakers + ' breakers';
+  document.getElementById('print-date').textContent = 'Printed: ' + fmtDate(new Date().toISOString());
+
+  renderEditGrid(panel);
+  captureEditBaseline(panel);
+  clearAutoSaveStatus();
+  showPage('view-panel');
+}
+
+function renderEditGrid(panel) {
+  const grid = document.getElementById('vp-breakers-grid');
+  grid.innerHTML = '';
+  panel.breakers.forEach(br => {
+    const linked = br.linkedTo || [];
+    const slot = document.createElement('div');
+    slot.className = 'breaker-slot-edit' + (linked.length ? ' linked' : '');
+    slot.id = 'vp-slot-' + br.number;
+    slot.innerHTML = `
+      <div class="breaker-num-edit">${br.number}</div>
+      <div id="vp-slot-inner-${br.number}" style="flex:1">
+        <textarea class="breaker-input" id="vp-br-${br.number}" rows="2"
+          placeholder="Click to describe breaker ${br.number}…"
+          oninput="scheduleAutoSave()">${br.description}</textarea>
+        ${linked.length ? `<span class="breaker-link-badge">🔗 Linked: ${linked.slice().sort((a,b)=>a-b).join(', ')}</span>` : ''}
+      </div>`;
+    grid.appendChild(slot);
+  });
+}
+
+function searchBreakers() {
+  const q = document.getElementById('vp-search').value.toLowerCase();
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (!panel) return;
+  panel.breakers.forEach(br => {
+    const slot = document.getElementById('vp-slot-' + br.number);
+    if (!slot) return;
+    if (!q) {
+      slot.style.opacity = '1';
+      slot.style.borderColor = '#e5e7eb';
+      return;
+    }
+    // Check live textarea value first, fall back to saved description
+    const textarea = document.getElementById('vp-br-' + br.number);
+    const liveText = textarea ? textarea.value.toLowerCase() : br.description.toLowerCase();
+    const match = liveText.includes(q);
+    slot.style.opacity = match ? '1' : '0.3';
+    slot.style.borderColor = match ? '#1a56db' : '#e5e7eb';
+  });
+}
+
+// ─────────────────────────────────────
+// AUTO-SAVE (debounced, no history entry)
+// ─────────────────────────────────────
+let _autoSaveTimer  = null;
+let _editBaseline   = {}; // descriptions at last explicit save (or panel open)
+
+function captureEditBaseline(panel) {
+  _editBaseline = {};
+  panel.breakers.forEach(br => { _editBaseline[br.number] = br.description; });
+}
+
+function clearAutoSaveStatus() {
+  const el = document.getElementById('vp-autosave-status');
+  if (el) { el.textContent = ''; el.className = 'autosave-status'; }
+}
+
+function scheduleAutoSave() {
+  const el = document.getElementById('vp-autosave-status');
+  if (el) { el.textContent = 'Unsaved changes…'; el.className = 'autosave-status unsaved'; }
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(autoSaveBreakers, 500);
+}
+
+function autoSaveBreakers() {
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+  panels[idx].breakers.forEach(br => {
+    const input = document.getElementById('vp-br-' + br.number);
+    if (input) br.description = input.value;
+  });
+  setPanels(panels);
+  const el = document.getElementById('vp-autosave-status');
+  if (el) {
+    el.textContent = '✓ Saved';
+    el.className = 'autosave-status saved';
+    clearTimeout(el._fadeTimer);
+    el._fadeTimer = setTimeout(() => clearAutoSaveStatus(), 3000);
+  }
+}
+
+// ─────────────────────────────────────
+// SAVE BREAKERS (with contact info modal)
+// ─────────────────────────────────────
+function saveAllBreakers() {
+  const user = getCurrentUser();
+  if (user) {
+    // Pre-fill from user data
+    document.getElementById('sm-name').value = user.name || '';
+    document.getElementById('sm-email').value = user.email || '';
+  }
+  document.getElementById('save-modal-error').style.display = 'none';
+  document.getElementById('save-modal').style.display = 'flex';
+}
+
+function closeSaveModal() {
+  document.getElementById('save-modal').style.display = 'none';
+}
+
+function confirmSaveBreakers() {
+  const name = document.getElementById('sm-name').value.trim();
+  const phone = document.getElementById('sm-phone').value.trim();
+  const email = document.getElementById('sm-email').value.trim();
+  const address = document.getElementById('sm-address').value.trim();
+  const err = document.getElementById('save-modal-error');
+  if (!name || !phone || !email) {
+    err.textContent = 'Name, phone, and email are required.';
+    err.style.display = 'block'; return;
+  }
+
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+
+  const now = new Date().toISOString();
+  let changeCount = 0;
+  panels[idx].breakers.forEach(br => {
+    const input = document.getElementById('vp-br-' + br.number);
+    const currentDesc = input ? input.value.trim() : br.description;
+    const baselineDesc = _editBaseline[br.number] ?? '';
+    if (currentDesc !== baselineDesc) {
+      br.history.push({
+        date: now,
+        previousDescription: baselineDesc,
+        newDescription: currentDesc,
+        contactName: name,
+        contactPhone: phone,
+        contactEmail: email,
+        contactAddress: address
+      });
+      br.description = currentDesc;
+      changeCount++;
+    }
+  });
+  setPanels(panels);
+  syncToCloud(panels[idx]);
+  // Reset baseline to current state
+  captureEditBaseline(panels[idx]);
+  closeSaveModal();
+  clearAutoSaveStatus();
+}
+
+// ─────────────────────────────────────
+// EDIT PANEL INFO
+// ─────────────────────────────────────
+function openEditPanelInfo() {
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (!panel) return;
+  document.getElementById('epi-address').value = panel.streetAddress || '';
+  document.getElementById('epi-panelid').value = panel.panelId || '';
+  document.getElementById('epi-manufacturer').value = panel.manufacturer || '';
+  document.getElementById('epi-location').value = panel.locationDescription || '';
+  document.getElementById('epi-numbreakers').value = panel.numBreakers || '';
+  document.getElementById('epi-breaker-warning').style.display = 'none';
+  document.getElementById('epi-success').style.display = 'none';
+  document.getElementById('epi-error').style.display = 'none';
+
+  // Show warning if user reduces breaker count
+  document.getElementById('epi-numbreakers').onchange = function() {
+    const newCount = parseInt(this.value);
+    const warning = document.getElementById('epi-breaker-warning');
+    warning.style.display = newCount < panel.numBreakers ? 'block' : 'none';
+  };
+  // epi page is not in the protected list but user must be owner — already gated by the button visibility
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-edit-panel-info').classList.add('active');
+  currentPage = 'edit-panel-info';
+  window.scrollTo(0, 0);
+}
+
+function saveEditPanelInfo() {
+  const address = document.getElementById('epi-address').value.trim();
+  const panelId = document.getElementById('epi-panelid').value.trim().toUpperCase();
+  const manufacturer = document.getElementById('epi-manufacturer').value;
+  const location = document.getElementById('epi-location').value.trim();
+  const err = document.getElementById('epi-error');
+  const suc = document.getElementById('epi-success');
+  err.style.display = 'none';
+  suc.style.display = 'none';
+
+  if (!address || !panelId) {
+    err.textContent = 'Street address and Panel ID are required.';
+    err.style.display = 'block'; return;
+  }
+
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+
+  // Check for Panel ID collision (excluding current panel)
+  const collision = panels.find(p => p.panelId === panelId && p.id !== currentPanelId);
+  if (collision) {
+    err.textContent = 'Panel ID "' + panelId + '" is already used by another panel.';
+    err.style.display = 'block'; return;
+  }
+
+  const newCount = parseInt(document.getElementById('epi-numbreakers').value);
+  const oldCount = panels[idx].numBreakers;
+
+  const doSave = () => _applyEditPanelInfo(newCount, address, panelId, manufacturer, location);
+
+  // If reducing with data loss, confirm first
+  if (newCount < oldCount) {
+    const affected = panels[idx].breakers
+      .filter(b => b.number > newCount && (b.description || b.history.length > 0))
+      .length;
+    if (affected > 0) {
+      showConfirm(
+        'Reduce Breaker Count',
+        `Reducing from ${oldCount} to ${newCount} breakers will permanently delete the descriptions and history for breakers ${newCount + 1}–${oldCount} (${affected} breaker${affected > 1 ? 's' : ''} with data). Continue?`,
+        doSave,
+        'Continue', 'btn-danger'
+      );
+      return;
+    }
+  }
+  doSave();
+}
+
+function _applyEditPanelInfo(newCount, address, panelId, manufacturer, location) {
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+  const suc = document.getElementById('epi-success');
+  const oldCount = panels[idx].numBreakers;
+
+  if (newCount < oldCount) {
+    panels[idx].breakers = panels[idx].breakers.filter(b => b.number <= newCount);
+  } else if (newCount > oldCount) {
+    for (let i = oldCount + 1; i <= newCount; i++) {
+      panels[idx].breakers.push({ number: i, description: '', history: [], linkedTo: [] });
+    }
+  }
+
+  panels[idx].numBreakers = newCount;
+  panels[idx].streetAddress = address;
+  panels[idx].panelId = panelId;
+  panels[idx].manufacturer = manufacturer;
+  panels[idx].locationDescription = location;
+  setPanels(panels);
+    syncToCloud(panels[idx]);
+
+  suc.textContent = 'Panel info updated!';
+  suc.style.display = 'block';
+  setTimeout(() => openPanelById_Internal(currentPanelId, true), 1200);
+}
+
+// ─────────────────────────────────────
+// HISTORY
+// ─────────────────────────────────────
+function openPanelHistory(internalId) {
+  const panel = getPanels().find(p => p.id === internalId);
+  if (!panel) return;
+  currentPanelId = internalId;
+  document.getElementById('hist-title').textContent = 'History: ' + panel.panelId;
+  renderHistory(panel);
+  switchHistTab('timeline');
+  showPage('history');
+}
+
+function viewBreakerHistory() {
+  openPanelHistory(currentPanelId);
+}
+
+function renderHistory(panel) {
+  _histPanel = panel;
+  const el = document.getElementById('history-list');
+  // Gather all history events across breakers
+  const events = [];
+  panel.breakers.forEach(br => {
+    br.history.forEach(h => events.push({ ...h, breakerNumber: br.number }));
+  });
+  events.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (events.length === 0) {
+    el.innerHTML = '<p style="color:#9ca3af;">No changes recorded yet.</p>';
+    return;
+  }
+  el.innerHTML = events.map(h => `
+    <div class="history-item">
+      <div class="hist-date">${fmtDate(h.date)}</div>
+      <div class="hist-breaker">Breaker #${h.breakerNumber}</div>
+      <div class="hist-desc">
+        ${h.previousDescription ? `<span style="color:#9ca3af;text-decoration:line-through">${h.previousDescription}</span> → ` : ''}
+        <strong>${h.newDescription || '<em>cleared</em>'}</strong>
+      </div>
+      <div class="hist-contact">By: ${h.contactName} · ${h.contactPhone} · ${h.contactEmail}${h.contactAddress ? ' · ' + h.contactAddress : ''}</div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────
+// COMPARISON VIEW
+// ─────────────────────────────────────
+let _histPanel = null;
+
+function switchHistTab(tab) {
+  document.getElementById('hist-tab-timeline').classList.toggle('active', tab === 'timeline');
+  document.getElementById('hist-tab-compare').classList.toggle('active', tab === 'compare');
+  document.getElementById('hist-timeline-view').style.display = tab === 'timeline' ? '' : 'none';
+  document.getElementById('hist-compare-view').style.display  = tab === 'compare'   ? '' : 'none';
+  if (tab === 'compare' && _histPanel) _populateCompareDates(_histPanel);
+}
+
+function _populateCompareDates(panel) {
+  const dates = [];
+  const seen = new Set();
+  panel.breakers.forEach(br => br.history.forEach(h => { if (!seen.has(h.date)) { seen.add(h.date); dates.push(h.date); } }));
+  dates.sort();
+  const fromSel = document.getElementById('compare-from');
+  const toSel   = document.getElementById('compare-to');
+  let fromOpts = '<option value="__initial__">Initial state (before any saves)</option>';
+  dates.forEach(d => { fromOpts += `<option value="${d}">${fmtDate(d)}</option>`; });
+  let toOpts = '';
+  dates.forEach(d => { toOpts += `<option value="${d}">${fmtDate(d)}</option>`; });
+  toOpts += '<option value="__current__" selected>Current state</option>';
+  fromSel.innerHTML = fromOpts;
+  toSel.innerHTML   = toOpts;
+  document.getElementById('compare-results').innerHTML = '';
+}
+
+function _buildSnapshot(panel, cutoff) {
+  // Returns { breakerNum: description } for state at/before cutoff
+  // cutoff = null → initial (before any history), '' → current
+  const snap = {};
+  panel.breakers.forEach(br => {
+    let desc = br.description;
+    if (cutoff !== '') {
+      const sorted = [...br.history].sort((a, b) => new Date(b.date) - new Date(a.date));
+      for (const h of sorted) {
+        if (cutoff === null || new Date(h.date) > new Date(cutoff)) desc = h.previousDescription || '';
+      }
+    }
+    snap[br.number] = desc || '';
+  });
+  return snap;
+}
+
+function runComparison() {
+  const panel = _histPanel;
+  if (!panel) return;
+  const fromVal = document.getElementById('compare-from').value;
+  const toVal   = document.getElementById('compare-to').value;
+  const snapA = _buildSnapshot(panel, fromVal === '__initial__' ? null : fromVal);
+  const snapB = _buildSnapshot(panel, toVal   === '__current__' ? ''   : toVal);
+  const fromLbl = fromVal === '__initial__' ? 'Initial state' : fmtDate(fromVal);
+  const toLbl   = toVal   === '__current__' ? 'Current state' : fmtDate(toVal);
+  let nChanged = 0, nAdded = 0, nCleared = 0;
+  const rows = panel.breakers.map(br => {
+    const a = snapA[br.number]; const b = snapB[br.number];
+    let cls = 'same';
+    if (a !== b) {
+      if (!a && b)  { cls = 'added';   nAdded++;   }
+      else if (a && !b) { cls = 'cleared'; nCleared++; }
+      else              { cls = 'changed'; nChanged++; }
+    }
+    return { num: br.number, a, b, cls };
+  });
+  const total = nChanged + nAdded + nCleared;
+  const changed = rows.filter(r => r.cls !== 'same');
+  const same    = rows.filter(r => r.cls === 'same');
+  const ri = r => {
+    let inner = '';
+    if      (r.cls === 'added')   inner = `<span class="ci-new">${escHtml(r.b)}</span><span class="ci-arr"> ← newly labelled</span>`;
+    else if (r.cls === 'cleared') inner = `<span class="ci-old">${escHtml(r.a)}</span><span class="ci-arr"> → </span><span style="color:#ef4444;font-style:italic">cleared</span>`;
+    else if (r.cls === 'changed') inner = `<span class="ci-old">${escHtml(r.a)}</span><span class="ci-arr">→</span><span class="ci-new">${escHtml(r.b)}</span>`;
+    else                          inner = `<span class="ci-same">${escHtml(r.b) || '<em>empty</em>'}</span>`;
+    return `<div class="compare-item ${r.cls}"><span class="ci-num">#${r.num}</span>${inner}</div>`;
+  };
+  const summaryTxt = total === 0 ? 'No differences between these snapshots.'
+    : `${total} change${total !== 1 ? 's' : ''} — ${nChanged} updated, ${nAdded} newly labelled, ${nCleared} cleared.`;
+  document.getElementById('compare-results').innerHTML =
+    `<p class="compare-result-hdr">Comparing: <em>${escHtml(fromLbl)}</em> → <em>${escHtml(toLbl)}</em></p>
+    <p class="compare-summary">${summaryTxt}</p>
+    ${changed.map(ri).join('')}
+    ${same.length && total > 0 ? `<details style="margin-top:14px"><summary style="cursor:pointer;color:#6b7280;font-size:0.88rem">${same.length} unchanged breaker${same.length !== 1 ? 's' : ''}</summary><div style="margin-top:8px">${same.map(ri).join('')}</div></details>` : ''}`;
+}
+
+// ─────────────────────────────────────
+// EDIT SINGLE BREAKER MODAL
+// ─────────────────────────────────────
+let editingBreakerNum = null;
+
+function openEditBreakerModal(breakerNum, currentDesc, panelInternalId) {
+  editingBreakerNum = breakerNum;
+  currentPanelId    = panelInternalId;
+  document.getElementById('ebm-title').textContent = 'Edit Breaker #' + breakerNum;
+  document.getElementById('ebm-desc').value = currentDesc;
+
+  // Populate link pills
+  const panel    = getPanels().find(p => p.id === panelInternalId);
+  const list     = document.getElementById('ebm-link-list');
+  list.innerHTML = '';
+  if (panel && panel.breakers.length > 1) {
+    const thisBr   = panel.breakers.find(b => b.number === breakerNum);
+    const linked   = (thisBr && thisBr.linkedTo) || [];
+    panel.breakers.forEach(b => {
+      if (b.number === breakerNum) return;
+      const liveInput = document.getElementById('vp-br-' + b.number);
+      const label     = (liveInput ? liveInput.value : b.description).trim();
+      const pill      = document.createElement('button');
+      pill.type       = 'button';
+      pill.className  = 'link-pill' + (linked.includes(b.number) ? ' selected' : '');
+      pill.dataset.num = b.number;
+      pill.innerHTML  = `<strong>#${b.number}</strong>${label ? '<br><span style="font-weight:400;color:#6b7280">' + label.substring(0,28) + (label.length>28?'…':'') + '</span>' : ''}`;
+      pill.onclick    = () => pill.classList.toggle('selected');
+      list.appendChild(pill);
+    });
+  }
+
+  document.getElementById('edit-breaker-modal').style.display = 'flex';
+}
+
+function saveEditBreaker() {
+  const desc  = document.getElementById('ebm-desc').value.trim();
+  const input = document.getElementById('vp-br-' + editingBreakerNum) ||
+                document.getElementById('setup-br-' + editingBreakerNum);
+  if (input) input.value = desc;
+
+  // Collect selected link pills and sync bidirectionally
+  const selected = Array.from(document.querySelectorAll('#ebm-link-list .link-pill.selected'))
+                        .map(p => parseInt(p.dataset.num));
+  _syncLinks(currentPanelId, editingBreakerNum, selected);
+
+  // Refresh badges on all visible slots
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (panel) _refreshAllLinkBadges(panel);
+
+  scheduleAutoSave();
+  closeEditBreakerModal();
+}
+
+// ── Bidirectional link sync ──────────────────────────────
+function _syncLinks(panelId, breakerNum, newLinked) {
+  const panels = getPanels();
+  const panel  = panels.find(p => p.id === panelId);
+  if (!panel) return;
+  const br = panel.breakers.find(b => b.number === breakerNum);
+  if (!br) return;
+
+  const oldLinked = br.linkedTo || [];
+
+  // Remove this breaker from partners that are being unlinked
+  oldLinked.forEach(partnerNum => {
+    if (!newLinked.includes(partnerNum)) {
+      const partner = panel.breakers.find(b => b.number === partnerNum);
+      if (partner) partner.linkedTo = (partner.linkedTo || []).filter(n => n !== breakerNum);
+    }
+  });
+
+  // Add this breaker to any newly selected partners
+  newLinked.forEach(partnerNum => {
+    const partner = panel.breakers.find(b => b.number === partnerNum);
+    if (partner) {
+      if (!partner.linkedTo) partner.linkedTo = [];
+      if (!partner.linkedTo.includes(breakerNum)) partner.linkedTo.push(breakerNum);
+    }
+  });
+
+  br.linkedTo = newLinked;
+  setPanels(panels);
+}
+
+// ── Refresh link badges in the visible grid ──────────────
+function _refreshAllLinkBadges(panel) {
+  panel.breakers.forEach(br => {
+    const slot  = document.getElementById('vp-slot-' + br.number);
+    if (!slot) return;
+    const inner  = document.getElementById('vp-slot-inner-' + br.number);
+    const linked = br.linkedTo || [];
+
+    // Update linked class on slot
+    slot.classList.toggle('linked', linked.length > 0);
+
+    // Remove old badge and re-add if needed
+    const old = inner ? inner.querySelector('.breaker-link-badge') : null;
+    if (old) old.remove();
+    if (inner && linked.length > 0) {
+      const badge       = document.createElement('span');
+      badge.className   = 'breaker-link-badge';
+      badge.textContent = '🔗 Linked: ' + linked.slice().sort((a, b) => a - b).join(', ');
+      inner.appendChild(badge);
+    }
+  });
+}
+
+function closeEditBreakerModal() {
+  document.getElementById('edit-breaker-modal').style.display = 'none';
+  editingBreakerNum = null;
+}
+
+// ─────────────────────────────────────
+// CONTACT FORM
+// ─────────────────────────────────────
+function submitContact() {
+  const name = document.getElementById('ct-name').value.trim();
+  const email = document.getElementById('ct-email').value.trim();
+  const msg = document.getElementById('ct-message').value.trim();
+  const ctErr = document.getElementById('ct-error');
+  ctErr.style.display = 'none';
+  if (!name || !email || !msg) {
+    ctErr.textContent = 'Please fill in all fields.';
+    ctErr.style.display = 'block';
+    return;
+  }
+  const s = document.getElementById('contact-success');
+  s.textContent = 'Thanks, ' + name + '! Your message has been received.';
+  s.style.display = 'block';
+  document.getElementById('ct-name').value = '';
+  document.getElementById('ct-email').value = '';
+  document.getElementById('ct-message').value = '';
+}
+
+// ─────────────────────────────────────
+// PRINT PREVIEW (in-page modal)
+// ─────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function printPanel() {
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (!panel) return;
+
+  // Read live textarea values (captures unsaved edits too)
+  const breakers = panel.breakers.map(br => {
+    const ta = document.getElementById('vp-br-' + br.number);
+    return { number: br.number, description: ta ? ta.value.trim() : br.description };
+  });
+
+  const printDate = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  const leftCol  = breakers.filter(br => br.number % 2 === 1); // odd numbers
+  const rightCol = breakers.filter(br => br.number % 2 === 0); // even numbers
+
+  const row = br => `<tr>
+    <td class="pp-num">${br.number}</td>
+    <td class="pp-desc">${br.description ? escHtml(br.description) : '<span class="pp-empty">—</span>'}</td>
+  </tr>`;
+
+  document.getElementById('print-preview-content').innerHTML = `
+    <div class="pp-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
+      <div style="flex:1;">
+        <h2>Panel ID: ${escHtml(panel.panelId)}</h2>
+        <div class="pp-meta">
+          ${escHtml(panel.streetAddress)}
+          ${panel.locationDescription ? ' &nbsp;·&nbsp; ' + escHtml(panel.locationDescription) : ''}
+          ${panel.manufacturer ? ' &nbsp;·&nbsp; ' + escHtml(panel.manufacturer) : ''}
+          &nbsp;·&nbsp; ${panel.numBreakers} breakers
+        </div>
+        <div class="pp-date">Printed: ${printDate}</div>
+      </div>
+      <div style="text-align:center;flex-shrink:0;">
+        <div id="pp-qr-code"></div>
+        <div style="font-size:0.7rem;color:#444;margin-top:4px;">Scan &amp; enter Panel ID</div>
+        <div style="font-size:0.7rem;color:#888;margin-top:1px;">mybreakerpanel.com</div>
+      </div>
+    </div>
+    <div class="pp-grid">
+      <table class="pp-table">
+        <tr><th>#</th><th>Circuit Description</th></tr>
+        ${leftCol.map(row).join('')}
+      </table>
+      <table class="pp-table">
+        <tr><th>#</th><th>Circuit Description</th></tr>
+        ${rightCol.map(row).join('')}
+      </table>
+    </div>`;
+
+  // Generate QR code into the preview (points to the Access Your Panel page)
+  const accessUrl = window.location.href.split('?')[0].split('#')[0] + '#access';
+  new QRCode(document.getElementById('pp-qr-code'), {
+    text: accessUrl,
+    width: 80,
+    height: 80,
+    colorDark: '#1e3a8a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  document.getElementById('print-preview-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePrintPreview() {
+  document.getElementById('print-preview-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── App confirm modal (replaces browser confirm()) ──
+let _confirmCallback = null;
+
+function showConfirm(title, message, onConfirm, confirmLabel = 'Confirm', confirmClass = 'btn-danger') {
+  document.getElementById('app-confirm-title').textContent = title;
+  document.getElementById('app-confirm-msg').textContent   = message;
+  const ok = document.getElementById('app-confirm-ok');
+  ok.textContent = confirmLabel;
+  ok.className   = 'btn ' + confirmClass;
+  _confirmCallback = onConfirm;
+  document.getElementById('app-confirm-modal').style.display = 'flex';
+}
+
+function closeConfirm(confirmed) {
+  document.getElementById('app-confirm-modal').style.display = 'none';
+  const cb = _confirmCallback;
+  _confirmCallback = null;
+  if (confirmed && cb) cb();
+}
+
+// ── Global Escape key: dismiss any open modal ──
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('save-modal').style.display !== 'none')         closeSaveModal();
+  if (document.getElementById('edit-breaker-modal').style.display !== 'none') closeEditBreakerModal();
+  if (document.getElementById('print-preview-modal').classList.contains('open')) closePrintPreview();
+  if (document.getElementById('app-confirm-modal').style.display !== 'none')  closeConfirm(false);
+});
+
+</script>
+</body>
+</html>
+
     const cred = await _auth.createUserWithEmailAndPassword(email, password);
     const profile = { id: cred.user.uid, name, username, email, createdDate: new Date().toISOString() };
     if (_db) await _db.collection('users').doc(cred.user.uid).set(profile);
