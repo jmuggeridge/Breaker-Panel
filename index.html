@@ -1710,7 +1710,7 @@
     </div>
     <div class="form-actions">
       <button class="btn btn-blue" onclick="saveUserEdits()">Save Changes</button>
-      <button class="btn btn-outline" onclick="showPage('dashboard')">Cancel</button>
+      <button class="btn btn-outline" onclick="goBack()">Cancel</button>
     </div>
   </div>
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
@@ -1795,7 +1795,7 @@
       </div>
       <div class="form-actions">
         <button class="btn btn-blue" onclick="saveNewPanel()">Save Panel & Build Register</button>
-        <button class="btn btn-outline" onclick="showPage('dashboard')">Cancel</button>
+        <button class="btn btn-outline" onclick="goBack()">Cancel</button>
       </div>
     </div>
   </div>
@@ -1980,7 +1980,7 @@
       </div>
       <div class="form-actions">
         <button class="btn btn-blue" onclick="saveEditPanelInfo()">Save Changes</button>
-        <button class="btn btn-outline" onclick="openPanelById_Internal(currentPanelId, true)">Cancel</button>
+        <button class="btn btn-outline" onclick="goBack()">Cancel</button>
       </div>
     </div>
   </div>
@@ -4426,6 +4426,3182 @@ function panelItemHTML(p, showQR = true) {
         <button class="btn btn-sm btn-blue" onclick="openPanelById_Internal('${p.id}', true)">View/Edit</button>
         <button class="btn btn-sm btn-outline" onclick="openPanelHistory('${p.id}')">History</button>
         <button class="btn btn-sm btn-outline" onclick="currentPanelId='${p.id}';openEditPanelInfo()">Edit Info</button>
+        <button class="btn btn-sm btn-danger" onclick="deletePanel('${p.id}')">Delete</button>
+      </div>
+    </div>`;
+}
+
+function filterPanelsList() { renderPanelsList(); }
+
+function openSetupQR(internalId) {
+  const panel = getPanels().find(p => p.id === internalId);
+  if (panel) showQRPage(panel);
+}
+
+function deletePanel(internalId) {
+  showConfirm(
+    'Delete Panel',
+    'Delete this panel? This cannot be undone.',
+    () => {
+    const _del = getPanels().find(p=>p.id===internalId);
+      const panels = getPanels().filter(p => p.id !== internalId);
+      setPanels(panels);
+    if(_del)deleteFromCloud(_del.panelId);
+      renderPanelsList();
+      renderRecentPanels();
+    },
+    'Delete', 'btn-danger'
+  );
+}
+
+// ─────────────────────────────────────
+// VIEW / EDIT PANEL
+// ─────────────────────────────────────
+async function openPanelById(panelId, showBackBtn) {
+  const KEY = panelId.toUpperCase();
+  let panel = getPanels().find(p => p.panelId === KEY);
+  if (!panel && _db) {
+    panel = await fetchFromCloud(KEY);
+    if (panel) { const ps=getPanels(); if(!ps.find(p=>p.panelId===KEY)){ps.push(panel);setPanels(ps);} }
+  }
+  if (!panel) {
+    const err = document.getElementById('landing-panel-error');
+    if (err) err.style.display = 'block';
+    showPage('landing');
+    return;
+  }
+  currentPanelId = panel.id;
+  openPanelById_Internal(panel.id, showBackBtn);
+}
+async function lookupPanelId() {
+  const inputEl = document.getElementById('landing-panel-id');
+  const val = inputEl ? inputEl.value.trim() : '';
+  if (!val) return;
+  const err = document.getElementById('landing-panel-error');
+  if (err) err.style.display = 'none';
+  const KEY = val.toUpperCase();
+  let panel = getPanels().find(p => p.panelId === KEY);
+  if (!panel && _db) {
+    if (err) { err.textContent = 'Looking up panel…'; err.style.color='#1a56db'; err.style.display='block'; }
+    panel = await fetchFromCloud(KEY);
+    if (panel) { const ps=getPanels(); if(!ps.find(p=>p.panelId===KEY)){ps.push(panel);setPanels(ps);} }
+    if (err) { err.style.color=''; err.textContent='Panel ID not found. Check the ID and try again.'; }
+  }
+  if (!panel) { if(err)err.style.display='block'; return; }
+  if (err) err.style.display = 'none';
+  currentPanelId = panel.id;
+  openPanelById_Internal(panel.id, false);
+}
+async function lookupAccessPanel() {
+  const inputEl = document.getElementById('access-panel-id');
+  const val = inputEl ? inputEl.value.trim() : '';
+  if (!val) return;
+  const err = document.getElementById('access-panel-error');
+  if (err) err.style.display = 'none';
+  const KEY = val.toUpperCase();
+  let panel = getPanels().find(p => p.panelId === KEY);
+  if (!panel && _db) {
+    if (err) { err.textContent = 'Looking up panel…'; err.style.color='#1a56db'; err.style.display='block'; }
+    panel = await fetchFromCloud(KEY);
+    if (panel) { const ps=getPanels(); if(!ps.find(p=>p.panelId===KEY)){ps.push(panel);setPanels(ps);} }
+    if (err) { err.style.color=''; err.textContent='Panel ID not found. Check the ID and try again.'; }
+  }
+  if (!panel) { if(err)err.style.display='block'; return; }
+  if (err) err.style.display = 'none';
+  currentPanelId = panel.id;
+  openPanelById_Internal(panel.id, false);
+}
+function openPanelById_Internal(internalId, showBackBtn) {
+  const panel = getPanels().find(p => p.id === internalId);
+  if (!panel) return;
+  currentPanelId = internalId;
+
+  document.getElementById('vp-title').textContent = 'Panel: ' + panel.panelId;
+  document.getElementById('vp-subtitle').textContent = panel.streetAddress + (panel.locationDescription ? ' · ' + panel.locationDescription : '');
+  document.getElementById('vp-back-btn').style.display = showBackBtn ? '' : 'none';
+
+  // Show "Edit Panel Info" only to the panel owner
+  const user = getCurrentUser();
+  const isOwner = user && panel.ownerId === user.id;
+  document.getElementById('vp-edit-info-btn').style.display = isOwner ? '' : 'none';
+
+  // Print header
+  document.getElementById('print-panel-title').textContent = 'Panel ID: ' + panel.panelId + ' — ' + panel.streetAddress;
+  document.getElementById('print-panel-meta').textContent = (panel.manufacturer ? 'Manufacturer: ' + panel.manufacturer + '  ·  ' : '') + panel.numBreakers + ' breakers';
+  document.getElementById('print-date').textContent = 'Printed: ' + fmtDate(new Date().toISOString());
+
+  renderEditGrid(panel);
+  captureEditBaseline(panel);
+  clearAutoSaveStatus();
+  showPage('view-panel');
+}
+
+function renderEditGrid(panel) {
+  const grid = document.getElementById('vp-breakers-grid');
+  grid.innerHTML = '';
+  panel.breakers.forEach(br => {
+    const linked = br.linkedTo || [];
+    const slot = document.createElement('div');
+    slot.className = 'breaker-slot-edit' + (linked.length ? ' linked' : '');
+    slot.id = 'vp-slot-' + br.number;
+    slot.innerHTML = `
+      <div class="breaker-num-edit">${br.number}</div>
+      <div id="vp-slot-inner-${br.number}" style="flex:1">
+        <textarea class="breaker-input" id="vp-br-${br.number}" rows="2"
+          placeholder="Click to describe breaker ${br.number}…"
+          oninput="scheduleAutoSave()">${br.description}</textarea>
+        ${linked.length ? `<span class="breaker-link-badge">🔗 Linked: ${linked.slice().sort((a,b)=>a-b).join(', ')}</span>` : ''}
+      </div>`;
+    grid.appendChild(slot);
+  });
+}
+
+function searchBreakers() {
+  const q = document.getElementById('vp-search').value.toLowerCase();
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (!panel) return;
+  panel.breakers.forEach(br => {
+    const slot = document.getElementById('vp-slot-' + br.number);
+    if (!slot) return;
+    if (!q) {
+      slot.style.opacity = '1';
+      slot.style.borderColor = '#e5e7eb';
+      return;
+    }
+    // Check live textarea value first, fall back to saved description
+    const textarea = document.getElementById('vp-br-' + br.number);
+    const liveText = textarea ? textarea.value.toLowerCase() : br.description.toLowerCase();
+    const match = liveText.includes(q);
+    slot.style.opacity = match ? '1' : '0.3';
+    slot.style.borderColor = match ? '#1a56db' : '#e5e7eb';
+  });
+}
+
+// ─────────────────────────────────────
+// AUTO-SAVE (debounced, no history entry)
+// ─────────────────────────────────────
+let _autoSaveTimer  = null;
+let _editBaseline   = {}; // descriptions at last explicit save (or panel open)
+
+function captureEditBaseline(panel) {
+  _editBaseline = {};
+  panel.breakers.forEach(br => { _editBaseline[br.number] = br.description; });
+}
+
+function clearAutoSaveStatus() {
+  const el = document.getElementById('vp-autosave-status');
+  if (el) { el.textContent = ''; el.className = 'autosave-status'; }
+}
+
+function scheduleAutoSave() {
+  const el = document.getElementById('vp-autosave-status');
+  if (el) { el.textContent = 'Unsaved changes…'; el.className = 'autosave-status unsaved'; }
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(autoSaveBreakers, 500);
+}
+
+function autoSaveBreakers() {
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+  panels[idx].breakers.forEach(br => {
+    const input = document.getElementById('vp-br-' + br.number);
+    if (input) br.description = input.value;
+  });
+  setPanels(panels);
+  const el = document.getElementById('vp-autosave-status');
+  if (el) {
+    el.textContent = '✓ Saved';
+    el.className = 'autosave-status saved';
+    clearTimeout(el._fadeTimer);
+    el._fadeTimer = setTimeout(() => clearAutoSaveStatus(), 3000);
+  }
+}
+
+// ─────────────────────────────────────
+// SAVE BREAKERS (with contact info modal)
+// ─────────────────────────────────────
+function saveAllBreakers() {
+  const user = getCurrentUser();
+  if (user) {
+    // Pre-fill from user data
+    document.getElementById('sm-name').value = user.name || '';
+    document.getElementById('sm-email').value = user.email || '';
+  }
+  document.getElementById('save-modal-error').style.display = 'none';
+  document.getElementById('save-modal').style.display = 'flex';
+}
+
+function closeSaveModal() {
+  document.getElementById('save-modal').style.display = 'none';
+}
+
+function confirmSaveBreakers() {
+  const name = document.getElementById('sm-name').value.trim();
+  const phone = document.getElementById('sm-phone').value.trim();
+  const email = document.getElementById('sm-email').value.trim();
+  const address = document.getElementById('sm-address').value.trim();
+  const err = document.getElementById('save-modal-error');
+  if (!name || !phone || !email) {
+    err.textContent = 'Name, phone, and email are required.';
+    err.style.display = 'block'; return;
+  }
+
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+
+  const now = new Date().toISOString();
+  let changeCount = 0;
+  panels[idx].breakers.forEach(br => {
+    const input = document.getElementById('vp-br-' + br.number);
+    const currentDesc = input ? input.value.trim() : br.description;
+    const baselineDesc = _editBaseline[br.number] ?? '';
+    if (currentDesc !== baselineDesc) {
+      br.history.push({
+        date: now,
+        previousDescription: baselineDesc,
+        newDescription: currentDesc,
+        contactName: name,
+        contactPhone: phone,
+        contactEmail: email,
+        contactAddress: address
+      });
+      br.description = currentDesc;
+      changeCount++;
+    }
+  });
+  setPanels(panels);
+  syncToCloud(panels[idx]);
+  // Reset baseline to current state
+  captureEditBaseline(panels[idx]);
+  closeSaveModal();
+  clearAutoSaveStatus();
+}
+
+// ─────────────────────────────────────
+// EDIT PANEL INFO
+// ─────────────────────────────────────
+function openEditPanelInfo() {
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (!panel) return;
+  document.getElementById('epi-address').value = panel.streetAddress || '';
+  document.getElementById('epi-panelid').value = panel.panelId || '';
+  document.getElementById('epi-manufacturer').value = panel.manufacturer || '';
+  document.getElementById('epi-location').value = panel.locationDescription || '';
+  document.getElementById('epi-numbreakers').value = panel.numBreakers || '';
+  document.getElementById('epi-breaker-warning').style.display = 'none';
+  document.getElementById('epi-success').style.display = 'none';
+  document.getElementById('epi-error').style.display = 'none';
+
+  // Show warning if user reduces breaker count
+  document.getElementById('epi-numbreakers').onchange = function() {
+    const newCount = parseInt(this.value);
+    const warning = document.getElementById('epi-breaker-warning');
+    warning.style.display = newCount < panel.numBreakers ? 'block' : 'none';
+  };
+  // epi page is not in the protected list but user must be owner — already gated by the button visibility
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-edit-panel-info').classList.add('active');
+  currentPage = 'edit-panel-info';
+  window.scrollTo(0, 0);
+}
+
+function saveEditPanelInfo() {
+  const address = document.getElementById('epi-address').value.trim();
+  const panelId = document.getElementById('epi-panelid').value.trim().toUpperCase();
+  const manufacturer = document.getElementById('epi-manufacturer').value;
+  const location = document.getElementById('epi-location').value.trim();
+  const err = document.getElementById('epi-error');
+  const suc = document.getElementById('epi-success');
+  err.style.display = 'none';
+  suc.style.display = 'none';
+
+  if (!address || !panelId) {
+    err.textContent = 'Street address and Panel ID are required.';
+    err.style.display = 'block'; return;
+  }
+
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+
+  // Check for Panel ID collision (excluding current panel)
+  const collision = panels.find(p => p.panelId === panelId && p.id !== currentPanelId);
+  if (collision) {
+    err.textContent = 'Panel ID "' + panelId + '" is already used by another panel.';
+    err.style.display = 'block'; return;
+  }
+
+  const newCount = parseInt(document.getElementById('epi-numbreakers').value);
+  const oldCount = panels[idx].numBreakers;
+
+  const doSave = () => _applyEditPanelInfo(newCount, address, panelId, manufacturer, location);
+
+  // If reducing with data loss, confirm first
+  if (newCount < oldCount) {
+    const affected = panels[idx].breakers
+      .filter(b => b.number > newCount && (b.description || b.history.length > 0))
+      .length;
+    if (affected > 0) {
+      showConfirm(
+        'Reduce Breaker Count',
+        `Reducing from ${oldCount} to ${newCount} breakers will permanently delete the descriptions and history for breakers ${newCount + 1}–${oldCount} (${affected} breaker${affected > 1 ? 's' : ''} with data). Continue?`,
+        doSave,
+        'Continue', 'btn-danger'
+      );
+      return;
+    }
+  }
+  doSave();
+}
+
+function _applyEditPanelInfo(newCount, address, panelId, manufacturer, location) {
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+  const suc = document.getElementById('epi-success');
+  const oldCount = panels[idx].numBreakers;
+
+  if (newCount < oldCount) {
+    panels[idx].breakers = panels[idx].breakers.filter(b => b.number <= newCount);
+  } else if (newCount > oldCount) {
+    for (let i = oldCount + 1; i <= newCount; i++) {
+      panels[idx].breakers.push({ number: i, description: '', history: [], linkedTo: [] });
+    }
+  }
+
+  panels[idx].numBreakers = newCount;
+  panels[idx].streetAddress = address;
+  panels[idx].panelId = panelId;
+  panels[idx].manufacturer = manufacturer;
+  panels[idx].locationDescription = location;
+  setPanels(panels);
+    syncToCloud(panels[idx]);
+
+  suc.textContent = 'Panel info updated!';
+  suc.style.display = 'block';
+  setTimeout(() => openPanelById_Internal(currentPanelId, true), 1200);
+}
+
+// ─────────────────────────────────────
+// HISTORY
+// ─────────────────────────────────────
+function openPanelHistory(internalId) {
+  const panel = getPanels().find(p => p.id === internalId);
+  if (!panel) return;
+  currentPanelId = internalId;
+  document.getElementById('hist-title').textContent = 'History: ' + panel.panelId;
+  renderHistory(panel);
+  switchHistTab('timeline');
+  showPage('history');
+}
+
+function viewBreakerHistory() {
+  openPanelHistory(currentPanelId);
+}
+
+function renderHistory(panel) {
+  _histPanel = panel;
+  const el = document.getElementById('history-list');
+  // Gather all history events across breakers
+  const events = [];
+  panel.breakers.forEach(br => {
+    br.history.forEach(h => events.push({ ...h, breakerNumber: br.number }));
+  });
+  events.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (events.length === 0) {
+    el.innerHTML = '<p style="color:#9ca3af;">No changes recorded yet.</p>';
+    return;
+  }
+  el.innerHTML = events.map(h => `
+    <div class="history-item">
+      <div class="hist-date">${fmtDate(h.date)}</div>
+      <div class="hist-breaker">Breaker #${h.breakerNumber}</div>
+      <div class="hist-desc">
+        ${h.previousDescription ? `<span style="color:#9ca3af;text-decoration:line-through">${h.previousDescription}</span> → ` : ''}
+        <strong>${h.newDescription || '<em>cleared</em>'}</strong>
+      </div>
+      <div class="hist-contact">By: ${h.contactName} · ${h.contactPhone} · ${h.contactEmail}${h.contactAddress ? ' · ' + h.contactAddress : ''}</div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────
+// COMPARISON VIEW
+// ─────────────────────────────────────
+let _histPanel = null;
+
+function switchHistTab(tab) {
+  document.getElementById('hist-tab-timeline').classList.toggle('active', tab === 'timeline');
+  document.getElementById('hist-tab-compare').classList.toggle('active', tab === 'compare');
+  document.getElementById('hist-timeline-view').style.display = tab === 'timeline' ? '' : 'none';
+  document.getElementById('hist-compare-view').style.display  = tab === 'compare'   ? '' : 'none';
+  if (tab === 'compare' && _histPanel) _populateCompareDates(_histPanel);
+}
+
+function _populateCompareDates(panel) {
+  const dates = [];
+  const seen = new Set();
+  panel.breakers.forEach(br => br.history.forEach(h => { if (!seen.has(h.date)) { seen.add(h.date); dates.push(h.date); } }));
+  dates.sort();
+  const fromSel = document.getElementById('compare-from');
+  const toSel   = document.getElementById('compare-to');
+  let fromOpts = '<option value="__initial__">Initial state (before any saves)</option>';
+  dates.forEach(d => { fromOpts += `<option value="${d}">${fmtDate(d)}</option>`; });
+  let toOpts = '';
+  dates.forEach(d => { toOpts += `<option value="${d}">${fmtDate(d)}</option>`; });
+  toOpts += '<option value="__current__" selected>Current state</option>';
+  fromSel.innerHTML = fromOpts;
+  toSel.innerHTML   = toOpts;
+  document.getElementById('compare-results').innerHTML = '';
+}
+
+function _buildSnapshot(panel, cutoff) {
+  // Returns { breakerNum: description } for state at/before cutoff
+  // cutoff = null → initial (before any history), '' → current
+  const snap = {};
+  panel.breakers.forEach(br => {
+    let desc = br.description;
+    if (cutoff !== '') {
+      const sorted = [...br.history].sort((a, b) => new Date(b.date) - new Date(a.date));
+      for (const h of sorted) {
+        if (cutoff === null || new Date(h.date) > new Date(cutoff)) desc = h.previousDescription || '';
+      }
+    }
+    snap[br.number] = desc || '';
+  });
+  return snap;
+}
+
+function runComparison() {
+  const panel = _histPanel;
+  if (!panel) return;
+  const fromVal = document.getElementById('compare-from').value;
+  const toVal   = document.getElementById('compare-to').value;
+  const snapA = _buildSnapshot(panel, fromVal === '__initial__' ? null : fromVal);
+  const snapB = _buildSnapshot(panel, toVal   === '__current__' ? ''   : toVal);
+  const fromLbl = fromVal === '__initial__' ? 'Initial state' : fmtDate(fromVal);
+  const toLbl   = toVal   === '__current__' ? 'Current state' : fmtDate(toVal);
+  let nChanged = 0, nAdded = 0, nCleared = 0;
+  const rows = panel.breakers.map(br => {
+    const a = snapA[br.number]; const b = snapB[br.number];
+    let cls = 'same';
+    if (a !== b) {
+      if (!a && b)  { cls = 'added';   nAdded++;   }
+      else if (a && !b) { cls = 'cleared'; nCleared++; }
+      else              { cls = 'changed'; nChanged++; }
+    }
+    return { num: br.number, a, b, cls };
+  });
+  const total = nChanged + nAdded + nCleared;
+  const changed = rows.filter(r => r.cls !== 'same');
+  const same    = rows.filter(r => r.cls === 'same');
+  const ri = r => {
+    let inner = '';
+    if      (r.cls === 'added')   inner = `<span class="ci-new">${escHtml(r.b)}</span><span class="ci-arr"> ← newly labelled</span>`;
+    else if (r.cls === 'cleared') inner = `<span class="ci-old">${escHtml(r.a)}</span><span class="ci-arr"> → </span><span style="color:#ef4444;font-style:italic">cleared</span>`;
+    else if (r.cls === 'changed') inner = `<span class="ci-old">${escHtml(r.a)}</span><span class="ci-arr">→</span><span class="ci-new">${escHtml(r.b)}</span>`;
+    else                          inner = `<span class="ci-same">${escHtml(r.b) || '<em>empty</em>'}</span>`;
+    return `<div class="compare-item ${r.cls}"><span class="ci-num">#${r.num}</span>${inner}</div>`;
+  };
+  const summaryTxt = total === 0 ? 'No differences between these snapshots.'
+    : `${total} change${total !== 1 ? 's' : ''} — ${nChanged} updated, ${nAdded} newly labelled, ${nCleared} cleared.`;
+  document.getElementById('compare-results').innerHTML =
+    `<p class="compare-result-hdr">Comparing: <em>${escHtml(fromLbl)}</em> → <em>${escHtml(toLbl)}</em></p>
+    <p class="compare-summary">${summaryTxt}</p>
+    ${changed.map(ri).join('')}
+    ${same.length && total > 0 ? `<details style="margin-top:14px"><summary style="cursor:pointer;color:#6b7280;font-size:0.88rem">${same.length} unchanged breaker${same.length !== 1 ? 's' : ''}</summary><div style="margin-top:8px">${same.map(ri).join('')}</div></details>` : ''}`;
+}
+
+// ─────────────────────────────────────
+// EDIT SINGLE BREAKER MODAL
+// ─────────────────────────────────────
+let editingBreakerNum = null;
+
+function openEditBreakerModal(breakerNum, currentDesc, panelInternalId) {
+  editingBreakerNum = breakerNum;
+  currentPanelId    = panelInternalId;
+  document.getElementById('ebm-title').textContent = 'Edit Breaker #' + breakerNum;
+  document.getElementById('ebm-desc').value = currentDesc;
+
+  // Populate link pills
+  const panel    = getPanels().find(p => p.id === panelInternalId);
+  const list     = document.getElementById('ebm-link-list');
+  list.innerHTML = '';
+  if (panel && panel.breakers.length > 1) {
+    const thisBr   = panel.breakers.find(b => b.number === breakerNum);
+    const linked   = (thisBr && thisBr.linkedTo) || [];
+    panel.breakers.forEach(b => {
+      if (b.number === breakerNum) return;
+      const liveInput = document.getElementById('vp-br-' + b.number);
+      const label     = (liveInput ? liveInput.value : b.description).trim();
+      const pill      = document.createElement('button');
+      pill.type       = 'button';
+      pill.className  = 'link-pill' + (linked.includes(b.number) ? ' selected' : '');
+      pill.dataset.num = b.number;
+      pill.innerHTML  = `<strong>#${b.number}</strong>${label ? '<br><span style="font-weight:400;color:#6b7280">' + label.substring(0,28) + (label.length>28?'…':'') + '</span>' : ''}`;
+      pill.onclick    = () => pill.classList.toggle('selected');
+      list.appendChild(pill);
+    });
+  }
+
+  document.getElementById('edit-breaker-modal').style.display = 'flex';
+}
+
+function saveEditBreaker() {
+  const desc  = document.getElementById('ebm-desc').value.trim();
+  const input = document.getElementById('vp-br-' + editingBreakerNum) ||
+                document.getElementById('setup-br-' + editingBreakerNum);
+  if (input) input.value = desc;
+
+  // Collect selected link pills and sync bidirectionally
+  const selected = Array.from(document.querySelectorAll('#ebm-link-list .link-pill.selected'))
+                        .map(p => parseInt(p.dataset.num));
+  _syncLinks(currentPanelId, editingBreakerNum, selected);
+
+  // Refresh badges on all visible slots
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (panel) _refreshAllLinkBadges(panel);
+
+  scheduleAutoSave();
+  closeEditBreakerModal();
+}
+
+// ── Bidirectional link sync ──────────────────────────────
+function _syncLinks(panelId, breakerNum, newLinked) {
+  const panels = getPanels();
+  const panel  = panels.find(p => p.id === panelId);
+  if (!panel) return;
+  const br = panel.breakers.find(b => b.number === breakerNum);
+  if (!br) return;
+
+  const oldLinked = br.linkedTo || [];
+
+  // Remove this breaker from partners that are being unlinked
+  oldLinked.forEach(partnerNum => {
+    if (!newLinked.includes(partnerNum)) {
+      const partner = panel.breakers.find(b => b.number === partnerNum);
+      if (partner) partner.linkedTo = (partner.linkedTo || []).filter(n => n !== breakerNum);
+    }
+  });
+
+  // Add this breaker to any newly selected partners
+  newLinked.forEach(partnerNum => {
+    const partner = panel.breakers.find(b => b.number === partnerNum);
+    if (partner) {
+      if (!partner.linkedTo) partner.linkedTo = [];
+      if (!partner.linkedTo.includes(breakerNum)) partner.linkedTo.push(breakerNum);
+    }
+  });
+
+  br.linkedTo = newLinked;
+  setPanels(panels);
+}
+
+// ── Refresh link badges in the visible grid ──────────────
+function _refreshAllLinkBadges(panel) {
+  panel.breakers.forEach(br => {
+    const slot  = document.getElementById('vp-slot-' + br.number);
+    if (!slot) return;
+    const inner  = document.getElementById('vp-slot-inner-' + br.number);
+    const linked = br.linkedTo || [];
+
+    // Update linked class on slot
+    slot.classList.toggle('linked', linked.length > 0);
+
+    // Remove old badge and re-add if needed
+    const old = inner ? inner.querySelector('.breaker-link-badge') : null;
+    if (old) old.remove();
+    if (inner && linked.length > 0) {
+      const badge       = document.createElement('span');
+      badge.className   = 'breaker-link-badge';
+      badge.textContent = '🔗 Linked: ' + linked.slice().sort((a, b) => a - b).join(', ');
+      inner.appendChild(badge);
+    }
+  });
+}
+
+function closeEditBreakerModal() {
+  document.getElementById('edit-breaker-modal').style.display = 'none';
+  editingBreakerNum = null;
+}
+
+// ─────────────────────────────────────
+// CONTACT FORM
+// ─────────────────────────────────────
+function submitContact() {
+  const name = document.getElementById('ct-name').value.trim();
+  const email = document.getElementById('ct-email').value.trim();
+  const msg = document.getElementById('ct-message').value.trim();
+  const ctErr = document.getElementById('ct-error');
+  ctErr.style.display = 'none';
+  if (!name || !email || !msg) {
+    ctErr.textContent = 'Please fill in all fields.';
+    ctErr.style.display = 'block';
+    return;
+  }
+  const s = document.getElementById('contact-success');
+  s.textContent = 'Thanks, ' + name + '! Your message has been received.';
+  s.style.display = 'block';
+  document.getElementById('ct-name').value = '';
+  document.getElementById('ct-email').value = '';
+  document.getElementById('ct-message').value = '';
+}
+
+// ─────────────────────────────────────
+// PRINT PREVIEW (in-page modal)
+// ─────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function printPanel() {
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (!panel) return;
+
+  // Read live textarea values (captures unsaved edits too)
+  const breakers = panel.breakers.map(br => {
+    const ta = document.getElementById('vp-br-' + br.number);
+    return { number: br.number, description: ta ? ta.value.trim() : br.description };
+  });
+
+  const printDate = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  const leftCol  = breakers.filter(br => br.number % 2 === 1); // odd numbers
+  const rightCol = breakers.filter(br => br.number % 2 === 0); // even numbers
+
+  const row = br => `<tr>
+    <td class="pp-num">${br.number}</td>
+    <td class="pp-desc">${br.description ? escHtml(br.description) : '<span class="pp-empty">—</span>'}</td>
+  </tr>`;
+
+  document.getElementById('print-preview-content').innerHTML = `
+    <div class="pp-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
+      <div style="flex:1;">
+        <h2>Panel ID: ${escHtml(panel.panelId)}</h2>
+        <div class="pp-meta">
+          ${escHtml(panel.streetAddress)}
+          ${panel.locationDescription ? ' &nbsp;·&nbsp; ' + escHtml(panel.locationDescription) : ''}
+          ${panel.manufacturer ? ' &nbsp;·&nbsp; ' + escHtml(panel.manufacturer) : ''}
+          &nbsp;·&nbsp; ${panel.numBreakers} breakers
+        </div>
+        <div class="pp-date">Printed: ${printDate}</div>
+      </div>
+      <div style="text-align:center;flex-shrink:0;">
+        <div id="pp-qr-code"></div>
+        <div style="font-size:0.7rem;color:#444;margin-top:4px;">Scan &amp; enter Panel ID</div>
+        <div style="font-size:0.7rem;color:#888;margin-top:1px;">mybreakerpanel.com</div>
+      </div>
+    </div>
+    <div class="pp-grid">
+      <table class="pp-table">
+        <tr><th>#</th><th>Circuit Description</th></tr>
+        ${leftCol.map(row).join('')}
+      </table>
+      <table class="pp-table">
+        <tr><th>#</th><th>Circuit Description</th></tr>
+        ${rightCol.map(row).join('')}
+      </table>
+    </div>`;
+
+  // Generate QR code into the preview (points to the Access Your Panel page)
+  const accessUrl = window.location.href.split('?')[0].split('#')[0] + '#access';
+  new QRCode(document.getElementById('pp-qr-code'), {
+    text: accessUrl,
+    width: 80,
+    height: 80,
+    colorDark: '#1e3a8a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  document.getElementById('print-preview-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePrintPreview() {
+  document.getElementById('print-preview-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── App confirm modal (replaces browser confirm()) ──
+let _confirmCallback = null;
+
+function showConfirm(title, message, onConfirm, confirmLabel = 'Confirm', confirmClass = 'btn-danger') {
+  document.getElementById('app-confirm-title').textContent = title;
+  document.getElementById('app-confirm-msg').textContent   = message;
+  const ok = document.getElementById('app-confirm-ok');
+  ok.textContent = confirmLabel;
+  ok.className   = 'btn ' + confirmClass;
+  _confirmCallback = onConfirm;
+  document.getElementById('app-confirm-modal').style.display = 'flex';
+}
+
+function closeConfirm(confirmed) {
+  document.getElementById('app-confirm-modal').style.display = 'none';
+  const cb = _confirmCallback;
+  _confirmCallback = null;
+  if (confirmed && cb) cb();
+}
+
+// ── Global Escape key: dismiss any open modal ──
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('save-modal').style.display !== 'none')         closeSaveModal();
+  if (document.getElementById('edit-breaker-modal').style.display !== 'none') closeEditBreakerModal();
+  if (document.getElementById('print-preview-modal').classList.contains('open')) closePrintPreview();
+  if (document.getElementById('app-confirm-modal').style.display !== 'none')  closeConfirm(false);
+});
+
+</script>
+</body>
+</html>
+
+      </div>
+    </div>
+  </div>
+  <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
+</div>
+
+<!-- ══════════════════════════════════════
+     BREAKER HISTORY
+══════════════════════════════════════ -->
+<div id="page-history" class="page">
+  <div class="page-header">
+    <h1 id="hist-title">Breaker History</h1>
+  </div>
+  <div class="page-content">
+    <div class="hist-tabs">
+      <button class="hist-tab active" id="hist-tab-timeline" onclick="switchHistTab('timeline')">📋 Timeline</button>
+      <button class="hist-tab" id="hist-tab-compare" onclick="switchHistTab('compare')">🔍 Compare</button>
+    </div>
+    <div id="hist-timeline-view">
+      <p style="color:#9ca3af;font-size:0.88rem;margin-bottom:12px">All changes for this panel, newest first.</p>
+      <div id="history-list" class="history-list"></div>
+    </div>
+    <div id="hist-compare-view" style="display:none">
+      <div class="compare-controls">
+        <div class="compare-selects">
+          <div class="compare-field">
+            <label>From</label>
+            <select id="compare-from"></select>
+          </div>
+          <div class="compare-arr">→</div>
+          <div class="compare-field">
+            <label>To</label>
+            <select id="compare-to"></select>
+          </div>
+        </div>
+        <button class="btn btn-blue" onclick="runComparison()">Compare</button>
+      </div>
+      <div id="compare-results"></div>
+    </div>
+    <button class="btn btn-outline" id="hist-back-btn" onclick="showPage('view-panel')">← Back to Panel</button>
+  </div>
+  <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
+</div>
+<!-- ══════════════════════════════════════
+     SAVE BREAKER MODAL (name/contact)
+══════════════════════════════════════ -->
+<div id="save-modal" class="edit-breaker-modal" style="display:none" onclick="if(event.target===this)closeSaveModal()">
+  <div class="modal-box">
+    <h3>💾 Save Changes</h3>
+    <p style="font-size:0.9rem;color:#6b7280;margin-bottom:20px;">Please provide your contact information. This is recorded with the change history.</p>
+    <div id="save-modal-error" class="error-msg"></div>
+    <div class="form-group">
+      <label>Your Name *</label>
+      <input type="text" id="sm-name" placeholder="Full name" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Phone *</label>
+        <input type="tel" id="sm-phone" placeholder="(555) 123-4567" />
+      </div>
+      <div class="form-group">
+        <label>Email *</label>
+        <input type="email" id="sm-email" placeholder="you@example.com" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Street Address</label>
+      <input type="text" id="sm-address" placeholder="123 Main St…" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-blue" onclick="confirmSaveBreakers()">Save</button>
+      <button class="btn btn-outline" onclick="closeSaveModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     EDIT SINGLE BREAKER MODAL
+══════════════════════════════════════ -->
+<div id="edit-breaker-modal" class="edit-breaker-modal" style="display:none" onclick="if(event.target===this)closeEditBreakerModal()">
+  <div class="modal-box">
+    <h3 id="ebm-title">Edit Breaker</h3>
+    <div class="form-group">
+      <label>Description (unlimited length)</label>
+      <textarea id="ebm-desc" style="min-height:100px" placeholder="e.g. Kitchen outlets, refrigerator, dishwasher"></textarea>
+    </div>
+    <div class="form-group" id="ebm-link-group">
+      <label>Linked breakers <span style="font-weight:400;color:#6b7280;font-size:0.82rem">— select breakers on the same multi-breaker circuit</span></label>
+      <div id="ebm-link-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-blue" onclick="saveEditBreaker()">Update</button>
+      <button class="btn btn-outline" onclick="closeEditBreakerModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     ABOUT PAGE (merged into landing page)
+══════════════════════════════════════ -->
+<div id="page-about" class="page" style="display:none!important">
+
+  <!-- Hero Banner -->
+  <div style="background:linear-gradient(135deg,#1e3a8a 0%,#1a56db 60%,#3b82f6 100%);color:#fff;padding:64px 24px 56px;text-align:center;">
+    <div style="font-size:3rem;margin-bottom:16px;">⚡</div>
+    <h1 style="font-size:2.4rem;font-weight:800;margin-bottom:14px;">About <span style="color:#fbbf24;">MyBreakerPanel</span></h1>
+    <p style="font-size:1.1rem;max-width:620px;margin:0 auto;opacity:0.92;line-height:1.75;">
+      A smarter way to label, manage, and share electrical panel information — built for homeowners, electricians, and facility professionals.
+    </p>
+  </div>
+
+  <!-- Problem / Solution -->
+  <div style="max-width:860px;margin:0 auto;padding:52px 24px 0;">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:48px;" class="about-two-col">
+
+      <div style="background:#fff5f5;border:2px solid #fecaca;border-radius:14px;padding:28px;">
+        <div style="margin-bottom:14px;text-align:center;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 262" style="max-width:220px;width:100%;border-radius:6px;box-shadow:0 3px 12px rgba(0,0,0,0.15);display:inline-block;" font-family="'Segoe UI', Arial, sans-serif">
+            <defs>
+              <filter id="paper-shadow2" x="-5%" y="-5%" width="115%" height="115%">
+                <feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#00000033"/>
+              </filter>
+            </defs>
+
+            <!-- Paper -->
+            <rect x="5" y="4" width="290" height="254" rx="3" fill="#f5f0d8" filter="url(#paper-shadow2)"/>
+
+            <!-- Header band -->
+            <rect x="5" y="4" width="290" height="26" rx="3" fill="#d4c98a"/>
+            <rect x="5" y="24" width="290" height="6" fill="#d4c98a"/>
+            <text x="150" y="20" text-anchor="middle" font-size="8.5" font-weight="700" fill="#3d3000" letter-spacing="0.8">CIRCUIT BREAKER PANEL DIRECTORY</text>
+
+            <!-- Tape corners -->
+            <rect x="16" y="4" width="26" height="8" rx="1" fill="#e8e8c8" opacity="0.75"/>
+            <rect x="258" y="4" width="26" height="8" rx="1" fill="#e8e8c8" opacity="0.75"/>
+
+            <!-- Column sub-headers -->
+            <text x="14" y="38" font-size="6.5" font-weight="700" fill="#666">#</text>
+            <text x="28" y="38" font-size="6.5" font-weight="700" fill="#666">CIRCUIT DESCRIPTION</text>
+            <text x="160" y="38" font-size="6.5" font-weight="700" fill="#666">#</text>
+            <text x="174" y="38" font-size="6.5" font-weight="700" fill="#666">CIRCUIT DESCRIPTION</text>
+
+            <!-- Structural lines -->
+            <line x1="5" y1="42" x2="295" y2="42" stroke="#c8b97a" stroke-width="0.8"/>
+            <line x1="150" y1="30" x2="150" y2="237" stroke="#c8b97a" stroke-width="1"/>
+            <line x1="23" y1="42" x2="23" y2="237" stroke="#c8b97a" stroke-width="0.6"/>
+            <line x1="170" y1="42" x2="170" y2="237" stroke="#c8b97a" stroke-width="0.6"/>
+
+            <!-- ── ROW 1 (y 42–66) ── -->
+            <line x1="5" y1="66" x2="295" y2="66" stroke="#ddd0a0" stroke-width="0.5"/>
+            <!-- Breaker 1: clean-ish -->
+            <text x="14" y="58" font-size="7" fill="#3a3a3a" font-weight="600" transform="rotate(-0.3,14,58)">1</text>
+            <text x="27" y="59" font-size="6.8" fill="#2a2a2a" transform="rotate(-0.5,27,59)">Kitchen outlets</text>
+            <!-- Breaker 2: normal -->
+            <text x="161" y="58" font-size="7" fill="#3a3a3a" font-weight="600" transform="rotate(0.2,161,58)">2</text>
+            <text x="174" y="59" font-size="6.8" fill="#2a2a2a" transform="rotate(0.4,174,59)">Liv rm lights</text>
+
+            <!-- ── ROW 2 (y 66–90) ── -->
+            <line x1="5" y1="90" x2="295" y2="90" stroke="#ddd0a0" stroke-width="0.5"/>
+            <!-- Breaker 3: crossed out + blue correction -->
+            <text x="14" y="82" font-size="7" fill="#3a3a3a" font-weight="600">3</text>
+            <text x="27" y="82" font-size="6.8" fill="#999" transform="rotate(-0.8,27,82)">Mstr bedrm</text>
+            <line x1="25" y1="80" x2="103" y2="80" stroke="#555" stroke-width="1.1"/>
+            <text x="27" y="76" font-size="6" fill="#1a1a9a" transform="rotate(-1.4,27,76)">mstr+hall+bath??</text>
+            <!-- Breaker 4: normal-ish -->
+            <text x="161" y="82" font-size="7" fill="#3a3a3a" font-weight="600" transform="rotate(-0.3,161,82)">4</text>
+            <text x="174" y="82" font-size="6.8" fill="#2a2a2a" transform="rotate(0.5,174,82)">Wshr / Dryr</text>
+
+            <!-- ── ROW 3 (y 90–114) ── -->
+            <line x1="5" y1="114" x2="295" y2="114" stroke="#ddd0a0" stroke-width="0.5"/>
+            <!-- Breaker 5: faded mess -->
+            <text x="14" y="106" font-size="7" fill="#555" font-weight="600" transform="rotate(0.5,14,106)">5</text>
+            <text x="27" y="107" font-size="6.5" fill="#666" transform="rotate(-2.1,27,107)" opacity="0.7">Bsmnt + ??</text>
+            <!-- Breaker 6: crossed out + blue fix -->
+            <text x="161" y="106" font-size="7" fill="#3a3a3a" font-weight="600">6</text>
+            <text x="174" y="106" font-size="6.8" fill="#999" transform="rotate(0.6,174,106)">A/C unit</text>
+            <line x1="172" y1="104" x2="218" y2="104" stroke="#555" stroke-width="1.1"/>
+            <text x="174" y="100" font-size="6" fill="#1a1a9a" transform="rotate(-1.1,174,100)">A/C + heat??</text>
+
+            <!-- ── ROW 4 (y 114–138) ── -->
+            <line x1="5" y1="138" x2="295" y2="138" stroke="#ddd0a0" stroke-width="0.5"/>
+            <!-- Breaker 7: crossed out + scrawled correction -->
+            <text x="14" y="130" font-size="7" fill="#3a3a3a" font-weight="600" transform="rotate(-0.4,14,130)">7</text>
+            <text x="27" y="130" font-size="6.8" fill="#888" transform="rotate(-1.0,27,130)">Garaj</text>
+            <line x1="25" y1="128" x2="70" y2="128" stroke="#555" stroke-width="1.1"/>
+            <text x="27" y="124" font-size="6" fill="#1a1a9a" transform="rotate(1.5,27,124)">Garage/outside??</text>
+            <!-- Breaker 8: crossed out + blue correction -->
+            <text x="161" y="130" font-size="7" fill="#3a3a3a" font-weight="600" transform="rotate(0.3,161,130)">8</text>
+            <text x="174" y="130" font-size="6.8" fill="#999" transform="rotate(0.7,174,130)">Dining rm</text>
+            <line x1="172" y1="128" x2="218" y2="128" stroke="#555" stroke-width="1.1"/>
+            <text x="174" y="124" font-size="6" fill="#1a1a9a" transform="rotate(-0.9,174,124)">Din + Den??</text>
+
+            <!-- ── ROW 5 (y 138–162) ── -->
+            <line x1="5" y1="162" x2="295" y2="162" stroke="#ddd0a0" stroke-width="0.5"/>
+            <!-- Breaker 9: abbreviated, tilted -->
+            <text x="14" y="154" font-size="7" fill="#3a3a3a" font-weight="600" transform="rotate(-0.5,14,154)">9</text>
+            <text x="27" y="155" font-size="6.8" fill="#2a2a2a" transform="rotate(1.3,27,155)">Wtr htr</text>
+            <!-- Breaker 10: conflicting notes -->
+            <text x="158" y="154" font-size="6.5" fill="#3a3a3a" font-weight="600">10</text>
+            <text x="174" y="154" font-size="6.8" fill="#2a2a2a" transform="rotate(0.4,174,154)">Office</text>
+            <text x="200" y="153" font-size="5.5" fill="#cc0000" transform="rotate(-1.2,200,153)">←NO! gst rm</text>
+
+            <!-- ── ROW 6 (y 162–186) ── -->
+            <line x1="5" y1="186" x2="295" y2="186" stroke="#ddd0a0" stroke-width="0.5"/>
+            <!-- Breaker 11: with red note -->
+            <text x="14" y="178" font-size="6.5" fill="#3a3a3a" font-weight="600">11</text>
+            <text x="27" y="179" font-size="6.5" fill="#2a2a2a" transform="rotate(-0.6,27,179)">Outdr lgts</text>
+            <text x="80" y="178" font-size="5.5" fill="#cc0000" transform="rotate(1.0,80,178)">frnt only?</text>
+            <!-- Breaker 12: unknown -->
+            <text x="158" y="178" font-size="6.5" fill="#555" font-weight="600">12</text>
+            <text x="174" y="179" font-size="8" fill="#888" font-style="italic" transform="rotate(0.9,174,179)">?</text>
+
+            <!-- ── ROW 7 (y 186–210) ── -->
+            <line x1="5" y1="210" x2="295" y2="210" stroke="#ddd0a0" stroke-width="0.5"/>
+            <!-- Breaker 13: barely legible -->
+            <text x="14" y="202" font-size="6.5" fill="#555" font-weight="600" transform="rotate(0.5,14,202)">13</text>
+            <text x="27" y="203" font-size="6" fill="#777" transform="rotate(-2.0,27,203)" opacity="0.6">Kitch+frdge+mcro</text>
+            <!-- Breaker 14: faded + messy -->
+            <text x="158" y="202" font-size="6.5" fill="#666" font-weight="600">14</text>
+            <text x="174" y="203" font-size="6.2" fill="#777" transform="rotate(1.8,174,203)" opacity="0.65">Bath 2 / hall??</text>
+
+            <!-- ── ROW 8 (y 210–234) ── -->
+            <line x1="5" y1="234" x2="295" y2="234" stroke="#ddd0a0" stroke-width="0.5"/>
+            <!-- Breaker 15: normal -->
+            <text x="14" y="226" font-size="6.5" fill="#3a3a3a" font-weight="600" transform="rotate(-0.3,14,226)">15</text>
+            <text x="27" y="227" font-size="6.8" fill="#2a2a2a" transform="rotate(-0.4,27,227)">HVAC blower</text>
+            <!-- Breaker 16: SPARE crossed out -->
+            <text x="158" y="226" font-size="6.5" fill="#3a3a3a" font-weight="600">16</text>
+            <text x="174" y="226" font-size="6.8" fill="#888" transform="rotate(0.6,174,226)">SPARE</text>
+            <line x1="172" y1="224" x2="210" y2="224" stroke="#555" stroke-width="1.1"/>
+            <text x="213" y="226" font-size="6.5" fill="#cc0000" transform="rotate(-1,213,226)">??</text>
+
+            <!-- Coffee stain (right column, rows 3-4) -->
+            <ellipse cx="240" cy="102" rx="18" ry="16" fill="none" stroke="#b8843a" stroke-width="2.2" opacity="0.2"/>
+            <ellipse cx="240" cy="102" rx="15" ry="13" fill="none" stroke="#b8843a" stroke-width="1" opacity="0.12"/>
+
+            <!-- Footer note -->
+            <text x="9" y="246" font-size="5.5" fill="#666" font-style="italic" transform="rotate(-0.4,9,246)">* Updated 2019 — call Mike w/ questions  555-0142</text>
+
+            <!-- Folded corner -->
+            <polygon points="272,258 295,234 295,258" fill="#e8ddb0" stroke="#c8b97a" stroke-width="0.5"/>
+            <polygon points="272,258 295,234 272,234" fill="#f5f0d8" stroke="#c8b97a" stroke-width="0.5"/>
+          </svg>
+        </div>
+        <h2 style="font-size:1.15rem;font-weight:700;color:#b91c1c;margin-bottom:10px;">The Problem</h2>
+        <p style="color:#374151;line-height:1.75;font-size:0.95rem;">Circuit breaker panels are plagued by inaccurate, outdated descriptions. The most common solution — a penciled-in paper register on the panel door — is cramped, hard to read, and almost never updated. There's no record of who made changes or when.</p>
+      </div>
+
+      <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:14px;padding:28px;">
+        <div style="margin-bottom:14px;text-align:center;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 285" style="max-width:285px;width:100%;border-radius:6px;box-shadow:0 3px 12px rgba(0,0,0,0.15);display:inline-block;" font-family="'Segoe UI', Arial, sans-serif">
+            <defs>
+              <filter id="sol-shadow" x="-5%" y="-5%" width="115%" height="115%">
+                <feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#00000033"/>
+              </filter>
+            </defs>
+
+            <!-- Paper -->
+            <rect x="5" y="4" width="370" height="277" rx="3" fill="#ffffff" filter="url(#sol-shadow)"/>
+
+            <!-- Blue title header -->
+            <rect x="5" y="4" width="370" height="28" rx="3" fill="#1e3a8a"/>
+            <rect x="5" y="18" width="370" height="14" fill="#1e3a8a"/>
+            <text x="155" y="21" text-anchor="middle" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="0.8">CIRCUIT BREAKER PANEL DIRECTORY</text>
+
+            <!-- Panel info -->
+            <text x="14" y="42" font-size="9" font-weight="800" fill="#1e3a8a">Panel ID: MAIN-01</text>
+            <text x="14" y="53" font-size="7" fill="#444">Main Electrical Panel  ·  Garage, North Wall  ·  200A Service</text>
+            <text x="14" y="63" font-size="6.5" fill="#666">Installed by: R. Kowalski Electric  ·  Permit #2019-4821</text>
+            <text x="14" y="73" font-size="6" fill="#999">Contact: James Mugg  ·  (555) 204-7731  ·  mugg@muggventures.com</text>
+            <text x="14" y="83" font-size="6" fill="#bbb">Printed: March 18, 2026  ·  Last updated: March 15, 2026</text>
+
+            <!-- QR code placeholder -->
+            <rect x="310" y="34" width="57" height="57" rx="2" fill="#f9f9f9" stroke="#e0e0e0" stroke-width="0.8"/>
+            <!-- Top-left position square -->
+            <rect x="313" y="37" width="14" height="14" rx="1" fill="#1e3a8a"/>
+            <rect x="315" y="39" width="10" height="10" rx="0.5" fill="#f9f9f9"/>
+            <rect x="317" y="41" width="6" height="6" fill="#1e3a8a"/>
+            <!-- Top-right position square -->
+            <rect x="340" y="37" width="14" height="14" rx="1" fill="#1e3a8a"/>
+            <rect x="342" y="39" width="10" height="10" rx="0.5" fill="#f9f9f9"/>
+            <rect x="344" y="41" width="6" height="6" fill="#1e3a8a"/>
+            <!-- Bottom-left position square -->
+            <rect x="313" y="64" width="14" height="14" rx="1" fill="#1e3a8a"/>
+            <rect x="315" y="66" width="10" height="10" rx="0.5" fill="#f9f9f9"/>
+            <rect x="317" y="68" width="6" height="6" fill="#1e3a8a"/>
+            <!-- QR data dots -->
+            <rect x="330" y="37" width="3" height="3" fill="#1e3a8a"/>
+            <rect x="335" y="37" width="3" height="3" fill="#1e3a8a"/>
+            <rect x="333" y="42" width="3" height="3" fill="#1e3a8a"/>
+            <rect x="340" y="55" width="3" height="3" fill="#1e3a8a"/>
+            <rect x="346" y="55" width="3" height="3" fill="#1e3a8a"/>
+            <rect x="330" y="59" width="3" height="3" fill="#1e3a8a"/>
+            <rect x="337" y="64" width="3" height="3" fill="#1e3a8a"/>
+            <rect x="344" y="68" width="3" height="3" fill="#1e3a8a"/>
+            <rect x="330" y="72" width="3" height="3" fill="#1e3a8a"/>
+            <rect x="336" y="50" width="3" height="3" fill="#1e3a8a"/>
+            <text x="339" y="95" text-anchor="middle" font-size="5.5" fill="#888">Scan to open app</text>
+
+            <!-- Header/table divider -->
+            <line x1="5" y1="91" x2="375" y2="91" stroke="#1e3a8a" stroke-width="1.5"/>
+
+            <!-- Center column divider -->
+            <line x1="191" y1="91" x2="191" y2="281" stroke="#ccc" stroke-width="0.8"/>
+
+            <!-- # sub-dividers -->
+            <line x1="28" y1="91" x2="28" y2="281" stroke="#e0e0e0" stroke-width="0.5"/>
+            <line x1="215" y1="91" x2="215" y2="281" stroke="#e0e0e0" stroke-width="0.5"/>
+
+            <!-- Table column headers -->
+            <rect x="5" y="91" width="186" height="13" fill="#1e3a8a"/>
+            <rect x="192" y="91" width="183" height="13" fill="#1e3a8a"/>
+            <text x="17" y="101" text-anchor="middle" font-size="6.5" font-weight="700" fill="#fff">#</text>
+            <text x="33" y="101" font-size="6.5" font-weight="700" fill="#fff">Circuit Description</text>
+            <text x="204" y="101" text-anchor="middle" font-size="6.5" font-weight="700" fill="#fff">#</text>
+            <text x="219" y="101" font-size="6.5" font-weight="700" fill="#fff">Circuit Description</text>
+
+            <!-- ── Row 1 (y=104–126) ── -->
+            <line x1="5" y1="126" x2="375" y2="126" stroke="#e5e7eb" stroke-width="0.5"/>
+            <rect x="5" y="104" width="23" height="22" fill="#f0f4ff"/>
+            <rect x="192" y="104" width="23" height="22" fill="#f0f4ff"/>
+            <text x="17" y="119" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">1</text>
+            <text x="32" y="113" font-size="6.5" fill="#111">Kitchen outlets — GFCI countertop</text>
+            <text x="32" y="122" font-size="6" fill="#555">receptacles, island, under-cabinet lighting</text>
+            <text x="204" y="119" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">2</text>
+            <text x="219" y="113" font-size="6.5" fill="#111">Living room &amp; dining — overhead</text>
+            <text x="219" y="122" font-size="6" fill="#555">lights, wall sconces, switched outlets</text>
+
+            <!-- ── Row 2 (y=126–148) ── -->
+            <line x1="5" y1="148" x2="375" y2="148" stroke="#e5e7eb" stroke-width="0.5"/>
+            <rect x="5" y="126" width="23" height="22" fill="#f0f4ff"/>
+            <rect x="192" y="126" width="23" height="22" fill="#f0f4ff"/>
+            <text x="17" y="141" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">3</text>
+            <text x="32" y="135" font-size="6.5" fill="#111">Master bedroom — all outlets north</text>
+            <text x="32" y="144" font-size="6" fill="#555">&amp; east walls, ceiling fan, bedside lamps</text>
+            <text x="204" y="141" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">4</text>
+            <text x="219" y="135" font-size="6.5" fill="#111">Washer / Dryer — 240V dedicated</text>
+            <text x="219" y="144" font-size="6" fill="#555">30A laundry room, both units on circuit</text>
+
+            <!-- ── Row 3 (y=148–170) ── -->
+            <line x1="5" y1="170" x2="375" y2="170" stroke="#e5e7eb" stroke-width="0.5"/>
+            <rect x="5" y="148" width="23" height="22" fill="#f0f4ff"/>
+            <rect x="192" y="148" width="23" height="22" fill="#f0f4ff"/>
+            <text x="17" y="163" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">5</text>
+            <text x="32" y="157" font-size="6.5" fill="#111">Basement — overhead fixtures,</text>
+            <text x="32" y="166" font-size="6" fill="#555">workshop fluorescents, utility outlets</text>
+            <text x="204" y="163" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">6</text>
+            <text x="219" y="157" font-size="6.5" fill="#111">A/C condenser — 240V outdoor unit,</text>
+            <text x="219" y="166" font-size="6" fill="#555">40A dedicated double-pole breaker</text>
+
+            <!-- ── Row 4 (y=170–192) ── -->
+            <line x1="5" y1="192" x2="375" y2="192" stroke="#e5e7eb" stroke-width="0.5"/>
+            <rect x="5" y="170" width="23" height="22" fill="#f0f4ff"/>
+            <rect x="192" y="170" width="23" height="22" fill="#f0f4ff"/>
+            <text x="17" y="185" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">7</text>
+            <text x="32" y="179" font-size="6.5" fill="#111">Garage — door opener, exterior</text>
+            <text x="32" y="188" font-size="6" fill="#555">flood lights, workbench side outlets</text>
+            <text x="204" y="185" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">8</text>
+            <text x="219" y="179" font-size="6.5" fill="#111">Office &amp; guest room — all outlets,</text>
+            <text x="219" y="188" font-size="6" fill="#555">ceiling fixtures, east wing circuits</text>
+
+            <!-- ── Row 5 (y=192–214) ── -->
+            <line x1="5" y1="214" x2="375" y2="214" stroke="#e5e7eb" stroke-width="0.5"/>
+            <rect x="5" y="192" width="23" height="22" fill="#f0f4ff"/>
+            <rect x="192" y="192" width="23" height="22" fill="#f0f4ff"/>
+            <text x="17" y="207" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">9</text>
+            <text x="32" y="201" font-size="6.5" fill="#111">Water heater — 240V dedicated 30A</text>
+            <text x="32" y="210" font-size="6" fill="#555">double-pole, utility room east wall</text>
+            <text x="204" y="207" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">10</text>
+            <text x="219" y="201" font-size="6.5" fill="#111">Bathrooms 1 &amp; 2 — GFCI outlets,</text>
+            <text x="219" y="210" font-size="6" fill="#555">exhaust fans, vanity &amp; mirror lighting</text>
+
+            <!-- ── Row 6 (y=214–236) ── -->
+            <line x1="5" y1="236" x2="375" y2="236" stroke="#e5e7eb" stroke-width="0.5"/>
+            <rect x="5" y="214" width="23" height="22" fill="#f0f4ff"/>
+            <rect x="192" y="214" width="23" height="22" fill="#f0f4ff"/>
+            <text x="17" y="229" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">11</text>
+            <text x="32" y="223" font-size="6.5" fill="#111">Outdoor lighting — front porch,</text>
+            <text x="32" y="232" font-size="6" fill="#555">backyard string lights, driveway post</text>
+            <text x="204" y="229" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">12</text>
+            <text x="219" y="223" font-size="6.5" fill="#111">Master bath &amp; closet — GFCI,</text>
+            <text x="219" y="232" font-size="6" fill="#555">heat lamp, exhaust fan, vanity lights</text>
+
+            <!-- ── Row 7 (y=236–258) ── -->
+            <line x1="5" y1="258" x2="375" y2="258" stroke="#e5e7eb" stroke-width="0.5"/>
+            <rect x="5" y="236" width="23" height="22" fill="#f0f4ff"/>
+            <rect x="192" y="236" width="23" height="22" fill="#f0f4ff"/>
+            <text x="17" y="251" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">13</text>
+            <text x="32" y="245" font-size="6.5" fill="#111">Refrigerator — dedicated 20A circuit,</text>
+            <text x="32" y="254" font-size="6" fill="#555">kitchen north wall, GFCI protected</text>
+            <text x="204" y="251" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">14</text>
+            <text x="219" y="245" font-size="6.5" fill="#111">Upstairs hall &amp; stairs — lighting,</text>
+            <text x="219" y="254" font-size="6" fill="#555">smoke detectors, closet outlets (3)</text>
+
+            <!-- ── Row 8 (y=258–281) ── -->
+            <rect x="5" y="258" width="23" height="23" fill="#f0f4ff"/>
+            <rect x="192" y="258" width="23" height="23" fill="#f0f4ff"/>
+            <text x="17" y="273" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">15</text>
+            <text x="32" y="267" font-size="6.5" fill="#111">HVAC blower — air handler fan</text>
+            <text x="32" y="276" font-size="6" fill="#555">motor &amp; thermostat control, 15A</text>
+            <text x="204" y="273" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1e3a8a">16</text>
+            <text x="219" y="267" font-size="6.5" fill="#111">Spare — unused circuit, available</text>
+            <text x="219" y="276" font-size="6" fill="#555">for future kitchen island expansion</text>
+          </svg>
+        </div>
+        <h2 style="font-size:1.15rem;font-weight:700;color:#15803d;margin-bottom:10px;">The Solution</h2>
+        <p style="color:#374151;line-height:1.75;font-size:0.95rem;">MyBreakerPanel gives every panel a digital register — unlimited description space per breaker, a full change history, and instant access via a QR code and Panel ID. No more guesswork. No more illegible pencil marks.</p>
+      </div>
+
+    </div>
+
+    <!-- How It Works -->
+    <div style="margin-bottom:52px;">
+      <h2 style="font-size:1.5rem;font-weight:800;color:#1e3a8a;text-align:center;margin-bottom:32px;">How It Works</h2>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;" class="about-steps">
+
+        <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:2px solid #e5e7eb;">
+          <div style="width:44px;height:44px;background:#1a56db;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;margin:0 auto 14px;">1</div>
+          <div style="font-size:1.8rem;margin-bottom:10px;">📝</div>
+          <h3 style="font-size:0.92rem;font-weight:700;color:#1e3a8a;margin-bottom:6px;">Register Your Panel</h3>
+          <p style="font-size:0.83rem;color:#6b7280;line-height:1.6;">Create an account and enter your panel's address, manufacturer, and number of breakers.</p>
+        </div>
+
+        <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:2px solid #e5e7eb;">
+          <div style="width:44px;height:44px;background:#1a56db;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;margin:0 auto 14px;">2</div>
+          <div style="margin-bottom:10px;display:flex;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" width="34" height="41">
+              <!-- Breaker body -->
+              <rect x="8" y="2" width="24" height="44" rx="4" fill="#1e3a8a"/>
+              <!-- Face plate highlight -->
+              <rect x="11" y="5" width="18" height="38" rx="3" fill="#2d4fa8"/>
+              <!-- Screw heads top/bottom -->
+              <circle cx="20" cy="8" r="2.2" fill="#1e3a8a"/>
+              <line x1="18.4" y1="8" x2="21.6" y2="8" stroke="#6b7280" stroke-width="0.8"/>
+              <circle cx="20" cy="40" r="2.2" fill="#1e3a8a"/>
+              <line x1="18.4" y1="40" x2="21.6" y2="40" stroke="#6b7280" stroke-width="0.8"/>
+              <!-- Toggle switch - ON position (up) -->
+              <rect x="16" y="13" width="8" height="18" rx="2" fill="#e5e7eb"/>
+              <rect x="16" y="13" width="8" height="10" rx="2" fill="#ffffff"/>
+              <!-- ON label -->
+              <text x="20" y="20.5" text-anchor="middle" font-size="4.5" font-weight="700" fill="#1e3a8a" font-family="Arial,sans-serif">ON</text>
+              <!-- Amperage label -->
+              <text x="20" y="35" text-anchor="middle" font-size="5" font-weight="700" fill="#fbbf24" font-family="Arial,sans-serif">20A</text>
+            </svg>
+          </div>
+          <h3 style="font-size:0.92rem;font-weight:700;color:#1e3a8a;margin-bottom:6px;">Label Each Breaker</h3>
+          <p style="font-size:0.83rem;color:#6b7280;line-height:1.6;">Click any breaker to add an unlimited-length description. As much detail as you need.</p>
+        </div>
+
+        <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:2px solid #e5e7eb;">
+          <div style="width:44px;height:44px;background:#1a56db;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;margin:0 auto 14px;">3</div>
+          <div style="font-size:1.8rem;margin-bottom:10px;">🖨️</div>
+          <h3 style="font-size:0.92rem;font-weight:700;color:#1e3a8a;margin-bottom:6px;">Print &amp; Affix</h3>
+          <p style="font-size:0.83rem;color:#6b7280;line-height:1.6;">Print the QR code and Panel ID card and affix it to the inside of your panel door.</p>
+        </div>
+
+        <div style="text-align:center;padding:24px 16px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:2px solid #e5e7eb;">
+          <div style="width:44px;height:44px;background:#1a56db;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;margin:0 auto 14px;">4</div>
+          <div style="font-size:1.8rem;margin-bottom:10px;">📱</div>
+          <h3 style="font-size:0.92rem;font-weight:700;color:#1e3a8a;margin-bottom:6px;">Access Anywhere</h3>
+          <p style="font-size:0.83rem;color:#6b7280;line-height:1.6;">Anyone scans the QR code to open the app, enters the Panel ID, and instantly sees the register — no password needed.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Who Is This For -->
+    <div style="margin-bottom:52px;">
+      <h2 style="font-size:1.5rem;font-weight:800;color:#1e3a8a;text-align:center;margin-bottom:32px;">Who Is This For?</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;">
+
+        <!-- Homeowners -->
+        <div style="background:#eff6ff;border-radius:12px;padding:22px 18px;text-align:center;border:2px solid #bfdbfe;">
+          <div style="margin-bottom:10px;display:flex;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 54" width="64" height="54">
+              <!-- Sky -->
+              <rect width="64" height="54" fill="#e0f2fe" rx="4"/>
+              <!-- Lawn -->
+              <rect x="0" y="44" width="64" height="10" rx="0" fill="#86efac"/>
+              <rect x="0" y="44" width="64" height="4" fill="#4ade80"/>
+              <!-- Chimney (behind roof) -->
+              <rect x="43" y="8" width="7" height="16" rx="1" fill="#9ca3af"/>
+              <rect x="42" y="8" width="9" height="2" rx="1" fill="#6b7280"/>
+              <!-- Roof -->
+              <polygon points="2,26 32,5 62,26" fill="#374151"/>
+              <polygon points="5,26 32,8 59,26" fill="#4b5563"/>
+              <!-- House body -->
+              <rect x="8" y="26" width="48" height="18" fill="#fef9ee"/>
+              <!-- Garage -->
+              <rect x="9" y="30" width="18" height="14" rx="1" fill="#e5e7eb"/>
+              <line x1="9" y1="35" x2="27" y2="35" stroke="#d1d5db" stroke-width="0.8"/>
+              <line x1="9" y1="39" x2="27" y2="39" stroke="#d1d5db" stroke-width="0.8"/>
+              <line x1="18" y1="30" x2="18" y2="44" stroke="#d1d5db" stroke-width="0.8"/>
+              <!-- Right window -->
+              <rect x="38" y="30" width="10" height="9" rx="1" fill="#bfdbfe" stroke="#93c5fd" stroke-width="0.8"/>
+              <line x1="43" y1="30" x2="43" y2="39" stroke="#93c5fd" stroke-width="0.7"/>
+              <line x1="38" y1="34.5" x2="48" y2="34.5" stroke="#93c5fd" stroke-width="0.7"/>
+              <!-- Front door -->
+              <rect x="52" y="33" width="3" height="11" rx="1" fill="#92400e"/>
+              <!-- Doorknob -->
+              <circle cx="53.5" cy="40" r="0.8" fill="#fbbf24"/>
+              <!-- Path/walkway -->
+              <rect x="30" y="44" width="4" height="4" fill="#d1d5db"/>
+            </svg>
+          </div>
+          <h3 style="font-size:0.95rem;font-weight:700;color:#1e3a8a;">Homeowners</h3>
+          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Finally know which breaker controls which room — and share it with family or contractors instantly.</p>
+        </div>
+
+        <!-- Electricians -->
+        <div style="background:#eff6ff;border-radius:12px;padding:22px 18px;text-align:center;border:2px solid #bfdbfe;">
+          <div style="margin-bottom:10px;display:flex;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 82 66" width="82" height="66">
+              <rect width="82" height="66" fill="#f0f9ff" rx="4"/>
+              <!-- Ground -->
+              <rect x="0" y="62" width="82" height="4" fill="#dcfce7"/>
+
+              <!-- ══ Left figure: man ══ -->
+              <!-- Hard hat -->
+              <ellipse cx="22" cy="8" rx="8" ry="3.5" fill="#f59e0b"/>
+              <rect x="13" y="11" width="18" height="2" rx="1" fill="#d97706"/>
+              <!-- Head -->
+              <circle cx="22" cy="19" r="7" fill="#c8955a"/>
+              <!-- Short dark hair (above forehead) -->
+              <path d="M15,17.5 Q15,10.5 22,10.5 Q29,10.5 29,17.5 Q27,14 22,13.5 Q17,14 15,17.5Z" fill="#2d1f0e"/>
+              <!-- Ear -->
+              <ellipse cx="15" cy="19.5" rx="1.3" ry="2" fill="#b8844a"/>
+              <ellipse cx="29" cy="19.5" rx="1.3" ry="2" fill="#b8844a"/>
+              <!-- Eyes — whites + iris + pupil -->
+              <ellipse cx="19.2" cy="19" rx="1.6" ry="1.5" fill="#fff"/>
+              <circle cx="19.4" cy="19.1" r="0.9" fill="#5c3d1e"/>
+              <circle cx="19.5" cy="19.1" r="0.42" fill="#0a0500"/>
+              <ellipse cx="24.8" cy="19" rx="1.6" ry="1.5" fill="#fff"/>
+              <circle cx="25" cy="19.1" r="0.9" fill="#5c3d1e"/>
+              <circle cx="25.1" cy="19.1" r="0.42" fill="#0a0500"/>
+              <!-- Eyebrows -->
+              <path d="M17.4,17 Q19.2,16.1 21,17" stroke="#2d1f0e" stroke-width="1" fill="none" stroke-linecap="round"/>
+              <path d="M23,17 Q24.8,16.1 26.6,17" stroke="#2d1f0e" stroke-width="1" fill="none" stroke-linecap="round"/>
+              <!-- Nose bridge -->
+              <path d="M22,20.5 Q21.2,22 22,22.5 Q22.8,22 22,22.5" stroke="#b8844a" stroke-width="0.6" fill="none"/>
+              <!-- Mouth -->
+              <path d="M19.5,24.2 Q22,25.8 24.5,24.2" stroke="#7c3d10" stroke-width="1" fill="none" stroke-linecap="round"/>
+              <!-- Neck -->
+              <rect x="20" y="25.5" width="4" height="4" rx="1" fill="#c8955a"/>
+              <!-- Shirt (navy) -->
+              <rect x="14" y="29.5" width="16" height="20" rx="2.5" fill="#1e3a8a"/>
+              <!-- Vest left panel -->
+              <rect x="14" y="29.5" width="6" height="20" rx="1.5" fill="#ea6c00"/>
+              <!-- Vest right panel -->
+              <rect x="24" y="29.5" width="6" height="20" rx="1.5" fill="#ea6c00"/>
+              <!-- Reflective strips on vest -->
+              <rect x="14" y="35" width="6" height="1.8" rx="0.4" fill="#fef08a" opacity="0.92"/>
+              <rect x="24" y="35" width="6" height="1.8" rx="0.4" fill="#fef08a" opacity="0.92"/>
+              <rect x="14" y="42" width="6" height="1.8" rx="0.4" fill="#fef08a" opacity="0.92"/>
+              <rect x="24" y="42" width="6" height="1.8" rx="0.4" fill="#fef08a" opacity="0.92"/>
+              <!-- Left arm (upper) -->
+              <rect x="7" y="30" width="7" height="13" rx="3.5" fill="#1e3a8a"/>
+              <!-- Left forearm bent (holding clipboard) -->
+              <rect x="5" y="40" width="9" height="6" rx="3" fill="#c8955a"/>
+              <!-- Clipboard -->
+              <rect x="0.5" y="43" width="11" height="14" rx="1.2" fill="#fefce8" stroke="#ca8a04" stroke-width="0.9"/>
+              <rect x="3.5" y="41.5" width="5.5" height="3" rx="1" fill="#ca8a04"/>
+              <line x1="2.5" y1="48" x2="9.5" y2="48" stroke="#94a3b8" stroke-width="0.7"/>
+              <line x1="2.5" y1="51" x2="9.5" y2="51" stroke="#94a3b8" stroke-width="0.7"/>
+              <line x1="2.5" y1="54" x2="7" y2="54" stroke="#94a3b8" stroke-width="0.7"/>
+              <!-- Right arm -->
+              <rect x="30" y="30" width="7" height="16" rx="3.5" fill="#1e3a8a"/>
+              <!-- Right hand -->
+              <ellipse cx="33.5" cy="47" rx="3" ry="2.5" fill="#c8955a"/>
+              <!-- Belt -->
+              <rect x="14" y="49" width="16" height="2" rx="0.5" fill="#1f2937"/>
+              <rect x="20" y="48.5" width="4" height="3" rx="0.8" fill="#6b7280"/>
+              <!-- Pants -->
+              <rect x="15" y="51" width="6" height="12" rx="2.5" fill="#374151"/>
+              <rect x="23" y="51" width="6" height="12" rx="2.5" fill="#374151"/>
+              <!-- Boots -->
+              <rect x="13.5" y="60.5" width="9" height="4" rx="2" fill="#111827"/>
+              <rect x="21.5" y="60.5" width="9" height="4" rx="2" fill="#111827"/>
+
+              <!-- ══ Right figure: woman ══ -->
+              <!-- Ponytail (behind, right side) -->
+              <path d="M64,17 Q67,22 67,32 Q65,36 63,33 Q62,27 63,20Z" fill="#2d1f0e"/>
+              <!-- Hard hat -->
+              <ellipse cx="58" cy="8" rx="8" ry="3.5" fill="#fbbf24"/>
+              <rect x="49" y="11" width="18" height="2" rx="1" fill="#f59e0b"/>
+              <!-- Head -->
+              <circle cx="58" cy="19" r="7" fill="#c8955a"/>
+              <!-- Ear -->
+              <ellipse cx="51" cy="19.5" rx="1.3" ry="2" fill="#b8844a"/>
+              <ellipse cx="65" cy="19.5" rx="1.3" ry="2" fill="#b8844a"/>
+              <!-- Eyes — whites + iris + pupil -->
+              <ellipse cx="55.2" cy="19" rx="1.6" ry="1.5" fill="#fff"/>
+              <circle cx="55.4" cy="19.1" r="0.9" fill="#5c3d1e"/>
+              <circle cx="55.5" cy="19.1" r="0.42" fill="#0a0500"/>
+              <ellipse cx="60.8" cy="19" rx="1.6" ry="1.5" fill="#fff"/>
+              <circle cx="61" cy="19.1" r="0.9" fill="#5c3d1e"/>
+              <circle cx="61.1" cy="19.1" r="0.42" fill="#0a0500"/>
+              <!-- Eyebrows (slightly arched, feminine) -->
+              <path d="M53.2,16.8 Q55.2,15.7 57,16.8" stroke="#2d1f0e" stroke-width="1" fill="none" stroke-linecap="round"/>
+              <path d="M59,16.8 Q60.8,15.7 62.8,16.8" stroke="#2d1f0e" stroke-width="1" fill="none" stroke-linecap="round"/>
+              <!-- Eyelash hints -->
+              <line x1="53.5" y1="17.6" x2="53.0" y2="16.9" stroke="#2d1f0e" stroke-width="0.55"/>
+              <line x1="56.7" y1="17.4" x2="56.8" y2="16.6" stroke="#2d1f0e" stroke-width="0.55"/>
+              <line x1="59.3" y1="17.4" x2="59.2" y2="16.6" stroke="#2d1f0e" stroke-width="0.55"/>
+              <line x1="62.5" y1="17.6" x2="63.0" y2="16.9" stroke="#2d1f0e" stroke-width="0.55"/>
+              <!-- Nose -->
+              <path d="M58,20.5 Q57.2,22 58,22.5 Q58.8,22 58,22.5" stroke="#b8844a" stroke-width="0.6" fill="none"/>
+              <!-- Mouth -->
+              <path d="M55.5,24.2 Q58,25.8 60.5,24.2" stroke="#7c3d10" stroke-width="1" fill="none" stroke-linecap="round"/>
+              <!-- Neck -->
+              <rect x="56" y="25.5" width="4" height="4" rx="1" fill="#c8955a"/>
+              <!-- Shirt (navy) -->
+              <rect x="50" y="29.5" width="16" height="20" rx="2.5" fill="#1e3a8a"/>
+              <!-- Vest left panel -->
+              <rect x="50" y="29.5" width="6" height="20" rx="1.5" fill="#ea6c00"/>
+              <!-- Vest right panel -->
+              <rect x="60" y="29.5" width="6" height="20" rx="1.5" fill="#ea6c00"/>
+              <!-- Reflective strips on vest -->
+              <rect x="50" y="35" width="6" height="1.8" rx="0.4" fill="#fef08a" opacity="0.92"/>
+              <rect x="60" y="35" width="6" height="1.8" rx="0.4" fill="#fef08a" opacity="0.92"/>
+              <rect x="50" y="42" width="6" height="1.8" rx="0.4" fill="#fef08a" opacity="0.92"/>
+              <rect x="60" y="42" width="6" height="1.8" rx="0.4" fill="#fef08a" opacity="0.92"/>
+              <!-- Left arm -->
+              <rect x="43" y="30" width="7" height="16" rx="3.5" fill="#1e3a8a"/>
+              <ellipse cx="46.5" cy="47" rx="3" ry="2.5" fill="#c8955a"/>
+              <!-- Right arm (upper, holding multimeter) -->
+              <rect x="66" y="30" width="7" height="13" rx="3.5" fill="#1e3a8a"/>
+              <!-- Forearm bent forward -->
+              <rect x="66" y="40" width="9" height="6" rx="3" fill="#c8955a"/>
+              <!-- Digital multimeter -->
+              <rect x="71" y="37" width="11" height="17" rx="2" fill="#1f2937"/>
+              <rect x="72.5" y="38.5" width="8" height="6" rx="1" fill="#1e40af"/>
+              <text x="76.5" y="43.5" text-anchor="middle" font-size="3.2" fill="#93c5fd" font-family="'Courier New',monospace">240V</text>
+              <!-- Dial knob -->
+              <circle cx="76.5" cy="49" r="2.5" fill="#374151" stroke="#4b5563" stroke-width="0.6"/>
+              <circle cx="76.5" cy="49" r="1.1" fill="#ea6c00"/>
+              <!-- Test lead wires -->
+              <path d="M74,54 Q73,58 72,62" stroke="#ef4444" stroke-width="1" fill="none"/>
+              <path d="M79,54 Q80,58 81,62" stroke="#111827" stroke-width="1" fill="none"/>
+              <rect x="71.2" y="62" width="2" height="3.5" rx="0.5" fill="#ef4444"/>
+              <rect x="80" y="62" width="2" height="3.5" rx="0.5" fill="#111827"/>
+              <!-- Belt -->
+              <rect x="50" y="49" width="16" height="2" rx="0.5" fill="#1f2937"/>
+              <rect x="56" y="48.5" width="4" height="3" rx="0.8" fill="#6b7280"/>
+              <!-- Pants -->
+              <rect x="51" y="51" width="6" height="12" rx="2.5" fill="#374151"/>
+              <rect x="59" y="51" width="6" height="12" rx="2.5" fill="#374151"/>
+              <!-- Boots -->
+              <rect x="49.5" y="60.5" width="9" height="4" rx="2" fill="#111827"/>
+              <rect x="57.5" y="60.5" width="9" height="4" rx="2" fill="#111827"/>
+            </svg>
+          </div>
+          <h3 style="font-size:0.95rem;font-weight:700;color:#1e3a8a;">Electricians</h3>
+          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Leave a complete, timestamped record of every panel you service — your contact info included.</p>
+        </div>
+
+        <!-- Commercial Facility Managers -->
+        <div style="background:#eff6ff;border-radius:12px;padding:22px 18px;text-align:center;border:2px solid #bfdbfe;">
+          <div style="margin-bottom:10px;display:flex;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 58" width="56" height="58">
+              <!-- Sky -->
+              <rect width="56" height="58" fill="#e0f2fe" rx="4"/>
+              <!-- Ground -->
+              <rect x="0" y="54" width="56" height="4" fill="#d1d5db"/>
+              <!-- Building body -->
+              <rect x="8" y="4" width="40" height="50" fill="#bfdbfe"/>
+              <!-- Glass facade overlay -->
+              <rect x="8" y="4" width="40" height="50" fill="url(#bldg-grad)" opacity="0.4"/>
+              <!-- Structural frame -->
+              <rect x="8" y="4" width="40" height="50" rx="1" fill="none" stroke="#1e3a8a" stroke-width="1.5"/>
+              <!-- Roof parapet -->
+              <rect x="6" y="2" width="44" height="5" rx="1" fill="#1e3a8a"/>
+              <!-- Floor dividers (5 floors) -->
+              <line x1="8" y1="14" x2="48" y2="14" stroke="#1e3a8a" stroke-width="0.8" opacity="0.5"/>
+              <line x1="8" y1="24" x2="48" y2="24" stroke="#1e3a8a" stroke-width="0.8" opacity="0.5"/>
+              <line x1="8" y1="34" x2="48" y2="34" stroke="#1e3a8a" stroke-width="0.8" opacity="0.5"/>
+              <line x1="8" y1="44" x2="48" y2="44" stroke="#1e3a8a" stroke-width="0.8" opacity="0.5"/>
+              <!-- Windows: 4 per floor, 4 floors of offices -->
+              <!-- Floor 1 (y=5-14) -->
+              <rect x="11" y="6" width="6" height="7" rx="0.5" fill="#93c5fd" opacity="0.85"/>
+              <rect x="20" y="6" width="6" height="7" rx="0.5" fill="#93c5fd" opacity="0.85"/>
+              <rect x="29" y="6" width="6" height="7" rx="0.5" fill="#dbeafe" opacity="0.85"/>
+              <rect x="38" y="6" width="6" height="7" rx="0.5" fill="#93c5fd" opacity="0.85"/>
+              <!-- Floor 2 (y=15-24) -->
+              <rect x="11" y="16" width="6" height="7" rx="0.5" fill="#93c5fd" opacity="0.85"/>
+              <rect x="20" y="16" width="6" height="7" rx="0.5" fill="#dbeafe" opacity="0.85"/>
+              <rect x="29" y="16" width="6" height="7" rx="0.5" fill="#93c5fd" opacity="0.85"/>
+              <rect x="38" y="16" width="6" height="7" rx="0.5" fill="#93c5fd" opacity="0.85"/>
+              <!-- Floor 3 (y=25-34) -->
+              <rect x="11" y="26" width="6" height="7" rx="0.5" fill="#dbeafe" opacity="0.85"/>
+              <rect x="20" y="26" width="6" height="7" rx="0.5" fill="#93c5fd" opacity="0.85"/>
+              <rect x="29" y="26" width="6" height="7" rx="0.5" fill="#93c5fd" opacity="0.85"/>
+              <rect x="38" y="26" width="6" height="7" rx="0.5" fill="#dbeafe" opacity="0.85"/>
+              <!-- Floor 4 (y=35-44) -->
+              <rect x="11" y="36" width="6" height="7" rx="0.5" fill="#93c5fd" opacity="0.85"/>
+              <rect x="20" y="36" width="6" height="7" rx="0.5" fill="#93c5fd" opacity="0.85"/>
+              <rect x="29" y="36" width="6" height="7" rx="0.5" fill="#dbeafe" opacity="0.85"/>
+              <rect x="38" y="36" width="6" height="7" rx="0.5" fill="#93c5fd" opacity="0.85"/>
+              <!-- Ground floor lobby (y=44-54) -->
+              <rect x="8" y="44" width="40" height="10" fill="#dbeafe"/>
+              <!-- Lobby glass doors -->
+              <rect x="18" y="46" width="8" height="8" rx="0.5" fill="#bfdbfe" stroke="#93c5fd" stroke-width="0.6"/>
+              <rect x="29" y="46" width="8" height="8" rx="0.5" fill="#bfdbfe" stroke="#93c5fd" stroke-width="0.6"/>
+              <line x1="22" y1="46" x2="22" y2="54" stroke="#93c5fd" stroke-width="0.5"/>
+              <line x1="33" y1="46" x2="33" y2="54" stroke="#93c5fd" stroke-width="0.5"/>
+              <!-- Small windows flanking doors -->
+              <rect x="11" y="47" width="5" height="6" rx="0.5" fill="#93c5fd" opacity="0.7"/>
+              <rect x="39" y="47" width="5" height="6" rx="0.5" fill="#93c5fd" opacity="0.7"/>
+              <!-- Building name sign -->
+              <rect x="14" y="43" width="28" height="3" rx="0.5" fill="#1e3a8a"/>
+            </svg>
+          </div>
+          <h3 style="font-size:0.95rem;font-weight:700;color:#1e3a8a;">Commercial Facility Managers</h3>
+          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Manage multiple panels across buildings with a searchable, always-current digital register.</p>
+        </div>
+
+        <!-- Residential Property Managers -->
+        <div style="background:#eff6ff;border-radius:12px;padding:22px 18px;text-align:center;border:2px solid #bfdbfe;">
+          <div style="margin-bottom:10px;display:flex;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 56" width="72" height="56">
+              <!-- Sky -->
+              <rect width="72" height="56" fill="#e0f2fe" rx="4"/>
+              <!-- Lawn -->
+              <rect x="0" y="51" width="72" height="5" fill="#86efac"/>
+              <!-- Building body (3 floors) -->
+              <rect x="6" y="16" width="60" height="35" rx="1" fill="#fef9ee"/>
+              <!-- Brick texture suggestion (horizontal lines) -->
+              <line x1="6" y1="20" x2="66" y2="20" stroke="#fde68a" stroke-width="0.6"/>
+              <line x1="6" y1="24" x2="66" y2="24" stroke="#fde68a" stroke-width="0.6"/>
+              <line x1="6" y1="28" x2="66" y2="28" stroke="#fde68a" stroke-width="0.6"/>
+              <line x1="6" y1="32" x2="66" y2="32" stroke="#fde68a" stroke-width="0.6"/>
+              <line x1="6" y1="36" x2="66" y2="36" stroke="#fde68a" stroke-width="0.6"/>
+              <line x1="6" y1="40" x2="66" y2="40" stroke="#fde68a" stroke-width="0.6"/>
+              <line x1="6" y1="44" x2="66" y2="44" stroke="#fde68a" stroke-width="0.6"/>
+              <!-- Building outline -->
+              <rect x="6" y="16" width="60" height="35" rx="1" fill="none" stroke="#d97706" stroke-width="1.2"/>
+              <!-- Flat roof / parapet -->
+              <rect x="4" y="13" width="64" height="5" rx="1" fill="#92400e"/>
+              <!-- Roof railing/parapet detail -->
+              <rect x="4" y="11" width="64" height="3" rx="1" fill="#b45309"/>
+              <!-- Floor dividers -->
+              <line x1="6" y1="28.5" x2="66" y2="28.5" stroke="#d97706" stroke-width="1.2" opacity="0.5"/>
+              <line x1="6" y1="40" x2="66" y2="40" stroke="#d97706" stroke-width="1.2" opacity="0.5"/>
+              <!-- === Top floor windows (y=16-28) === -->
+              <!-- Unit 1 -->
+              <rect x="10" y="18" width="12" height="9" rx="1" fill="#bfdbfe" stroke="#93c5fd" stroke-width="0.6"/>
+              <line x1="16" y1="18" x2="16" y2="27" stroke="#93c5fd" stroke-width="0.5"/>
+              <line x1="10" y1="22.5" x2="22" y2="22.5" stroke="#93c5fd" stroke-width="0.5"/>
+              <!-- Unit 2 -->
+              <rect x="30" y="18" width="12" height="9" rx="1" fill="#bfdbfe" stroke="#93c5fd" stroke-width="0.6"/>
+              <line x1="36" y1="18" x2="36" y2="27" stroke="#93c5fd" stroke-width="0.5"/>
+              <line x1="30" y1="22.5" x2="42" y2="22.5" stroke="#93c5fd" stroke-width="0.5"/>
+              <!-- Unit 3 -->
+              <rect x="50" y="18" width="12" height="9" rx="1" fill="#fef9c3" stroke="#fde68a" stroke-width="0.6"/>
+              <line x1="56" y1="18" x2="56" y2="27" stroke="#fde68a" stroke-width="0.5"/>
+              <line x1="50" y1="22.5" x2="62" y2="22.5" stroke="#fde68a" stroke-width="0.5"/>
+              <!-- === Middle floor windows (y=29-40) === -->
+              <rect x="10" y="30.5" width="12" height="9" rx="1" fill="#fef9c3" stroke="#fde68a" stroke-width="0.6"/>
+              <line x1="16" y1="30.5" x2="16" y2="39.5" stroke="#fde68a" stroke-width="0.5"/>
+              <line x1="10" y1="35" x2="22" y2="35" stroke="#fde68a" stroke-width="0.5"/>
+              <rect x="30" y="30.5" width="12" height="9" rx="1" fill="#bfdbfe" stroke="#93c5fd" stroke-width="0.6"/>
+              <line x1="36" y1="30.5" x2="36" y2="39.5" stroke="#93c5fd" stroke-width="0.5"/>
+              <line x1="30" y1="35" x2="42" y2="35" stroke="#93c5fd" stroke-width="0.5"/>
+              <rect x="50" y="30.5" width="12" height="9" rx="1" fill="#bfdbfe" stroke="#93c5fd" stroke-width="0.6"/>
+              <line x1="56" y1="30.5" x2="56" y2="39.5" stroke="#93c5fd" stroke-width="0.5"/>
+              <line x1="50" y1="35" x2="62" y2="35" stroke="#93c5fd" stroke-width="0.5"/>
+              <!-- === Ground floor === -->
+              <!-- Entry door (center) -->
+              <rect x="30" y="42" width="12" height="9" rx="1" fill="#92400e"/>
+              <rect x="31" y="43" width="4.5" height="8" rx="0.5" fill="#b45309"/>
+              <rect x="36.5" y="43" width="4.5" height="8" rx="0.5" fill="#b45309"/>
+              <circle cx="35.5" cy="47.5" r="0.9" fill="#fbbf24"/>
+              <circle cx="37" cy="47.5" r="0.9" fill="#fbbf24"/>
+              <!-- Ground floor windows -->
+              <rect x="10" y="42" width="12" height="9" rx="1" fill="#bfdbfe" stroke="#93c5fd" stroke-width="0.6"/>
+              <line x1="16" y1="42" x2="16" y2="51" stroke="#93c5fd" stroke-width="0.5"/>
+              <rect x="50" y="42" width="12" height="9" rx="1" fill="#bfdbfe" stroke="#93c5fd" stroke-width="0.6"/>
+              <line x1="56" y1="42" x2="56" y2="51" stroke="#93c5fd" stroke-width="0.5"/>
+              <!-- Steps -->
+              <rect x="27" y="50" width="18" height="2" rx="0.5" fill="#d97706"/>
+              <rect x="29" y="52" width="14" height="2" rx="0.5" fill="#b45309"/>
+              <!-- Mailboxes suggestion -->
+              <rect x="8" y="47" width="6" height="4" rx="0.5" fill="#d97706"/>
+              <line x1="11" y1="47" x2="11" y2="51" stroke="#b45309" stroke-width="0.5"/>
+              <line x1="8" y1="49" x2="14" y2="49" stroke="#b45309" stroke-width="0.5"/>
+            </svg>
+          </div>
+          <h3 style="font-size:0.95rem;font-weight:700;color:#1e3a8a;">Residential Property Managers</h3>
+          <p style="font-size:0.82rem;color:#374151;margin-top:6px;line-height:1.6;">Provide tenants and maintenance staff with accurate panel information — without handing over account access.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CTA Banner -->
+    <div style="background:linear-gradient(135deg,#1e3a8a,#1a56db);border-radius:16px;padding:40px 32px;text-align:center;margin-bottom:52px;">
+      <h2 style="color:#fff;font-size:1.5rem;font-weight:800;margin-bottom:10px;">Ready to get started?</h2>
+      <p style="color:rgba(255,255,255,0.85);margin-bottom:24px;font-size:0.97rem;">It's free. Set up your first panel in minutes.</p>
+      <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="showPage('signup')">Create Free Account</button>
+        <button class="btn btn-secondary" onclick="showPage('login')">Log In</button>
+      </div>
+    </div>
+
+  </div>
+
+  <style>
+    @media (max-width: 640px) {
+      .about-two-col { grid-template-columns: 1fr !important; }
+      .about-steps { grid-template-columns: 1fr 1fr !important; }
+    }
+    @media (max-width: 400px) {
+      .about-steps { grid-template-columns: 1fr !important; }
+    }
+  </style>
+
+  <footer>&copy; 2026 <span>MyBreakerPanel</span> · mybreakerpanel.com &nbsp;|&nbsp; myelectricalpanel.com</footer>
+</div>
+
+<!-- ══════════════════════════════════════
+     CONTACT PAGE
+══════════════════════════════════════ -->
+<div id="page-contact" class="page">
+  <div class="info-page">
+    <h1>Contact Us</h1>
+    <p>Have questions, feedback, or partnership inquiries? We'd love to hear from you.</p>
+    <div class="contact-form">
+      <div id="contact-success" class="success-msg"></div>
+      <div id="ct-error" class="error-msg"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" id="ct-name" placeholder="Jane Smith" />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="ct-email" placeholder="jane@example.com" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <textarea id="ct-message" style="min-height:120px" placeholder="Your message…"></textarea>
+      </div>
+      <button class="btn btn-blue" onclick="submitContact()">Send Message</button>
+    </div>
+  </div>
+  <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     CONFIRM MODAL
+══════════════════════════════════════ -->
+<div id="app-confirm-modal" class="edit-breaker-modal" style="display:none"
+     onclick="if(event.target===this)closeConfirm(false)">
+  <div class="modal-box" style="max-width:420px">
+    <h3 id="app-confirm-title"></h3>
+    <p id="app-confirm-msg" style="color:#374151;font-size:0.95rem;line-height:1.5;margin-bottom:0"></p>
+    <div class="modal-actions">
+      <button id="app-confirm-ok" class="btn btn-danger" onclick="closeConfirm(true)">Confirm</button>
+      <button class="btn btn-outline" onclick="closeConfirm(false)">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PRINT PREVIEW MODAL
+══════════════════════════════════════ -->
+<div id="print-preview-modal" onclick="if(event.target===this)closePrintPreview()">
+  <div id="print-preview-inner">
+    <div id="print-preview-toolbar">
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Print</button>
+      <button class="btn btn-secondary" onclick="closePrintPreview()">✕ Close</button>
+      <span>Review your panel register below, then click Print.</span>
+    </div>
+    <div id="print-preview-content"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+
+// ─────────────────────────────────────
+// FIREBASE CLOUD SYNC
+// ─────────────────────────────────────
+const _fbCfg={apiKey:"AIzaSyArh-1SBLVDFnBGVml0do-LgSJGrpZVAM4",authDomain:"mybreakerpanel.firebaseapp.com",projectId:"mybreakerpanel",storageBucket:"mybreakerpanel.firebasestorage.app",messagingSenderId:"594886339510",appId:"1:594886339510:web:34fa0a4d0c59d179c2af17"};
+let _db=null;
+let _auth=null;
+let _currentUserProfile=null;
+try{if(typeof firebase!=="undefined"){firebase.initializeApp(_fbCfg);_db=firebase.firestore();_auth=firebase.auth();}}
+catch(e){console.warn("Firebase init:",e);}
+
+function syncToCloud(p){
+  if(!_db||!p||!p.panelId)return;
+  _db.collection("panels").doc(p.panelId).set(p).catch(e=>console.warn("sync:",e));
+}
+function deleteFromCloud(id){
+  if(!_db||!id)return;
+  _db.collection("panels").doc(id).delete().catch(e=>console.warn("del:",e));
+}
+async function fetchFromCloud(id){
+  if(!_db)return null;
+  try{const d=await _db.collection("panels").doc(id.toUpperCase()).get();return d.exists?d.data():null;}
+  catch(e){console.warn("fetch:",e);return null;}
+}
+function migrateLocalToCloud(){
+  if(!_db||localStorage.getItem("bp_synced"))return;
+  const ps=getPanels();
+  if(!ps.length){localStorage.setItem("bp_synced","1");return;}
+  Promise.all(ps.map(p=>_db.collection("panels").doc(p.panelId).set(p)))
+    .then(()=>localStorage.setItem("bp_synced","1"))
+    .catch(e=>console.warn("migrate:",e));
+}
+
+// ─────────────────────────────────────
+// DATA LAYER
+// ─────────────────────────────────────
+function getData(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+  catch { return fallback; }
+}
+function setData(key, val) {
+  localStorage.setItem(key, JSON.stringify(val));
+}
+
+function getUsers() { return getData('mbp_users', []); }
+function setUsers(u) { setData('mbp_users', u); }
+function getPanels() {
+  const panels = getData('mbp_panels', []);
+  // Migration: ensure every breaker has a linkedTo array
+  panels.forEach(p => {
+    if (p.breakers) p.breakers.forEach(b => { if (!b.linkedTo) b.linkedTo = []; });
+  });
+  return panels;
+}
+function setPanels(p) { setData('mbp_panels', p); }
+function getCurrentUser() {
+  if (!_auth || !_auth.currentUser) return null;
+  if (_currentUserProfile) return _currentUserProfile;
+  const fbUser = _auth.currentUser;
+  return { id: fbUser.uid, name: fbUser.displayName || fbUser.email, email: fbUser.email, username: fbUser.email };
+}
+function setCurrentUser(id) { localStorage.setItem('mbp_currentUser', id || ''); }
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+// ─────────────────────────────────────
+// PAGE ROUTING
+// ─────────────────────────────────────
+let currentPage = 'landing';
+
+const PROTECTED_PAGES = ['dashboard', 'add-panel', 'your-panels', 'edit-user', 'panel-setup'];
+
+// ── In-app history stack (for ← → arrow buttons) ──
+let pageHistory    = [];
+let historyPos     = -1;
+let _historyIgnore = false; // set during goBack/goForward to skip push
+
+function updateNavArrows() {
+  const back = document.getElementById('nav-back');
+  const fwd  = document.getElementById('nav-fwd');
+  if (back) back.disabled = historyPos <= 0;
+  if (fwd)  fwd.disabled  = historyPos >= pageHistory.length - 1;
+}
+
+// ── Hamburger menu ──
+function toggleNavMenu() {
+  const links = document.getElementById('nav-links');
+  const btn   = document.getElementById('nav-hamburger');
+  const open  = links.classList.toggle('open');
+  const bars  = btn.querySelectorAll('span');
+  if (open) {
+    bars[0].style.cssText = 'transform:translateY(7px) rotate(45deg)';
+    bars[1].style.cssText = 'opacity:0';
+    bars[2].style.cssText = 'transform:translateY(-7px) rotate(-45deg)';
+  } else {
+    bars.forEach(b => b.style.cssText = '');
+  }
+}
+
+function closeNavMenu() {
+  const links = document.getElementById('nav-links');
+  const btn   = document.getElementById('nav-hamburger');
+  if (!links) return;
+  links.classList.remove('open');
+  if (btn) btn.querySelectorAll('span').forEach(b => b.style.cssText = '');
+}
+
+// ── Core renderer (only called from the hash router) ──
+function _renderPage(name) {
+  closeNavMenu();
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + name);
+  if (el) { el.classList.add('active'); currentPage = name; }
+  window.scrollTo(0, 0);
+  onPageLoad(name);
+}
+
+// ── Hash router: every page change flows through here ──
+function _setHash(name) {
+  const newHash = '#' + name;
+  if (window.location.hash === newHash) {
+    // Hash unchanged → hashchange won't fire → render directly
+    _renderPage(name);
+  } else {
+    window.location.hash = name; // triggers hashchange → _renderPage
+  }
+}
+
+window.addEventListener('hashchange', () => {
+  const name = window.location.hash.replace(/^#/, '') || 'landing';
+  _renderPage(name);
+});
+
+// ── Public API ──
+function showPage(name) {
+  if (PROTECTED_PAGES.includes(name) && !getCurrentUser()) {
+    document.getElementById('login-error').textContent = 'Please log in to access that page.';
+    document.getElementById('login-error').style.display = 'block';
+    name = 'login';
+  }
+  if (!_historyIgnore) {
+    pageHistory = pageHistory.slice(0, historyPos + 1);
+    pageHistory.push(name);
+    historyPos = pageHistory.length - 1;
+    updateNavArrows();
+  }
+  _setHash(name);
+}
+
+function goBack() {
+  if (historyPos <= 0) return;
+  historyPos--;
+  _historyIgnore = true;
+  _setHash(pageHistory[historyPos]);
+  _historyIgnore = false;
+  updateNavArrows();
+}
+
+function goForward() {
+  if (historyPos >= pageHistory.length - 1) return;
+  historyPos++;
+  _historyIgnore = true;
+  _setHash(pageHistory[historyPos]);
+  _historyIgnore = false;
+  updateNavArrows();
+}
+
+function onPageLoad(name) {
+  const user = getCurrentUser();
+  // Nav
+  document.getElementById('nav-login').style.display = user ? 'none' : '';
+  document.getElementById('nav-signup').style.display = user ? 'none' : '';
+  document.getElementById('nav-dashboard').style.display = user ? '' : 'none';
+  document.getElementById('nav-logout').style.display = user ? '' : 'none';
+    // Landing hero buttons
+    const _heroBtns = document.getElementById('landing-hero-btns');
+    const _heroUser = document.getElementById('landing-hero-user');
+    if (_heroBtns) _heroBtns.style.display = user ? 'none' : '';
+    if (_heroUser) _heroUser.style.display = user ? '' : 'none';
+
+  if (name === 'dashboard' && user) {
+    document.getElementById('dash-greeting').textContent = 'Welcome, ' + user.name.split(' ')[0] + '!';
+    renderRecentPanels();
+  }
+  if (name === 'your-panels') renderPanelsList();
+  if (name === 'edit-user' && user) {
+    document.getElementById('eu-name').value = user.name;
+    document.getElementById('eu-email').value = user.email;
+    document.getElementById('eu-password').value = '';
+    document.getElementById('edituser-success').style.display = 'none';
+  }
+  if (name === 'add-panel' && user) {
+    document.getElementById('ap-cname').value = user.name || '';
+    document.getElementById('ap-cemail').value = user.email || '';
+  }
+  if (name === 'recover') {
+    resetRecoverPage();
+  }
+}
+
+// Initialize — honour any hash in the URL (e.g. deep-link from QR code)
+window.addEventListener('DOMContentLoaded', () => {
+  if (_auth) {
+    _auth.onAuthStateChanged(async (fbUser) => {
+      if (fbUser) {
+        const doc = _db ? await _db.collection('users').doc(fbUser.uid).get() : null;
+        _currentUserProfile = (doc && doc.exists)
+          ? { ...doc.data(), id: fbUser.uid }
+          : { id: fbUser.uid, name: fbUser.email, email: fbUser.email, username: fbUser.email };
+      } else {
+        _currentUserProfile = null;
+      }
+      if (typeof currentPage !== 'undefined') onPageLoad(currentPage);
+    });
+  }
+  migrateLocalToCloud();
+  const initial = window.location.hash.replace(/^#/, '') || 'landing';
+  showPage(initial);
+});
+
+// ─────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────
+async function doSignUp() {
+  const name = document.getElementById('signup-name').value.trim();
+  const username = document.getElementById('signup-username').value.trim();
+  const password = document.getElementById('signup-password').value;
+  const email = document.getElementById('signup-email').value.trim().toLowerCase();
+  const err = document.getElementById('signup-error');
+  err.style.display = 'none';
+  if (!name || !username || !password || !email) { err.textContent = 'All fields are required.'; err.style.display = 'block'; return; }
+  if (password.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.style.display = 'block'; return; }
+  if (!_auth) { err.textContent = 'Service unavailable. Please try again.'; err.style.display = 'block'; return; }
+  try {
+    const cred = await _auth.createUserWithEmailAndPassword(email, password);
+    const profile = { id: cred.user.uid, name, username, email, createdDate: new Date().toISOString() };
+    if (_db) await _db.collection('users').doc(cred.user.uid).set(profile);
+    _currentUserProfile = profile;
+    showPage('dashboard');
+  } catch(e) {
+    const msgs = { 'auth/email-already-in-use': 'That email is already registered.', 'auth/invalid-email': 'Invalid email address.', 'auth/weak-password': 'Password must be at least 6 characters.' };
+    err.textContent = msgs[e.code] || e.message;
+    err.style.display = 'block';
+  }
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-username').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  const err = document.getElementById('login-error');
+  err.style.display = 'none';
+  if (!_auth) { err.textContent = 'Service unavailable. Please try again.'; err.style.display = 'block'; return; }
+  try {
+    await _auth.signInWithEmailAndPassword(email, password);
+    showPage('dashboard');
+  } catch(e) {
+    err.textContent = 'Invalid email or password.';
+    err.style.display = 'block';
+  }
+}
+
+function logOut() {
+  if (_auth) _auth.signOut();
+  _currentUserProfile = null;
+  showPage('landing');
+}
+
+// ─────────────────────────────────────
+// ACCOUNT RECOVERY
+// ─────────────────────────────────────
+let recoverUserId = null;
+
+function resetRecoverPage() {
+  recoverUserId = null;
+  document.getElementById('recover-step1').style.display = 'block';
+  document.getElementById('recover-step2').style.display = 'none';
+  document.getElementById('recover-email').value = '';
+  document.getElementById('recover-newpw').value = '';
+  document.getElementById('recover-confirmpw').value = '';
+  document.getElementById('recover-error').style.display = 'none';
+  document.getElementById('recover-success').style.display = 'none';
+  document.getElementById('recover-pw-error').style.display = 'none';
+}
+
+async function lookupByEmail() {
+  const email = document.getElementById('recover-email').value.trim().toLowerCase();
+  const errEl = document.getElementById('recover-error');
+  const sucEl = document.getElementById('recover-success');
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+
+  if (!email) {
+    errEl.textContent = 'Please enter your email address.';
+    errEl.style.display = 'block'; return;
+  }
+  if (!_auth) {
+    errEl.textContent = 'Service unavailable. Please try again.';
+    errEl.style.display = 'block'; return;
+  }
+  try {
+    await _auth.sendPasswordResetEmail(email);
+    document.getElementById('recover-step1').style.display = 'none';
+    document.getElementById('recover-step2').style.display = 'block';
+    document.getElementById('recover-step2-msg').textContent =
+      'A password reset link has been sent to ' + email + '. Check your inbox and follow the link to set a new password.';
+    document.getElementById('recover-pw-error').style.display = 'none';
+  } catch(e) {
+    const msgs = { 'auth/user-not-found': 'No account found with that email address.', 'auth/invalid-email': 'Invalid email address.' };
+    errEl.textContent = msgs[e.code] || 'Could not send reset email. Please try again.';
+    errEl.style.display = 'block';
+  }
+}
+
+function resetPassword() {
+  // Password reset is handled via Firebase email link (see lookupByEmail)
+  showPage('login');
+}
+
+async function saveUserEdits() {
+  const fbUser = _auth ? _auth.currentUser : null;
+  if (!fbUser) return;
+  const name = document.getElementById('eu-name').value.trim();
+  const email = document.getElementById('eu-email').value.trim();
+  const pw = document.getElementById('eu-password').value;
+  const updates = {};
+  if (name) { updates.name = name; if (_currentUserProfile) _currentUserProfile.name = name; }
+  if (email) updates.email = email;
+  try {
+    if (pw && pw.length >= 6) await fbUser.updatePassword(pw);
+    if (_db && Object.keys(updates).length) await _db.collection('users').doc(fbUser.uid).update(updates);
+    document.getElementById('edituser-success').textContent = 'Profile updated successfully!';
+    document.getElementById('edituser-success').style.display = 'block';
+  } catch(e) {
+    document.getElementById('edituser-success').textContent = 'Error: ' + e.message;
+    document.getElementById('edituser-success').style.display = 'block';
+  }
+}
+
+// ─────────────────────────────────────
+// ADD NEW PANEL
+// ─────────────────────────────────────
+let currentPanelId = null; // the panel being worked on
+
+function saveNewPanel() {
+  const address = document.getElementById('ap-address').value.trim();
+  const panelId = document.getElementById('ap-panelid').value.trim().toUpperCase();
+  const manufacturer = document.getElementById('ap-manufacturer').value.trim();
+  const location = document.getElementById('ap-location').value.trim();
+  const numBreakers = parseInt(document.getElementById('ap-numbreakers').value);
+  const cname = document.getElementById('ap-cname').value.trim();
+  const cphone = document.getElementById('ap-cphone').value.trim();
+  const cemail = document.getElementById('ap-cemail').value.trim();
+  const err = document.getElementById('addpanel-error');
+  err.style.display = 'none';
+
+  if (!address || !panelId || !numBreakers) {
+    err.textContent = 'Street address, Panel ID, and number of breakers are required.';
+    err.style.display = 'block'; return;
+  }
+  const panels = getPanels();
+  if (panels.find(p => p.panelId === panelId)) {
+    err.textContent = 'Panel ID "' + panelId + '" already exists. Choose a unique ID.';
+    err.style.display = 'block'; return;
+  }
+
+  const user = getCurrentUser();
+  const breakers = [];
+  for (let i = 1; i <= numBreakers; i++) {
+    breakers.push({ number: i, description: '', history: [], linkedTo: [] });
+  }
+
+  const panel = {
+    id: uid(),
+    panelId,
+    streetAddress: address,
+    locationDescription: location,
+    manufacturer,
+    numBreakers,
+    breakers,
+    createdDate: new Date().toISOString(),
+    createdBy: { name: cname, phone: cphone, email: cemail },
+    ownerId: user ? user.id : null,
+    qrCodeGenerated: false
+  };
+  panels.push(panel);
+  setPanels(panels);
+  currentPanelId = panel.id;
+
+  // Clear form
+  ['ap-address','ap-panelid','ap-manufacturer','ap-location','ap-cname','ap-cphone','ap-cemail'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('ap-numbreakers').value = '';
+
+  openPanelSetup(panel.id);
+}
+
+function openPanelSetup(panelInternalId) {
+  const panel = getPanels().find(p => p.id === panelInternalId);
+  if (!panel) return;
+  currentPanelId = panelInternalId;
+  document.getElementById('setup-title').textContent = 'Label Breakers — ' + panel.panelId;
+  renderSetupGrid(panel);
+  showPage('panel-setup');
+}
+
+function renderSetupGrid(panel) {
+  const grid = document.getElementById('setup-breakers-grid');
+  grid.innerHTML = '';
+  panel.breakers.forEach(br => {
+    const slot = document.createElement('div');
+    slot.className = 'breaker-slot-edit';
+    slot.id = 'setup-slot-' + br.number;
+    slot.innerHTML = `
+      <div class="breaker-num-edit">${br.number}</div>
+      <div style="flex:1">
+        <textarea class="breaker-input" id="setup-br-${br.number}" rows="2"
+          placeholder="Click to describe this breaker…">${br.description}</textarea>
+      </div>`;
+    grid.appendChild(slot);
+  });
+}
+
+function confirmPanelSetup() {
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+  panels[idx].breakers.forEach(br => {
+    const input = document.getElementById('setup-br-' + br.number);
+    if (input) br.description = input.value.trim();
+  });
+  panels[idx].qrCodeGenerated = true;
+  setPanels(panels);
+  showQRPage(panels[idx]);
+}
+
+function savePanelSetupDraft() {
+  // Save current textarea values before leaving
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx !== -1) {
+    panels[idx].breakers.forEach(br => {
+      const input = document.getElementById('setup-br-' + br.number);
+      if (input) br.description = input.value.trim();
+    });
+    setPanels(panels);
+  }
+  showPage('dashboard');
+}
+
+// ─────────────────────────────────────
+// QR CODE
+// ─────────────────────────────────────
+function showQRPage(panel) {
+  document.getElementById('qr-panel-name').textContent = panel.panelId + ' — ' + panel.streetAddress;
+  document.getElementById('qr-panel-id-text').textContent = panel.panelId;
+
+  // QR code links to the app homepage only — user enters Panel ID once they arrive
+  const url = window.location.href.split('?')[0] + '?panel=' + encodeURIComponent(panel.panelId);
+
+  const container = document.getElementById('qr-code-display');
+  container.innerHTML = '';
+  new QRCode(container, {
+    text: url,
+    width: 200,
+    height: 200,
+    colorDark: '#1e3a8a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  currentPanelId = panel.id;
+  showPage('qr');
+}
+
+function goToPanelView() {
+  openPanelById_Internal(currentPanelId, true);
+}
+
+function showQRForCurrentPanel() {
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (panel) showQRPage(panel);
+}
+
+// ─────────────────────────────────────
+// YOUR PANELS
+// ─────────────────────────────────────
+function renderRecentPanels() {
+  const user = getCurrentUser();
+  const panels = getPanels().filter(p => p.ownerId === (user ? user.id : null));
+  const el = document.getElementById('dash-recent-panels');
+  if (panels.length === 0) {
+    el.innerHTML = '<p style="color:#9ca3af;font-size:0.92rem;">No panels yet. <a href="#" onclick="showPage(\'add-panel\')">Add your first panel →</a></p>';
+    return;
+  }
+  el.innerHTML = panels.slice(-3).reverse().map(p => panelItemHTML(p, false)).join('');
+}
+
+function renderPanelsList() {
+  const user = getCurrentUser();
+  const search = (document.getElementById('panels-search')?.value || '').toLowerCase();
+  let panels = getPanels().filter(p => p.ownerId === (user ? user.id : null));
+
+  if (search) {
+    panels = panels.filter(p =>
+      p.panelId.toLowerCase().includes(search) ||
+      p.streetAddress.toLowerCase().includes(search) ||
+      p.breakers.some(b => b.description.toLowerCase().includes(search))
+    );
+  }
+  const el = document.getElementById('panels-list');
+  if (panels.length === 0) {
+    el.innerHTML = '<p style="color:#9ca3af;font-size:0.92rem;">' + (search ? 'No panels match your search.' : 'No panels yet. <a href="#" onclick="showPage(\'add-panel\')">Add your first panel →</a>') + '</p>';
+    return;
+  }
+  el.innerHTML = panels.map(p => panelItemHTML(p)).join('');
+}
+
+function panelItemHTML(p, showQR = true) {
+  return `
+    <div class="panel-item">
+      <div class="panel-item-info">
+        <h3>${p.panelId} <span class="badge badge-blue">${p.numBreakers} breakers</span> ${p.qrCodeGenerated ? '<span class="badge badge-green">QR ✓</span>' : ''}</h3>
+        <p>${p.streetAddress}${p.locationDescription ? ' · ' + p.locationDescription : ''}</p>
+        <p style="margin-top:2px;font-size:0.8rem;color:#9ca3af">Added ${fmtDate(p.createdDate)}</p>
+      </div>
+      <div class="panel-item-actions">
+        <button class="btn btn-sm btn-blue" onclick="openPanelById_Internal('${p.id}', true)">View/Edit</button>
+        <button class="btn btn-sm btn-outline" onclick="openPanelHistory('${p.id}')">History</button>
+        <button class="btn btn-sm btn-outline" onclick="currentPanelId='${p.id}';openEditPanelInfo()">openEditPanelInfo</button>
+        <button class="btn btn-sm btn-danger" onclick="deletePanel('${p.id}')">Delete</button>
+      </div>
+    </div>`;
+}
+
+function filterPanelsList() { renderPanelsList(); }
+
+function openSetupQR(internalId) {
+  const panel = getPanels().find(p => p.id === internalId);
+  if (panel) showQRPage(panel);
+}
+
+function deletePanel(internalId) {
+  showConfirm(
+    'Delete Panel',
+    'Delete this panel? This cannot be undone.',
+    () => {
+    const _del = getPanels().find(p=>p.id===internalId);
+      const panels = getPanels().filter(p => p.id !== internalId);
+      setPanels(panels);
+    if(_del)deleteFromCloud(_del.panelId);
+      renderPanelsList();
+      renderRecentPanels();
+    },
+    'Delete', 'btn-danger'
+  );
+}
+
+// ─────────────────────────────────────
+// VIEW / EDIT PANEL
+// ─────────────────────────────────────
+async function openPanelById(panelId, showBackBtn) {
+  const KEY = panelId.toUpperCase();
+  let panel = getPanels().find(p => p.panelId === KEY);
+  if (!panel && _db) {
+    panel = await fetchFromCloud(KEY);
+    if (panel) { const ps=getPanels(); if(!ps.find(p=>p.panelId===KEY)){ps.push(panel);setPanels(ps);} }
+  }
+  if (!panel) {
+    const err = document.getElementById('landing-panel-error');
+    if (err) err.style.display = 'block';
+    showPage('landing');
+    return;
+  }
+  currentPanelId = panel.id;
+  openPanelById_Internal(panel.id, showBackBtn);
+}
+async function lookupPanelId() {
+  const inputEl = document.getElementById('landing-panel-id');
+  const val = inputEl ? inputEl.value.trim() : '';
+  if (!val) return;
+  const err = document.getElementById('landing-panel-error');
+  if (err) err.style.display = 'none';
+  const KEY = val.toUpperCase();
+  let panel = getPanels().find(p => p.panelId === KEY);
+  if (!panel && _db) {
+    if (err) { err.textContent = 'Looking up panel…'; err.style.color='#1a56db'; err.style.display='block'; }
+    panel = await fetchFromCloud(KEY);
+    if (panel) { const ps=getPanels(); if(!ps.find(p=>p.panelId===KEY)){ps.push(panel);setPanels(ps);} }
+    if (err) { err.style.color=''; err.textContent='Panel ID not found. Check the ID and try again.'; }
+  }
+  if (!panel) { if(err)err.style.display='block'; return; }
+  if (err) err.style.display = 'none';
+  currentPanelId = panel.id;
+  openPanelById_Internal(panel.id, false);
+}
+async function lookupAccessPanel() {
+  const inputEl = document.getElementById('access-panel-id');
+  const val = inputEl ? inputEl.value.trim() : '';
+  if (!val) return;
+  const err = document.getElementById('access-panel-error');
+  if (err) err.style.display = 'none';
+  const KEY = val.toUpperCase();
+  let panel = getPanels().find(p => p.panelId === KEY);
+  if (!panel && _db) {
+    if (err) { err.textContent = 'Looking up panel…'; err.style.color='#1a56db'; err.style.display='block'; }
+    panel = await fetchFromCloud(KEY);
+    if (panel) { const ps=getPanels(); if(!ps.find(p=>p.panelId===KEY)){ps.push(panel);setPanels(ps);} }
+    if (err) { err.style.color=''; err.textContent='Panel ID not found. Check the ID and try again.'; }
+  }
+  if (!panel) { if(err)err.style.display='block'; return; }
+  if (err) err.style.display = 'none';
+  currentPanelId = panel.id;
+  openPanelById_Internal(panel.id, false);
+}
+function openPanelById_Internal(internalId, showBackBtn) {
+  const panel = getPanels().find(p => p.id === internalId);
+  if (!panel) return;
+  currentPanelId = internalId;
+
+  document.getElementById('vp-title').textContent = 'Panel: ' + panel.panelId;
+  document.getElementById('vp-subtitle').textContent = panel.streetAddress + (panel.locationDescription ? ' · ' + panel.locationDescription : '');
+  document.getElementById('vp-back-btn').style.display = showBackBtn ? '' : 'none';
+
+  // Show "Edit Panel Info" only to the panel owner
+  const user = getCurrentUser();
+  const isOwner = user && panel.ownerId === user.id;
+  document.getElementById('vp-edit-info-btn').style.display = isOwner ? '' : 'none';
+
+  // Print header
+  document.getElementById('print-panel-title').textContent = 'Panel ID: ' + panel.panelId + ' — ' + panel.streetAddress;
+  document.getElementById('print-panel-meta').textContent = (panel.manufacturer ? 'Manufacturer: ' + panel.manufacturer + '  ·  ' : '') + panel.numBreakers + ' breakers';
+  document.getElementById('print-date').textContent = 'Printed: ' + fmtDate(new Date().toISOString());
+
+  renderEditGrid(panel);
+  captureEditBaseline(panel);
+  clearAutoSaveStatus();
+  showPage('view-panel');
+}
+
+function renderEditGrid(panel) {
+  const grid = document.getElementById('vp-breakers-grid');
+  grid.innerHTML = '';
+  panel.breakers.forEach(br => {
+    const linked = br.linkedTo || [];
+    const slot = document.createElement('div');
+    slot.className = 'breaker-slot-edit' + (linked.length ? ' linked' : '');
+    slot.id = 'vp-slot-' + br.number;
+    slot.innerHTML = `
+      <div class="breaker-num-edit">${br.number}</div>
+      <div id="vp-slot-inner-${br.number}" style="flex:1">
+        <textarea class="breaker-input" id="vp-br-${br.number}" rows="2"
+          placeholder="Click to describe breaker ${br.number}…"
+          oninput="scheduleAutoSave()">${br.description}</textarea>
+        ${linked.length ? `<span class="breaker-link-badge">🔗 Linked: ${linked.slice().sort((a,b)=>a-b).join(', ')}</span>` : ''}
+      </div>`;
+    grid.appendChild(slot);
+  });
+}
+
+function searchBreakers() {
+  const q = document.getElementById('vp-search').value.toLowerCase();
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (!panel) return;
+  panel.breakers.forEach(br => {
+    const slot = document.getElementById('vp-slot-' + br.number);
+    if (!slot) return;
+    if (!q) {
+      slot.style.opacity = '1';
+      slot.style.borderColor = '#e5e7eb';
+      return;
+    }
+    // Check live textarea value first, fall back to saved description
+    const textarea = document.getElementById('vp-br-' + br.number);
+    const liveText = textarea ? textarea.value.toLowerCase() : br.description.toLowerCase();
+    const match = liveText.includes(q);
+    slot.style.opacity = match ? '1' : '0.3';
+    slot.style.borderColor = match ? '#1a56db' : '#e5e7eb';
+  });
+}
+
+// ─────────────────────────────────────
+// AUTO-SAVE (debounced, no history entry)
+// ─────────────────────────────────────
+let _autoSaveTimer  = null;
+let _editBaseline   = {}; // descriptions at last explicit save (or panel open)
+
+function captureEditBaseline(panel) {
+  _editBaseline = {};
+  panel.breakers.forEach(br => { _editBaseline[br.number] = br.description; });
+}
+
+function clearAutoSaveStatus() {
+  const el = document.getElementById('vp-autosave-status');
+  if (el) { el.textContent = ''; el.className = 'autosave-status'; }
+}
+
+function scheduleAutoSave() {
+  const el = document.getElementById('vp-autosave-status');
+  if (el) { el.textContent = 'Unsaved changes…'; el.className = 'autosave-status unsaved'; }
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(autoSaveBreakers, 500);
+}
+
+function autoSaveBreakers() {
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+  panels[idx].breakers.forEach(br => {
+    const input = document.getElementById('vp-br-' + br.number);
+    if (input) br.description = input.value;
+  });
+  setPanels(panels);
+  const el = document.getElementById('vp-autosave-status');
+  if (el) {
+    el.textContent = '✓ Saved';
+    el.className = 'autosave-status saved';
+    clearTimeout(el._fadeTimer);
+    el._fadeTimer = setTimeout(() => clearAutoSaveStatus(), 3000);
+  }
+}
+
+// ─────────────────────────────────────
+// SAVE BREAKERS (with contact info modal)
+// ─────────────────────────────────────
+function saveAllBreakers() {
+  const user = getCurrentUser();
+  if (user) {
+    // Pre-fill from user data
+    document.getElementById('sm-name').value = user.name || '';
+    document.getElementById('sm-email').value = user.email || '';
+  }
+  document.getElementById('save-modal-error').style.display = 'none';
+  document.getElementById('save-modal').style.display = 'flex';
+}
+
+function closeSaveModal() {
+  document.getElementById('save-modal').style.display = 'none';
+}
+
+function confirmSaveBreakers() {
+  const name = document.getElementById('sm-name').value.trim();
+  const phone = document.getElementById('sm-phone').value.trim();
+  const email = document.getElementById('sm-email').value.trim();
+  const address = document.getElementById('sm-address').value.trim();
+  const err = document.getElementById('save-modal-error');
+  if (!name || !phone || !email) {
+    err.textContent = 'Name, phone, and email are required.';
+    err.style.display = 'block'; return;
+  }
+
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+
+  const now = new Date().toISOString();
+  let changeCount = 0;
+  panels[idx].breakers.forEach(br => {
+    const input = document.getElementById('vp-br-' + br.number);
+    const currentDesc = input ? input.value.trim() : br.description;
+    const baselineDesc = _editBaseline[br.number] ?? '';
+    if (currentDesc !== baselineDesc) {
+      br.history.push({
+        date: now,
+        previousDescription: baselineDesc,
+        newDescription: currentDesc,
+        contactName: name,
+        contactPhone: phone,
+        contactEmail: email,
+        contactAddress: address
+      });
+      br.description = currentDesc;
+      changeCount++;
+    }
+  });
+  setPanels(panels);
+  syncToCloud(panels[idx]);
+  // Reset baseline to current state
+  captureEditBaseline(panels[idx]);
+  closeSaveModal();
+  clearAutoSaveStatus();
+}
+
+// ─────────────────────────────────────
+// EDIT PANEL INFO
+// ─────────────────────────────────────
+function openEditPanelInfo() {
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (!panel) return;
+  document.getElementById('epi-address').value = panel.streetAddress || '';
+  document.getElementById('epi-panelid').value = panel.panelId || '';
+  document.getElementById('epi-manufacturer').value = panel.manufacturer || '';
+  document.getElementById('epi-location').value = panel.locationDescription || '';
+  document.getElementById('epi-numbreakers').value = panel.numBreakers || '';
+  document.getElementById('epi-breaker-warning').style.display = 'none';
+  document.getElementById('epi-success').style.display = 'none';
+  document.getElementById('epi-error').style.display = 'none';
+
+  // Show warning if user reduces breaker count
+  document.getElementById('epi-numbreakers').onchange = function() {
+    const newCount = parseInt(this.value);
+    const warning = document.getElementById('epi-breaker-warning');
+    warning.style.display = newCount < panel.numBreakers ? 'block' : 'none';
+  };
+  // epi page is not in the protected list but user must be owner — already gated by the button visibility
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-edit-panel-info').classList.add('active');
+  currentPage = 'edit-panel-info';
+  window.scrollTo(0, 0);
+}
+
+function saveEditPanelInfo() {
+  const address = document.getElementById('epi-address').value.trim();
+  const panelId = document.getElementById('epi-panelid').value.trim().toUpperCase();
+  const manufacturer = document.getElementById('epi-manufacturer').value;
+  const location = document.getElementById('epi-location').value.trim();
+  const err = document.getElementById('epi-error');
+  const suc = document.getElementById('epi-success');
+  err.style.display = 'none';
+  suc.style.display = 'none';
+
+  if (!address || !panelId) {
+    err.textContent = 'Street address and Panel ID are required.';
+    err.style.display = 'block'; return;
+  }
+
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+
+  // Check for Panel ID collision (excluding current panel)
+  const collision = panels.find(p => p.panelId === panelId && p.id !== currentPanelId);
+  if (collision) {
+    err.textContent = 'Panel ID "' + panelId + '" is already used by another panel.';
+    err.style.display = 'block'; return;
+  }
+
+  const newCount = parseInt(document.getElementById('epi-numbreakers').value);
+  const oldCount = panels[idx].numBreakers;
+
+  const doSave = () => _applyEditPanelInfo(newCount, address, panelId, manufacturer, location);
+
+  // If reducing with data loss, confirm first
+  if (newCount < oldCount) {
+    const affected = panels[idx].breakers
+      .filter(b => b.number > newCount && (b.description || b.history.length > 0))
+      .length;
+    if (affected > 0) {
+      showConfirm(
+        'Reduce Breaker Count',
+        `Reducing from ${oldCount} to ${newCount} breakers will permanently delete the descriptions and history for breakers ${newCount + 1}–${oldCount} (${affected} breaker${affected > 1 ? 's' : ''} with data). Continue?`,
+        doSave,
+        'Continue', 'btn-danger'
+      );
+      return;
+    }
+  }
+  doSave();
+}
+
+function _applyEditPanelInfo(newCount, address, panelId, manufacturer, location) {
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+  const suc = document.getElementById('epi-success');
+  const oldCount = panels[idx].numBreakers;
+
+  if (newCount < oldCount) {
+    panels[idx].breakers = panels[idx].breakers.filter(b => b.number <= newCount);
+  } else if (newCount > oldCount) {
+    for (let i = oldCount + 1; i <= newCount; i++) {
+      panels[idx].breakers.push({ number: i, description: '', history: [], linkedTo: [] });
+    }
+  }
+
+  panels[idx].numBreakers = newCount;
+  panels[idx].streetAddress = address;
+  panels[idx].panelId = panelId;
+  panels[idx].manufacturer = manufacturer;
+  panels[idx].locationDescription = location;
+  setPanels(panels);
+    syncToCloud(panels[idx]);
+
+  suc.textContent = 'Panel info updated!';
+  suc.style.display = 'block';
+  setTimeout(() => openPanelById_Internal(currentPanelId, true), 1200);
+}
+
+// ─────────────────────────────────────
+// HISTORY
+// ─────────────────────────────────────
+function openPanelHistory(internalId) {
+  const panel = getPanels().find(p => p.id === internalId);
+  if (!panel) return;
+  currentPanelId = internalId;
+  document.getElementById('hist-title').textContent = 'History: ' + panel.panelId;
+  renderHistory(panel);
+  switchHistTab('timeline');
+  showPage('history');
+}
+
+function viewBreakerHistory() {
+  openPanelHistory(currentPanelId);
+}
+
+function renderHistory(panel) {
+  _histPanel = panel;
+  const el = document.getElementById('history-list');
+  // Gather all history events across breakers
+  const events = [];
+  panel.breakers.forEach(br => {
+    br.history.forEach(h => events.push({ ...h, breakerNumber: br.number }));
+  });
+  events.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (events.length === 0) {
+    el.innerHTML = '<p style="color:#9ca3af;">No changes recorded yet.</p>';
+    return;
+  }
+  el.innerHTML = events.map(h => `
+    <div class="history-item">
+      <div class="hist-date">${fmtDate(h.date)}</div>
+      <div class="hist-breaker">Breaker #${h.breakerNumber}</div>
+      <div class="hist-desc">
+        ${h.previousDescription ? `<span style="color:#9ca3af;text-decoration:line-through">${h.previousDescription}</span> → ` : ''}
+        <strong>${h.newDescription || '<em>cleared</em>'}</strong>
+      </div>
+      <div class="hist-contact">By: ${h.contactName} · ${h.contactPhone} · ${h.contactEmail}${h.contactAddress ? ' · ' + h.contactAddress : ''}</div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────
+// COMPARISON VIEW
+// ─────────────────────────────────────
+let _histPanel = null;
+
+function switchHistTab(tab) {
+  document.getElementById('hist-tab-timeline').classList.toggle('active', tab === 'timeline');
+  document.getElementById('hist-tab-compare').classList.toggle('active', tab === 'compare');
+  document.getElementById('hist-timeline-view').style.display = tab === 'timeline' ? '' : 'none';
+  document.getElementById('hist-compare-view').style.display  = tab === 'compare'   ? '' : 'none';
+  if (tab === 'compare' && _histPanel) _populateCompareDates(_histPanel);
+}
+
+function _populateCompareDates(panel) {
+  const dates = [];
+  const seen = new Set();
+  panel.breakers.forEach(br => br.history.forEach(h => { if (!seen.has(h.date)) { seen.add(h.date); dates.push(h.date); } }));
+  dates.sort();
+  const fromSel = document.getElementById('compare-from');
+  const toSel   = document.getElementById('compare-to');
+  let fromOpts = '<option value="__initial__">Initial state (before any saves)</option>';
+  dates.forEach(d => { fromOpts += `<option value="${d}">${fmtDate(d)}</option>`; });
+  let toOpts = '';
+  dates.forEach(d => { toOpts += `<option value="${d}">${fmtDate(d)}</option>`; });
+  toOpts += '<option value="__current__" selected>Current state</option>';
+  fromSel.innerHTML = fromOpts;
+  toSel.innerHTML   = toOpts;
+  document.getElementById('compare-results').innerHTML = '';
+}
+
+function _buildSnapshot(panel, cutoff) {
+  // Returns { breakerNum: description } for state at/before cutoff
+  // cutoff = null → initial (before any history), '' → current
+  const snap = {};
+  panel.breakers.forEach(br => {
+    let desc = br.description;
+    if (cutoff !== '') {
+      const sorted = [...br.history].sort((a, b) => new Date(b.date) - new Date(a.date));
+      for (const h of sorted) {
+        if (cutoff === null || new Date(h.date) > new Date(cutoff)) desc = h.previousDescription || '';
+      }
+    }
+    snap[br.number] = desc || '';
+  });
+  return snap;
+}
+
+function runComparison() {
+  const panel = _histPanel;
+  if (!panel) return;
+  const fromVal = document.getElementById('compare-from').value;
+  const toVal   = document.getElementById('compare-to').value;
+  const snapA = _buildSnapshot(panel, fromVal === '__initial__' ? null : fromVal);
+  const snapB = _buildSnapshot(panel, toVal   === '__current__' ? ''   : toVal);
+  const fromLbl = fromVal === '__initial__' ? 'Initial state' : fmtDate(fromVal);
+  const toLbl   = toVal   === '__current__' ? 'Current state' : fmtDate(toVal);
+  let nChanged = 0, nAdded = 0, nCleared = 0;
+  const rows = panel.breakers.map(br => {
+    const a = snapA[br.number]; const b = snapB[br.number];
+    let cls = 'same';
+    if (a !== b) {
+      if (!a && b)  { cls = 'added';   nAdded++;   }
+      else if (a && !b) { cls = 'cleared'; nCleared++; }
+      else              { cls = 'changed'; nChanged++; }
+    }
+    return { num: br.number, a, b, cls };
+  });
+  const total = nChanged + nAdded + nCleared;
+  const changed = rows.filter(r => r.cls !== 'same');
+  const same    = rows.filter(r => r.cls === 'same');
+  const ri = r => {
+    let inner = '';
+    if      (r.cls === 'added')   inner = `<span class="ci-new">${escHtml(r.b)}</span><span class="ci-arr"> ← newly labelled</span>`;
+    else if (r.cls === 'cleared') inner = `<span class="ci-old">${escHtml(r.a)}</span><span class="ci-arr"> → </span><span style="color:#ef4444;font-style:italic">cleared</span>`;
+    else if (r.cls === 'changed') inner = `<span class="ci-old">${escHtml(r.a)}</span><span class="ci-arr">→</span><span class="ci-new">${escHtml(r.b)}</span>`;
+    else                          inner = `<span class="ci-same">${escHtml(r.b) || '<em>empty</em>'}</span>`;
+    return `<div class="compare-item ${r.cls}"><span class="ci-num">#${r.num}</span>${inner}</div>`;
+  };
+  const summaryTxt = total === 0 ? 'No differences between these snapshots.'
+    : `${total} change${total !== 1 ? 's' : ''} — ${nChanged} updated, ${nAdded} newly labelled, ${nCleared} cleared.`;
+  document.getElementById('compare-results').innerHTML =
+    `<p class="compare-result-hdr">Comparing: <em>${escHtml(fromLbl)}</em> → <em>${escHtml(toLbl)}</em></p>
+    <p class="compare-summary">${summaryTxt}</p>
+    ${changed.map(ri).join('')}
+    ${same.length && total > 0 ? `<details style="margin-top:14px"><summary style="cursor:pointer;color:#6b7280;font-size:0.88rem">${same.length} unchanged breaker${same.length !== 1 ? 's' : ''}</summary><div style="margin-top:8px">${same.map(ri).join('')}</div></details>` : ''}`;
+}
+
+// ─────────────────────────────────────
+// EDIT SINGLE BREAKER MODAL
+// ─────────────────────────────────────
+let editingBreakerNum = null;
+
+function openEditBreakerModal(breakerNum, currentDesc, panelInternalId) {
+  editingBreakerNum = breakerNum;
+  currentPanelId    = panelInternalId;
+  document.getElementById('ebm-title').textContent = 'Edit Breaker #' + breakerNum;
+  document.getElementById('ebm-desc').value = currentDesc;
+
+  // Populate link pills
+  const panel    = getPanels().find(p => p.id === panelInternalId);
+  const list     = document.getElementById('ebm-link-list');
+  list.innerHTML = '';
+  if (panel && panel.breakers.length > 1) {
+    const thisBr   = panel.breakers.find(b => b.number === breakerNum);
+    const linked   = (thisBr && thisBr.linkedTo) || [];
+    panel.breakers.forEach(b => {
+      if (b.number === breakerNum) return;
+      const liveInput = document.getElementById('vp-br-' + b.number);
+      const label     = (liveInput ? liveInput.value : b.description).trim();
+      const pill      = document.createElement('button');
+      pill.type       = 'button';
+      pill.className  = 'link-pill' + (linked.includes(b.number) ? ' selected' : '');
+      pill.dataset.num = b.number;
+      pill.innerHTML  = `<strong>#${b.number}</strong>${label ? '<br><span style="font-weight:400;color:#6b7280">' + label.substring(0,28) + (label.length>28?'…':'') + '</span>' : ''}`;
+      pill.onclick    = () => pill.classList.toggle('selected');
+      list.appendChild(pill);
+    });
+  }
+
+  document.getElementById('edit-breaker-modal').style.display = 'flex';
+}
+
+function saveEditBreaker() {
+  const desc  = document.getElementById('ebm-desc').value.trim();
+  const input = document.getElementById('vp-br-' + editingBreakerNum) ||
+                document.getElementById('setup-br-' + editingBreakerNum);
+  if (input) input.value = desc;
+
+  // Collect selected link pills and sync bidirectionally
+  const selected = Array.from(document.querySelectorAll('#ebm-link-list .link-pill.selected'))
+                        .map(p => parseInt(p.dataset.num));
+  _syncLinks(currentPanelId, editingBreakerNum, selected);
+
+  // Refresh badges on all visible slots
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (panel) _refreshAllLinkBadges(panel);
+
+  scheduleAutoSave();
+  closeEditBreakerModal();
+}
+
+// ── Bidirectional link sync ──────────────────────────────
+function _syncLinks(panelId, breakerNum, newLinked) {
+  const panels = getPanels();
+  const panel  = panels.find(p => p.id === panelId);
+  if (!panel) return;
+  const br = panel.breakers.find(b => b.number === breakerNum);
+  if (!br) return;
+
+  const oldLinked = br.linkedTo || [];
+
+  // Remove this breaker from partners that are being unlinked
+  oldLinked.forEach(partnerNum => {
+    if (!newLinked.includes(partnerNum)) {
+      const partner = panel.breakers.find(b => b.number === partnerNum);
+      if (partner) partner.linkedTo = (partner.linkedTo || []).filter(n => n !== breakerNum);
+    }
+  });
+
+  // Add this breaker to any newly selected partners
+  newLinked.forEach(partnerNum => {
+    const partner = panel.breakers.find(b => b.number === partnerNum);
+    if (partner) {
+      if (!partner.linkedTo) partner.linkedTo = [];
+      if (!partner.linkedTo.includes(breakerNum)) partner.linkedTo.push(breakerNum);
+    }
+  });
+
+  br.linkedTo = newLinked;
+  setPanels(panels);
+}
+
+// ── Refresh link badges in the visible grid ──────────────
+function _refreshAllLinkBadges(panel) {
+  panel.breakers.forEach(br => {
+    const slot  = document.getElementById('vp-slot-' + br.number);
+    if (!slot) return;
+    const inner  = document.getElementById('vp-slot-inner-' + br.number);
+    const linked = br.linkedTo || [];
+
+    // Update linked class on slot
+    slot.classList.toggle('linked', linked.length > 0);
+
+    // Remove old badge and re-add if needed
+    const old = inner ? inner.querySelector('.breaker-link-badge') : null;
+    if (old) old.remove();
+    if (inner && linked.length > 0) {
+      const badge       = document.createElement('span');
+      badge.className   = 'breaker-link-badge';
+      badge.textContent = '🔗 Linked: ' + linked.slice().sort((a, b) => a - b).join(', ');
+      inner.appendChild(badge);
+    }
+  });
+}
+
+function closeEditBreakerModal() {
+  document.getElementById('edit-breaker-modal').style.display = 'none';
+  editingBreakerNum = null;
+}
+
+// ─────────────────────────────────────
+// CONTACT FORM
+// ─────────────────────────────────────
+function submitContact() {
+  const name = document.getElementById('ct-name').value.trim();
+  const email = document.getElementById('ct-email').value.trim();
+  const msg = document.getElementById('ct-message').value.trim();
+  const ctErr = document.getElementById('ct-error');
+  ctErr.style.display = 'none';
+  if (!name || !email || !msg) {
+    ctErr.textContent = 'Please fill in all fields.';
+    ctErr.style.display = 'block';
+    return;
+  }
+  const s = document.getElementById('contact-success');
+  s.textContent = 'Thanks, ' + name + '! Your message has been received.';
+  s.style.display = 'block';
+  document.getElementById('ct-name').value = '';
+  document.getElementById('ct-email').value = '';
+  document.getElementById('ct-message').value = '';
+}
+
+// ─────────────────────────────────────
+// PRINT PREVIEW (in-page modal)
+// ─────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function printPanel() {
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (!panel) return;
+
+  // Read live textarea values (captures unsaved edits too)
+  const breakers = panel.breakers.map(br => {
+    const ta = document.getElementById('vp-br-' + br.number);
+    return { number: br.number, description: ta ? ta.value.trim() : br.description };
+  });
+
+  const printDate = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  const leftCol  = breakers.filter(br => br.number % 2 === 1); // odd numbers
+  const rightCol = breakers.filter(br => br.number % 2 === 0); // even numbers
+
+  const row = br => `<tr>
+    <td class="pp-num">${br.number}</td>
+    <td class="pp-desc">${br.description ? escHtml(br.description) : '<span class="pp-empty">—</span>'}</td>
+  </tr>`;
+
+  document.getElementById('print-preview-content').innerHTML = `
+    <div class="pp-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
+      <div style="flex:1;">
+        <h2>Panel ID: ${escHtml(panel.panelId)}</h2>
+        <div class="pp-meta">
+          ${escHtml(panel.streetAddress)}
+          ${panel.locationDescription ? ' &nbsp;·&nbsp; ' + escHtml(panel.locationDescription) : ''}
+          ${panel.manufacturer ? ' &nbsp;·&nbsp; ' + escHtml(panel.manufacturer) : ''}
+          &nbsp;·&nbsp; ${panel.numBreakers} breakers
+        </div>
+        <div class="pp-date">Printed: ${printDate}</div>
+      </div>
+      <div style="text-align:center;flex-shrink:0;">
+        <div id="pp-qr-code"></div>
+        <div style="font-size:0.7rem;color:#444;margin-top:4px;">Scan &amp; enter Panel ID</div>
+        <div style="font-size:0.7rem;color:#888;margin-top:1px;">mybreakerpanel.com</div>
+      </div>
+    </div>
+    <div class="pp-grid">
+      <table class="pp-table">
+        <tr><th>#</th><th>Circuit Description</th></tr>
+        ${leftCol.map(row).join('')}
+      </table>
+      <table class="pp-table">
+        <tr><th>#</th><th>Circuit Description</th></tr>
+        ${rightCol.map(row).join('')}
+      </table>
+    </div>`;
+
+  // Generate QR code into the preview (points to the Access Your Panel page)
+  const accessUrl = window.location.href.split('?')[0].split('#')[0] + '#access';
+  new QRCode(document.getElementById('pp-qr-code'), {
+    text: accessUrl,
+    width: 80,
+    height: 80,
+    colorDark: '#1e3a8a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  document.getElementById('print-preview-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePrintPreview() {
+  document.getElementById('print-preview-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── App confirm modal (replaces browser confirm()) ──
+let _confirmCallback = null;
+
+function showConfirm(title, message, onConfirm, confirmLabel = 'Confirm', confirmClass = 'btn-danger') {
+  document.getElementById('app-confirm-title').textContent = title;
+  document.getElementById('app-confirm-msg').textContent   = message;
+  const ok = document.getElementById('app-confirm-ok');
+  ok.textContent = confirmLabel;
+  ok.className   = 'btn ' + confirmClass;
+  _confirmCallback = onConfirm;
+  document.getElementById('app-confirm-modal').style.display = 'flex';
+}
+
+function closeConfirm(confirmed) {
+  document.getElementById('app-confirm-modal').style.display = 'none';
+  const cb = _confirmCallback;
+  _confirmCallback = null;
+  if (confirmed && cb) cb();
+}
+
+// ── Global Escape key: dismiss any open modal ──
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('save-modal').style.display !== 'none')         closeSaveModal();
+  if (document.getElementById('edit-breaker-modal').style.display !== 'none') closeEditBreakerModal();
+  if (document.getElementById('print-preview-modal').classList.contains('open')) closePrintPreview();
+  if (document.getElementById('app-confirm-modal').style.display !== 'none')  closeConfirm(false);
+});
+
+</script>
+</body>
+</html>
+
+    const cred = await _auth.createUserWithEmailAndPassword(email, password);
+    const profile = { id: cred.user.uid, name, username, email, createdDate: new Date().toISOString() };
+    if (_db) await _db.collection('users').doc(cred.user.uid).set(profile);
+    _currentUserProfile = profile;
+    showPage('dashboard');
+  } catch(e) {
+    const msgs = { 'auth/email-already-in-use': 'That email is already registered.', 'auth/invalid-email': 'Invalid email address.', 'auth/weak-password': 'Password must be at least 6 characters.' };
+    err.textContent = msgs[e.code] || e.message;
+    err.style.display = 'block';
+  }
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-username').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  const err = document.getElementById('login-error');
+  err.style.display = 'none';
+  if (!_auth) { err.textContent = 'Service unavailable. Please try again.'; err.style.display = 'block'; return; }
+  try {
+    await _auth.signInWithEmailAndPassword(email, password);
+    showPage('dashboard');
+  } catch(e) {
+    err.textContent = 'Invalid email or password.';
+    err.style.display = 'block';
+  }
+}
+
+function logOut() {
+  if (_auth) _auth.signOut();
+  _currentUserProfile = null;
+  showPage('landing');
+}
+
+// ─────────────────────────────────────
+// ACCOUNT RECOVERY
+// ─────────────────────────────────────
+let recoverUserId = null;
+
+function resetRecoverPage() {
+  recoverUserId = null;
+  document.getElementById('recover-step1').style.display = 'block';
+  document.getElementById('recover-step2').style.display = 'none';
+  document.getElementById('recover-email').value = '';
+  document.getElementById('recover-newpw').value = '';
+  document.getElementById('recover-confirmpw').value = '';
+  document.getElementById('recover-error').style.display = 'none';
+  document.getElementById('recover-success').style.display = 'none';
+  document.getElementById('recover-pw-error').style.display = 'none';
+}
+
+async function lookupByEmail() {
+  const email = document.getElementById('recover-email').value.trim().toLowerCase();
+  const errEl = document.getElementById('recover-error');
+  const sucEl = document.getElementById('recover-success');
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+
+  if (!email) {
+    errEl.textContent = 'Please enter your email address.';
+    errEl.style.display = 'block'; return;
+  }
+  if (!_auth) {
+    errEl.textContent = 'Service unavailable. Please try again.';
+    errEl.style.display = 'block'; return;
+  }
+  try {
+    await _auth.sendPasswordResetEmail(email);
+    document.getElementById('recover-step1').style.display = 'none';
+    document.getElementById('recover-step2').style.display = 'block';
+    document.getElementById('recover-step2-msg').textContent =
+      'A password reset link has been sent to ' + email + '. Check your inbox and follow the link to set a new password.';
+    document.getElementById('recover-pw-error').style.display = 'none';
+  } catch(e) {
+    const msgs = { 'auth/user-not-found': 'No account found with that email address.', 'auth/invalid-email': 'Invalid email address.' };
+    errEl.textContent = msgs[e.code] || 'Could not send reset email. Please try again.';
+    errEl.style.display = 'block';
+  }
+}
+
+function resetPassword() {
+  // Password reset is handled via Firebase email link (see lookupByEmail)
+  showPage('login');
+}
+
+async function saveUserEdits() {
+  const fbUser = _auth ? _auth.currentUser : null;
+  if (!fbUser) return;
+  const name = document.getElementById('eu-name').value.trim();
+  const email = document.getElementById('eu-email').value.trim();
+  const pw = document.getElementById('eu-password').value;
+  const updates = {};
+  if (name) { updates.name = name; if (_currentUserProfile) _currentUserProfile.name = name; }
+  if (email) updates.email = email;
+  try {
+    if (pw && pw.length >= 6) await fbUser.updatePassword(pw);
+    if (_db && Object.keys(updates).length) await _db.collection('users').doc(fbUser.uid).update(updates);
+    document.getElementById('edituser-success').textContent = 'Profile updated successfully!';
+    document.getElementById('edituser-success').style.display = 'block';
+  } catch(e) {
+    document.getElementById('edituser-success').textContent = 'Error: ' + e.message;
+    document.getElementById('edituser-success').style.display = 'block';
+  }
+}
+
+// ─────────────────────────────────────
+// ADD NEW PANEL
+// ─────────────────────────────────────
+let currentPanelId = null; // the panel being worked on
+
+function saveNewPanel() {
+  const address = document.getElementById('ap-address').value.trim();
+  const panelId = document.getElementById('ap-panelid').value.trim().toUpperCase();
+  const manufacturer = document.getElementById('ap-manufacturer').value.trim();
+  const location = document.getElementById('ap-location').value.trim();
+  const numBreakers = parseInt(document.getElementById('ap-numbreakers').value);
+  const cname = document.getElementById('ap-cname').value.trim();
+  const cphone = document.getElementById('ap-cphone').value.trim();
+  const cemail = document.getElementById('ap-cemail').value.trim();
+  const err = document.getElementById('addpanel-error');
+  err.style.display = 'none';
+
+  if (!address || !panelId || !numBreakers) {
+    err.textContent = 'Street address, Panel ID, and number of breakers are required.';
+    err.style.display = 'block'; return;
+  }
+  const panels = getPanels();
+  if (panels.find(p => p.panelId === panelId)) {
+    err.textContent = 'Panel ID "' + panelId + '" already exists. Choose a unique ID.';
+    err.style.display = 'block'; return;
+  }
+
+  const user = getCurrentUser();
+  const breakers = [];
+  for (let i = 1; i <= numBreakers; i++) {
+    breakers.push({ number: i, description: '', history: [], linkedTo: [] });
+  }
+
+  const panel = {
+    id: uid(),
+    panelId,
+    streetAddress: address,
+    locationDescription: location,
+    manufacturer,
+    numBreakers,
+    breakers,
+    createdDate: new Date().toISOString(),
+    createdBy: { name: cname, phone: cphone, email: cemail },
+    ownerId: user ? user.id : null,
+    qrCodeGenerated: false
+  };
+  panels.push(panel);
+  setPanels(panels);
+  currentPanelId = panel.id;
+
+  // Clear form
+  ['ap-address','ap-panelid','ap-manufacturer','ap-location','ap-cname','ap-cphone','ap-cemail'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('ap-numbreakers').value = '';
+
+  openPanelSetup(panel.id);
+}
+
+function openPanelSetup(panelInternalId) {
+  const panel = getPanels().find(p => p.id === panelInternalId);
+  if (!panel) return;
+  currentPanelId = panelInternalId;
+  document.getElementById('setup-title').textContent = 'Label Breakers — ' + panel.panelId;
+  renderSetupGrid(panel);
+  showPage('panel-setup');
+}
+
+function renderSetupGrid(panel) {
+  const grid = document.getElementById('setup-breakers-grid');
+  grid.innerHTML = '';
+  panel.breakers.forEach(br => {
+    const slot = document.createElement('div');
+    slot.className = 'breaker-slot-edit';
+    slot.id = 'setup-slot-' + br.number;
+    slot.innerHTML = `
+      <div class="breaker-num-edit">${br.number}</div>
+      <div style="flex:1">
+        <textarea class="breaker-input" id="setup-br-${br.number}" rows="2"
+          placeholder="Click to describe this breaker…">${br.description}</textarea>
+      </div>`;
+    grid.appendChild(slot);
+  });
+}
+
+function confirmPanelSetup() {
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx === -1) return;
+  panels[idx].breakers.forEach(br => {
+    const input = document.getElementById('setup-br-' + br.number);
+    if (input) br.description = input.value.trim();
+  });
+  panels[idx].qrCodeGenerated = true;
+  setPanels(panels);
+  showQRPage(panels[idx]);
+}
+
+function savePanelSetupDraft() {
+  // Save current textarea values before leaving
+  const panels = getPanels();
+  const idx = panels.findIndex(p => p.id === currentPanelId);
+  if (idx !== -1) {
+    panels[idx].breakers.forEach(br => {
+      const input = document.getElementById('setup-br-' + br.number);
+      if (input) br.description = input.value.trim();
+    });
+    setPanels(panels);
+  }
+  showPage('dashboard');
+}
+
+// ─────────────────────────────────────
+// QR CODE
+// ─────────────────────────────────────
+function showQRPage(panel) {
+  document.getElementById('qr-panel-name').textContent = panel.panelId + ' — ' + panel.streetAddress;
+  document.getElementById('qr-panel-id-text').textContent = panel.panelId;
+
+  // QR code links to the app homepage only — user enters Panel ID once they arrive
+  const url = window.location.href.split('?')[0] + '?panel=' + encodeURIComponent(panel.panelId);
+
+  const container = document.getElementById('qr-code-display');
+  container.innerHTML = '';
+  new QRCode(container, {
+    text: url,
+    width: 200,
+    height: 200,
+    colorDark: '#1e3a8a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  currentPanelId = panel.id;
+  showPage('qr');
+}
+
+function goToPanelView() {
+  openPanelById_Internal(currentPanelId, true);
+}
+
+function showQRForCurrentPanel() {
+  const panel = getPanels().find(p => p.id === currentPanelId);
+  if (panel) showQRPage(panel);
+}
+
+// ─────────────────────────────────────
+// YOUR PANELS
+// ─────────────────────────────────────
+function renderRecentPanels() {
+  const user = getCurrentUser();
+  const panels = getPanels().filter(p => p.ownerId === (user ? user.id : null));
+  const el = document.getElementById('dash-recent-panels');
+  if (panels.length === 0) {
+    el.innerHTML = '<p style="color:#9ca3af;font-size:0.92rem;">No panels yet. <a href="#" onclick="showPage(\'add-panel\')">Add your first panel →</a></p>';
+    return;
+  }
+  el.innerHTML = panels.slice(-3).reverse().map(p => panelItemHTML(p, false)).join('');
+}
+
+function renderPanelsList() {
+  const user = getCurrentUser();
+  const search = (document.getElementById('panels-search')?.value || '').toLowerCase();
+  let panels = getPanels().filter(p => p.ownerId === (user ? user.id : null));
+
+  if (search) {
+    panels = panels.filter(p =>
+      p.panelId.toLowerCase().includes(search) ||
+      p.streetAddress.toLowerCase().includes(search) ||
+      p.breakers.some(b => b.description.toLowerCase().includes(search))
+    );
+  }
+  const el = document.getElementById('panels-list');
+  if (panels.length === 0) {
+    el.innerHTML = '<p style="color:#9ca3af;font-size:0.92rem;">' + (search ? 'No panels match your search.' : 'No panels yet. <a href="#" onclick="showPage(\'add-panel\')">Add your first panel →</a>') + '</p>';
+    return;
+  }
+  el.innerHTML = panels.map(p => panelItemHTML(p)).join('');
+}
+
+function panelItemHTML(p, showQR = true) {
+  return `
+    <div class="panel-item">
+      <div class="panel-item-info">
+        <h3>${p.panelId} <span class="badge badge-blue">${p.numBreakers} breakers</span> ${p.qrCodeGenerated ? '<span class="badge badge-green">QR ✓</span>' : ''}</h3>
+        <p>${p.streetAddress}${p.locationDescription ? ' · ' + p.locationDescription : ''}</p>
+        <p style="margin-top:2px;font-size:0.8rem;color:#9ca3af">Added ${fmtDate(p.createdDate)}</p>
+      </div>
+      <div class="panel-item-actions">
+        <button class="btn btn-sm btn-blue" onclick="openPanelById_Internal('${p.id}', true)">View/Edit</button>
+        <button class="btn btn-sm btn-outline" onclick="openPanelHistory('${p.id}')">History</button>
+        <button class="btn btn-sm btn-outline" onclick="currentPanelId='${p.id}';openEditPanelInfo()">openEditPanelInfo</button>
         <button class="btn btn-sm btn-danger" onclick="deletePanel('${p.id}')">Delete</button>
       </div>
     </div>`;
