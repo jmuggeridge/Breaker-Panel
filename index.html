@@ -7,6 +7,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <style>
     /* ── Reset & Base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1549,7 +1550,7 @@
     <div id="login-error" class="error-msg"></div>
     <div class="form-group">
       <label>Username</label>
-      <input type="text" id="login-username" placeholder="Your username" onkeydown="if(event.key==='Enter')doLogin()" />
+      <input type="email" id="login-username" placeholder="Your email address" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="email" />
     </div>
     <div class="form-group">
       <label>Password</label>
@@ -2867,7 +2868,9 @@
 // ─────────────────────────────────────
 const _fbCfg={apiKey:"AIzaSyArh-1SBLVDFnBGVml0do-LgSJGrpZVAM4",authDomain:"mybreakerpanel.firebaseapp.com",projectId:"mybreakerpanel",storageBucket:"mybreakerpanel.firebasestorage.app",messagingSenderId:"594886339510",appId:"1:594886339510:web:34fa0a4d0c59d179c2af17"};
 let _db=null;
-try{if(typeof firebase!=="undefined"){firebase.initializeApp(_fbCfg);_db=firebase.firestore();}}
+let _auth=null;
+let _currentUserProfile=null;
+try{if(typeof firebase!=="undefined"){firebase.initializeApp(_fbCfg);_db=firebase.firestore();_auth=firebase.auth();}}
 catch(e){console.warn("Firebase init:",e);}
 
 function syncToCloud(p){
@@ -2915,9 +2918,10 @@ function getPanels() {
 }
 function setPanels(p) { setData('mbp_panels', p); }
 function getCurrentUser() {
-  const id = localStorage.getItem('mbp_currentUser');
-  if (!id) return null;
-  return getUsers().find(u => u.id === id) || null;
+  if (!_auth || !_auth.currentUser) return null;
+  if (_currentUserProfile) return _currentUserProfile;
+  const fbUser = _auth.currentUser;
+  return { id: fbUser.uid, name: fbUser.displayName || fbUser.email, email: fbUser.email, username: fbUser.email };
 }
 function setCurrentUser(id) { localStorage.setItem('mbp_currentUser', id || ''); }
 
@@ -3059,6 +3063,19 @@ function onPageLoad(name) {
 
 // Initialize — honour any hash in the URL (e.g. deep-link from QR code)
 window.addEventListener('DOMContentLoaded', () => {
+  if (_auth) {
+    _auth.onAuthStateChanged(async (fbUser) => {
+      if (fbUser) {
+        const doc = _db ? await _db.collection('users').doc(fbUser.uid).get() : null;
+        _currentUserProfile = (doc && doc.exists)
+          ? { ...doc.data(), id: fbUser.uid }
+          : { id: fbUser.uid, name: fbUser.email, email: fbUser.email, username: fbUser.email };
+      } else {
+        _currentUserProfile = null;
+      }
+      if (typeof currentPage !== 'undefined') onPageLoad(currentPage);
+    });
+  }
   migrateLocalToCloud();
   const initial = window.location.hash.replace(/^#/, '') || 'landing';
   showPage(initial);
@@ -3067,41 +3084,47 @@ window.addEventListener('DOMContentLoaded', () => {
 // ─────────────────────────────────────
 // AUTH
 // ─────────────────────────────────────
-function doSignUp() {
+async function doSignUp() {
   const name = document.getElementById('signup-name').value.trim();
   const username = document.getElementById('signup-username').value.trim();
   const password = document.getElementById('signup-password').value;
-  const email = document.getElementById('signup-email').value.trim();
+  const email = document.getElementById('signup-email').value.trim().toLowerCase();
   const err = document.getElementById('signup-error');
   err.style.display = 'none';
-
   if (!name || !username || !password || !email) { err.textContent = 'All fields are required.'; err.style.display = 'block'; return; }
   if (password.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.style.display = 'block'; return; }
-
-  const users = getUsers();
-  if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
-    err.textContent = 'That username is already taken.'; err.style.display = 'block'; return;
+  if (!_auth) { err.textContent = 'Service unavailable. Please try again.'; err.style.display = 'block'; return; }
+  try {
+    const cred = await _auth.createUserWithEmailAndPassword(email, password);
+    const profile = { id: cred.user.uid, name, username, email, createdDate: new Date().toISOString() };
+    if (_db) await _db.collection('users').doc(cred.user.uid).set(profile);
+    _currentUserProfile = profile;
+    showPage('dashboard');
+  } catch(e) {
+    const msgs = { 'auth/email-already-in-use': 'That email is already registered.', 'auth/invalid-email': 'Invalid email address.', 'auth/weak-password': 'Password must be at least 6 characters.' };
+    err.textContent = msgs[e.code] || e.message;
+    err.style.display = 'block';
   }
-  const newUser = { id: uid(), name, username, password, email, createdDate: new Date().toISOString() };
-  users.push(newUser);
-  setUsers(users);
-  setCurrentUser(newUser.id);
-  showPage('dashboard');
 }
 
-function doLogin() {
-  const username = document.getElementById('login-username').value.trim();
+async function doLogin() {
+  const email = document.getElementById('login-username').value.trim().toLowerCase();
   const password = document.getElementById('login-password').value;
   const err = document.getElementById('login-error');
   err.style.display = 'none';
-  const user = getUsers().find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
-  if (!user) { err.textContent = 'Invalid username or password.'; err.style.display = 'block'; return; }
-  setCurrentUser(user.id);
-  showPage('dashboard');
+  if (!_auth) { err.textContent = 'Service unavailable. Please try again.'; err.style.display = 'block'; return; }
+  try {
+    await _auth.signInWithEmailAndPassword(email, password);
+    showPage('dashboard');
+  } catch(e) {
+    err.textContent = 'Invalid email or password.';
+    err.style.display = 'block';
+  }
 }
 
 function logOut() {
-  setCurrentUser(null);
+  if (_auth) _auth.signOut();
+  _currentUserProfile = null;
   showPage('landing');
 }
 
@@ -3122,7 +3145,7 @@ function resetRecoverPage() {
   document.getElementById('recover-pw-error').style.display = 'none';
 }
 
-function lookupByEmail() {
+async function lookupByEmail() {
   const email = document.getElementById('recover-email').value.trim().toLowerCase();
   const errEl = document.getElementById('recover-error');
   const sucEl = document.getElementById('recover-success');
@@ -3133,72 +3156,47 @@ function lookupByEmail() {
     errEl.textContent = 'Please enter your email address.';
     errEl.style.display = 'block'; return;
   }
-
-  const user = getUsers().find(u => u.email.toLowerCase() === email);
-  if (!user) {
-    errEl.textContent = 'No account found with that email address. Please check and try again.';
+  if (!_auth) {
+    errEl.textContent = 'Service unavailable. Please try again.';
     errEl.style.display = 'block'; return;
   }
-
-  // Found — show username and move to step 2
-  recoverUserId = user.id;
-  document.getElementById('recover-step1').style.display = 'none';
-  document.getElementById('recover-step2').style.display = 'block';
-  document.getElementById('recover-step2-msg').textContent =
-    'Account found! Your username is: ' + user.username;
-  document.getElementById('recover-pw-error').style.display = 'none';
+  try {
+    await _auth.sendPasswordResetEmail(email);
+    document.getElementById('recover-step1').style.display = 'none';
+    document.getElementById('recover-step2').style.display = 'block';
+    document.getElementById('recover-step2-msg').textContent =
+      'A password reset link has been sent to ' + email + '. Check your inbox and follow the link to set a new password.';
+    document.getElementById('recover-pw-error').style.display = 'none';
+  } catch(e) {
+    const msgs = { 'auth/user-not-found': 'No account found with that email address.', 'auth/invalid-email': 'Invalid email address.' };
+    errEl.textContent = msgs[e.code] || 'Could not send reset email. Please try again.';
+    errEl.style.display = 'block';
+  }
 }
 
 function resetPassword() {
-  const newpw = document.getElementById('recover-newpw').value;
-  const confirmpw = document.getElementById('recover-confirmpw').value;
-  const errEl = document.getElementById('recover-pw-error');
-  errEl.style.display = 'none';
-
-  if (!newpw || newpw.length < 6) {
-    errEl.textContent = 'Password must be at least 6 characters.';
-    errEl.style.display = 'block'; return;
-  }
-  if (newpw !== confirmpw) {
-    errEl.textContent = 'Passwords do not match. Please try again.';
-    errEl.style.display = 'block'; return;
-  }
-  if (!recoverUserId) {
-    errEl.textContent = 'Session expired. Please start over.';
-    errEl.style.display = 'block'; return;
-  }
-
-  const users = getUsers();
-  const idx = users.findIndex(u => u.id === recoverUserId);
-  if (idx === -1) {
-    errEl.textContent = 'Account not found. Please start over.';
-    errEl.style.display = 'block'; return;
-  }
-
-  users[idx].password = newpw;
-  setUsers(users);
-
-  // Auto-log in and go to dashboard
-  setCurrentUser(recoverUserId);
-  recoverUserId = null;
-  showPage('dashboard');
+  // Password reset is handled via Firebase email link (see lookupByEmail)
+  showPage('login');
 }
 
-function saveUserEdits() {
-  const user = getCurrentUser();
-  if (!user) return;
+async function saveUserEdits() {
+  const fbUser = _auth ? _auth.currentUser : null;
+  if (!fbUser) return;
   const name = document.getElementById('eu-name').value.trim();
   const email = document.getElementById('eu-email').value.trim();
   const pw = document.getElementById('eu-password').value;
-  const users = getUsers();
-  const idx = users.findIndex(u => u.id === user.id);
-  if (idx === -1) return;
-  if (name) users[idx].name = name;
-  if (email) users[idx].email = email;
-  if (pw && pw.length >= 6) users[idx].password = pw;
-  setUsers(users);
-  document.getElementById('edituser-success').textContent = 'Profile updated successfully!';
-  document.getElementById('edituser-success').style.display = 'block';
+  const updates = {};
+  if (name) { updates.name = name; if (_currentUserProfile) _currentUserProfile.name = name; }
+  if (email) updates.email = email;
+  try {
+    if (pw && pw.length >= 6) await fbUser.updatePassword(pw);
+    if (_db && Object.keys(updates).length) await _db.collection('users').doc(fbUser.uid).update(updates);
+    document.getElementById('edituser-success').textContent = 'Profile updated successfully!';
+    document.getElementById('edituser-success').style.display = 'block';
+  } catch(e) {
+    document.getElementById('edituser-success').textContent = 'Error: ' + e.message;
+    document.getElementById('edituser-success').style.display = 'block';
+  }
 }
 
 // ─────────────────────────────────────
@@ -4123,3 +4121,4 @@ document.addEventListener('keydown', (e) => {
 </script>
 </body>
 </html>
+
