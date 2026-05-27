@@ -3312,7 +3312,7 @@ function renderSetupGrid(panel) {
       <div class="breaker-num-edit">${br.number}</div>
       <div style="flex:1">
         <textarea class="breaker-input" id="setup-br-${br.number}" rows="2"
-          placeholder="Click to describe this breaker…">${br.description}</textarea>
+          placeholder="Click to describe this breaker…">${escHtml(br.description)}</textarea>
       </div>`;
     grid.appendChild(slot);
   });
@@ -3417,8 +3417,8 @@ function panelItemHTML(p, showQR = true) {
   return `
     <div class="panel-item">
       <div class="panel-item-info">
-        <h3>${p.panelId} <span class="badge badge-blue">${p.numBreakers} breakers</span> ${p.qrCodeGenerated ? '<span class="badge badge-green">QR ✓</span>' : ''}</h3>
-        <p>${p.streetAddress}${p.locationDescription ? ' · ' + p.locationDescription : ''}</p>
+        <h3>${escHtml(p.panelId)} <span class="badge badge-blue">${p.numBreakers} breakers</span> ${p.qrCodeGenerated ? '<span class="badge badge-green">QR ✓</span>' : ''}</h3>
+        <p>${escHtml(p.streetAddress)}${p.locationDescription ? ' · ' + p.locationDescription : ''}</p>
         <p style="margin-top:2px;font-size:0.8rem;color:#9ca3af">Added ${fmtDate(p.createdDate)}</p>
       </div>
       <div class="panel-item-actions">
@@ -3548,7 +3548,7 @@ function renderEditGrid(panel) {
       <div id="vp-slot-inner-${br.number}" style="flex:1">
         <textarea class="breaker-input" id="vp-br-${br.number}" rows="2"
           placeholder="Click to describe breaker ${br.number}…"
-          oninput="scheduleAutoSave()">${br.description}</textarea>
+          oninput="scheduleAutoSave()">${escHtml(br.description)}</textarea>
         ${linked.length ? `<span class="breaker-link-badge">🔗 Linked: ${linked.slice().sort((a,b)=>a-b).join(', ')}</span>` : ''}
       </div>`;
     grid.appendChild(slot);
@@ -3820,9 +3820,9 @@ function renderHistory(panel) {
       <div class="hist-breaker">Breaker #${h.breakerNumber}</div>
       <div class="hist-desc">
         ${h.previousDescription ? `<span style="color:#9ca3af;text-decoration:line-through">${h.previousDescription}</span> → ` : ''}
-        <strong>${h.newDescription || '<em>cleared</em>'}</strong>
+        <strong>${h.newDescription ? escHtml(h.newDescription) : '<em>cleared</em>'}</strong>
       </div>
-      <div class="hist-contact">By: ${h.contactName} · ${h.contactPhone} · ${h.contactEmail}${h.contactAddress ? ' · ' + h.contactAddress : ''}</div>
+      <div class="hist-contact">By: ${escHtml(h.contactName)} · ${escHtml(h.contactPhone)} · ${escHtml(h.contactEmail)}${h.contactAddress ? ' · ' + h.contactAddress : ''}</div>
     </div>`).join('');
 }
 
