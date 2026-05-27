@@ -2871,6 +2871,8 @@
 // ─────────────────────────────────────
 const _fbCfg={apiKey:"AIzaSyArh-1SBLVDFnBGVml0do-LgSJGrpZVAM4",authDomain:"mybreakerpanel.firebaseapp.com",projectId:"mybreakerpanel",storageBucket:"mybreakerpanel.firebasestorage.app",messagingSenderId:"594886339510",appId:"1:594886339510:web:34fa0a4d0c59d179c2af17"};
 let _db=null;
+let _cachedPanels=[];
+let _panelsUnsubscribe=null;
 let _auth=null;
 let _currentUserProfile=null;
 try{if(typeof firebase!=="undefined"){firebase.initializeApp(_fbCfg);_db=firebase.firestore();_auth=firebase.auth();}}
@@ -2911,15 +2913,37 @@ function setData(key, val) {
 
 function getUsers() { return getData('mbp_users', []); }
 function setUsers(u) { setData('mbp_users', u); }
-function getPanels() {
-  const panels = getData('mbp_panels', []);
-  // Migration: ensure every breaker has a linkedTo array
-  panels.forEach(p => {
-    if (p.breakers) p.breakers.forEach(b => { if (!b.linkedTo) b.linkedTo = []; });
-  });
-  return panels;
+function _subscribePanels(uid) {
+  if (_panelsUnsubscribe) _panelsUnsubscribe();
+  if (!_db) return;
+  _panelsUnsubscribe = _db.collection('panels')
+    .where('ownerId', '==', uid)
+    .onSnapshot(snapshot => {
+      _cachedPanels = snapshot.docs.map(doc => {
+        const d = doc.data();
+        if (d.breakers) d.breakers.forEach(b => { if (!b.linkedTo) b.linkedTo = []; });
+        return d;
+      });
+      if (typeof currentPage !== 'undefined' &&
+          ['your-panels','dashboard','view-panel','panel-setup'].includes(currentPage))
+        _renderPage(currentPage);
+    }, err => console.warn('panels snapshot:', err));
 }
-function setPanels(p) { setData('mbp_panels', p); }
+function _unsubscribePanels() {
+  if (_panelsUnsubscribe) { _panelsUnsubscribe(); _panelsUnsubscribe = null; }
+  _cachedPanels = [];
+}
+function getPanels() { return _cachedPanels; }
+function setPanels(panels) {
+  if (!_db) return;
+  const batch = _db.batch();
+  panels.forEach(p => { batch.set(_db.collection('panels').doc(p.panelId), p); });
+  _cachedPanels.forEach(c => {
+    if (!panels.find(p => p.panelId === c.panelId))
+      batch.delete(_db.collection('panels').doc(c.panelId));
+  });
+  batch.commit().catch(e => console.error('setPanels:', e));
+}
 function getCurrentUser() {
   if (!_auth || !_auth.currentUser) return null;
   if (_currentUserProfile) return _currentUserProfile;
@@ -2939,7 +2963,7 @@ function fmtDate(iso) {
 // ─────────────────────────────────────
 let currentPage = 'landing';
 
-const PROTECTED_PAGES = ['dashboard', 'add-panel', 'your-panels', 'edit-user', 'panel-setup'];
+const PROTECTED_PAGES = ['dashboard', 'add-panel', 'your-panels', 'edit-user', 'panel-setup', 'qr', 'view-panel', 'edit-panel-info', 'history'];
 
 // ── In-app history stack (for ← → arrow buttons) ──
 let pageHistory    = [];
@@ -3073,17 +3097,19 @@ function onPageLoad(name) {
 window.addEventListener('DOMContentLoaded', () => {
   if (_auth) {
     _auth.onAuthStateChanged(async (fbUser) => {
-      if (fbUser) {
-        const doc = _db ? await _db.collection('users').doc(fbUser.uid).get() : null;
-        _currentUserProfile = (doc && doc.exists)
-          ? { ...doc.data(), id: fbUser.uid }
-          : { id: fbUser.uid, name: fbUser.email, email: fbUser.email, username: fbUser.email };
-      } else {
-        _currentUserProfile = null;
-      }
+    if (fbUser) {
+      const doc = _db ? await _db.collection('users').doc(fbUser.uid).get() : null;
+      _currentUserProfile = (doc && doc.exists)
+        ? { ...doc.data(), id: fbUser.uid }
+        : { id: fbUser.uid, name: fbUser.email, email: fbUser.email };
+      _subscribePanels(fbUser.uid);
       if (typeof currentPage !== 'undefined') onPageLoad(currentPage);
-    });
-  }
+    } else {
+      _unsubscribePanels();
+      _currentUserProfile = null;
+      if (typeof currentPage !== 'undefined') onPageLoad(currentPage);
+    }
+  });
   migrateLocalToCloud();
   const initial = window.location.hash.replace(/^#/, '') || 'landing';
   showPage(initial);
