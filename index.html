@@ -3281,7 +3281,7 @@ function saveNewPanel() {
   };
   panels.push(panel);
   setPanels(panels);
-  currentPanelId = panel.id;
+  currentPanelId = panel.panelId;
 
   // Clear form
   ['ap-address','ap-panelid','ap-manufacturer','ap-location','ap-cname','ap-cphone','ap-cemail'].forEach(id => {
@@ -3289,7 +3289,7 @@ function saveNewPanel() {
   });
   document.getElementById('ap-numbreakers').value = '';
 
-  openPanelSetup(panel.id);
+  openPanelSetup(panel.panelId);
 }
 
 function openPanelSetup(panelInternalId) {
@@ -3366,7 +3366,7 @@ function showQRPage(panel) {
     correctLevel: QRCode.CorrectLevel.H
   });
 
-  currentPanelId = panel.id;
+  currentPanelId = panel.panelId;
   showPage('qr');
 }
 
@@ -3469,8 +3469,8 @@ async function openPanelById(panelId, showBackBtn) {
     showPage('landing');
     return;
   }
-  currentPanelId = panel.id;
-  openPanelById_Internal(panel.id, showBackBtn);
+  currentPanelId = panel.panelId;
+  openPanelById_Internal(panel.panelId, showBackBtn);
 }
 async function lookupPanelId() {
   const inputEl = document.getElementById('landing-panel-id');
@@ -3488,8 +3488,8 @@ async function lookupPanelId() {
   }
   if (!panel) { if(err)err.style.display='block'; return; }
   if (err) err.style.display = 'none';
-  currentPanelId = panel.id;
-  openPanelById_Internal(panel.id, false);
+  currentPanelId = panel.panelId;
+  openPanelById_Internal(panel.panelId, false);
 }
 async function lookupAccessPanel() {
   const inputEl = document.getElementById('access-panel-id');
@@ -3507,8 +3507,8 @@ async function lookupAccessPanel() {
   }
   if (!panel) { if(err)err.style.display='block'; return; }
   if (err) err.style.display = 'none';
-  currentPanelId = panel.id;
-  openPanelById_Internal(panel.id, false);
+  currentPanelId = panel.panelId;
+  openPanelById_Internal(panel.panelId, false);
 }
 function openPanelById_Internal(internalId, showBackBtn) {
   const panel = getPanels().find(p => p.id === internalId);
