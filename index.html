@@ -3110,6 +3110,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (typeof currentPage !== 'undefined') onPageLoad(currentPage);
     }
   });
+  }
   migrateLocalToCloud();
   const initial = window.location.hash.replace(/^#/, '') || 'landing';
   showPage(initial);
@@ -4150,7 +4151,6 @@ document.addEventListener('keydown', (e) => {
   if (document.getElementById('edit-breaker-modal').style.display !== 'none') closeEditBreakerModal();
   if (document.getElementById('print-preview-modal').classList.contains('open')) closePrintPreview();
   if (document.getElementById('app-confirm-modal').style.display !== 'none')  closeConfirm(false);
-});
 });
 
 </script>
