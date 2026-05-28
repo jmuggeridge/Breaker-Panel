@@ -3293,7 +3293,7 @@ function saveNewPanel() {
 }
 
 function openPanelSetup(panelInternalId) {
-  const panel = getPanels().find(p => p.id === panelInternalId);
+  const panel = getPanels().find(p => p.panelId === panelInternalId);
   if (!panel) return;
   currentPanelId = panelInternalId;
   document.getElementById('setup-title').textContent = 'Label Breakers — ' + panel.panelId;
@@ -3320,7 +3320,7 @@ function renderSetupGrid(panel) {
 
 function confirmPanelSetup() {
   const panels = getPanels();
-  const idx = panels.findIndex(p => p.id === currentPanelId);
+  const idx = panels.findIndex(p => p.panelId === currentPanelId);
   if (idx === -1) return;
   panels[idx].breakers.forEach(br => {
     const input = document.getElementById('setup-br-' + br.number);
@@ -3334,7 +3334,7 @@ function confirmPanelSetup() {
 function savePanelSetupDraft() {
   // Save current textarea values before leaving
   const panels = getPanels();
-  const idx = panels.findIndex(p => p.id === currentPanelId);
+  const idx = panels.findIndex(p => p.panelId === currentPanelId);
   if (idx !== -1) {
     panels[idx].breakers.forEach(br => {
       const input = document.getElementById('setup-br-' + br.number);
@@ -3375,7 +3375,7 @@ function goToPanelView() {
 }
 
 function showQRForCurrentPanel() {
-  const panel = getPanels().find(p => p.id === currentPanelId);
+  const panel = getPanels().find(p => p.panelId === currentPanelId);
   if (panel) showQRPage(panel);
 }
 
@@ -3422,10 +3422,10 @@ function panelItemHTML(p, showQR = true) {
         <p style="margin-top:2px;font-size:0.8rem;color:#9ca3af">Added ${fmtDate(p.createdDate)}</p>
       </div>
       <div class="panel-item-actions">
-        <button class="btn btn-sm btn-blue" onclick="openPanelById_Internal('${p.id}', true)">View/Edit</button>
-        <button class="btn btn-sm btn-outline" onclick="openPanelHistory('${p.id}')">History</button>
-        <button class="btn btn-sm btn-outline" onclick="currentPanelId='${p.id}';openEditPanelInfo()">Edit Info</button>
-        <button class="btn btn-sm btn-danger" onclick="deletePanel('${p.id}')">Delete</button>
+        <button class="btn btn-sm btn-blue" onclick="openPanelById_Internal('${p.panelId}', true)">View/Edit</button>
+        <button class="btn btn-sm btn-outline" onclick="openPanelHistory('${p.panelId}')">History</button>
+        <button class="btn btn-sm btn-outline" onclick="currentPanelId='${p.panelId}';openEditPanelInfo()">Edit Info</button>
+        <button class="btn btn-sm btn-danger" onclick="deletePanel('${p.panelId}')">Delete</button>
       </div>
     </div>`;
 }
@@ -3433,7 +3433,7 @@ function panelItemHTML(p, showQR = true) {
 function filterPanelsList() { renderPanelsList(); }
 
 function openSetupQR(internalId) {
-  const panel = getPanels().find(p => p.id === internalId);
+  const panel = getPanels().find(p => p.panelId === internalId);
   if (panel) showQRPage(panel);
 }
 
@@ -3442,8 +3442,8 @@ function deletePanel(internalId) {
     'Delete Panel',
     'Delete this panel? This cannot be undone.',
     () => {
-    const _del = getPanels().find(p=>p.id===internalId);
-      const panels = getPanels().filter(p => p.id !== internalId);
+    const _del = getPanels().find(p=>p.panelId===internalId);
+      const panels = getPanels().filter(p => p.panelId !== internalId);
       setPanels(panels);
     if(_del)deleteFromCloud(_del.panelId);
       renderPanelsList();
@@ -3511,7 +3511,7 @@ async function lookupAccessPanel() {
   openPanelById_Internal(panel.panelId, false);
 }
 function openPanelById_Internal(internalId, showBackBtn) {
-  const panel = getPanels().find(p => p.id === internalId);
+  const panel = getPanels().find(p => p.panelId === internalId);
   if (!panel) return;
   currentPanelId = internalId;
 
@@ -3557,7 +3557,7 @@ function renderEditGrid(panel) {
 
 function searchBreakers() {
   const q = document.getElementById('vp-search').value.toLowerCase();
-  const panel = getPanels().find(p => p.id === currentPanelId);
+  const panel = getPanels().find(p => p.panelId === currentPanelId);
   if (!panel) return;
   panel.breakers.forEach(br => {
     const slot = document.getElementById('vp-slot-' + br.number);
@@ -3601,7 +3601,7 @@ function scheduleAutoSave() {
 
 function autoSaveBreakers() {
   const panels = getPanels();
-  const idx = panels.findIndex(p => p.id === currentPanelId);
+  const idx = panels.findIndex(p => p.panelId === currentPanelId);
   if (idx === -1) return;
   panels[idx].breakers.forEach(br => {
     const input = document.getElementById('vp-br-' + br.number);
@@ -3647,7 +3647,7 @@ function confirmSaveBreakers() {
   }
 
   const panels = getPanels();
-  const idx = panels.findIndex(p => p.id === currentPanelId);
+  const idx = panels.findIndex(p => p.panelId === currentPanelId);
   if (idx === -1) return;
 
   const now = new Date().toISOString();
@@ -3682,7 +3682,7 @@ function confirmSaveBreakers() {
 // EDIT PANEL INFO
 // ─────────────────────────────────────
 function openEditPanelInfo() {
-  const panel = getPanels().find(p => p.id === currentPanelId);
+  const panel = getPanels().find(p => p.panelId === currentPanelId);
   if (!panel) return;
   document.getElementById('epi-address').value = panel.streetAddress || '';
   document.getElementById('epi-panelid').value = panel.panelId || '';
@@ -3722,11 +3722,11 @@ function saveEditPanelInfo() {
   }
 
   const panels = getPanels();
-  const idx = panels.findIndex(p => p.id === currentPanelId);
+  const idx = panels.findIndex(p => p.panelId === currentPanelId);
   if (idx === -1) return;
 
   // Check for Panel ID collision (excluding current panel)
-  const collision = panels.find(p => p.panelId === panelId && p.id !== currentPanelId);
+  const collision = panels.find(p => p.panelId === panelId && p.panelId !== currentPanelId);
   if (collision) {
     err.textContent = 'Panel ID "' + panelId + '" is already used by another panel.';
     err.style.display = 'block'; return;
@@ -3757,7 +3757,7 @@ function saveEditPanelInfo() {
 
 function _applyEditPanelInfo(newCount, address, panelId, manufacturer, location) {
   const panels = getPanels();
-  const idx = panels.findIndex(p => p.id === currentPanelId);
+  const idx = panels.findIndex(p => p.panelId === currentPanelId);
   if (idx === -1) return;
   const suc = document.getElementById('epi-success');
   const oldCount = panels[idx].numBreakers;
@@ -3787,7 +3787,7 @@ function _applyEditPanelInfo(newCount, address, panelId, manufacturer, location)
 // HISTORY
 // ─────────────────────────────────────
 function openPanelHistory(internalId) {
-  const panel = getPanels().find(p => p.id === internalId);
+  const panel = getPanels().find(p => p.panelId === internalId);
   if (!panel) return;
   currentPanelId = internalId;
   document.getElementById('hist-title').textContent = 'History: ' + panel.panelId;
@@ -3925,7 +3925,7 @@ function openEditBreakerModal(breakerNum, currentDesc, panelInternalId) {
   document.getElementById('ebm-desc').value = currentDesc;
 
   // Populate link pills
-  const panel    = getPanels().find(p => p.id === panelInternalId);
+  const panel    = getPanels().find(p => p.panelId === panelInternalId);
   const list     = document.getElementById('ebm-link-list');
   list.innerHTML = '';
   if (panel && panel.breakers.length > 1) {
@@ -3960,7 +3960,7 @@ function saveEditBreaker() {
   _syncLinks(currentPanelId, editingBreakerNum, selected);
 
   // Refresh badges on all visible slots
-  const panel = getPanels().find(p => p.id === currentPanelId);
+  const panel = getPanels().find(p => p.panelId === currentPanelId);
   if (panel) _refreshAllLinkBadges(panel);
 
   scheduleAutoSave();
@@ -3970,7 +3970,7 @@ function saveEditBreaker() {
 // ── Bidirectional link sync ──────────────────────────────
 function _syncLinks(panelId, breakerNum, newLinked) {
   const panels = getPanels();
-  const panel  = panels.find(p => p.id === panelId);
+  const panel  = panels.find(p => p.panelId === panelId);
   if (!panel) return;
   const br = panel.breakers.find(b => b.number === breakerNum);
   if (!br) return;
@@ -4056,7 +4056,7 @@ function escHtml(s) {
 }
 
 function printPanel() {
-  const panel = getPanels().find(p => p.id === currentPanelId);
+  const panel = getPanels().find(p => p.panelId === currentPanelId);
   if (!panel) return;
 
   // Read live textarea values (captures unsaved edits too)
