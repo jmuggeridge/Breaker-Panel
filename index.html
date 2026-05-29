@@ -2825,7 +2825,9 @@
         <label>Message</label>
         <textarea id="ct-message" style="min-height:120px" placeholder="Your message…"></textarea>
       </div>
-      <button class="btn btn-blue" onclick="submitContact()">Send Message</button>
+      <!-- Honeypot: hidden from real users, bots fill it in -->
+          <input type="text" id="ct-honeypot" name="website" style="display:none;position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
+          <button class="btn btn-blue" onclick="submitContact()">Send Message</button>
     </div>
   </div>
   <footer>&copy; 2026 <span>MyBreakerPanel</span></footer>
@@ -4045,7 +4047,8 @@ function submitContact() {
   const name    = document.getElementById('ct-name').value.trim();
   const email   = document.getElementById('ct-email').value.trim();
   const msg     = document.getElementById('ct-message').value.trim();
-  const ctErr   = document.getElementById('ct-error');
+  if (document.getElementById('ct-honeypot').value) return; // bot trap
+        const ctErr   = document.getElementById('ct-error');
   const ctOk    = document.getElementById('contact-success');
   ctErr.style.display = 'none';
   ctOk.style.display  = 'none';
