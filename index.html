@@ -2865,6 +2865,17 @@
      JAVASCRIPT
 ══════════════════════════════════════ -->
 <script>
+  // XSS sanitizer — escapes user-supplied text before innerHTML insertion
+  function sanitize(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
 
 // ─────────────────────────────────────
 // FIREBASE CLOUD SYNC
@@ -3313,7 +3324,7 @@ function renderSetupGrid(panel) {
       <div class="breaker-num-edit">${br.number}</div>
       <div style="flex:1">
         <textarea class="breaker-input" id="setup-br-${br.number}" rows="2"
-          placeholder="Click to describe this breaker…">${escHtml(br.description)}</textarea>
+          placeholder="Click to describe this breaker…">${sanitize(escHtml(br.description))}</textarea>
       </div>`;
     grid.appendChild(slot);
   });
@@ -3419,7 +3430,7 @@ function panelItemHTML(p, showQR = true) {
     <div class="panel-item">
       <div class="panel-item-info">
         <h3>${escHtml(p.panelId)} <span class="badge badge-blue">${p.numBreakers} breakers</span> ${p.qrCodeGenerated ? '<span class="badge badge-green">QR ✓</span>' : ''}</h3>
-        <p>${escHtml(p.streetAddress)}${p.locationDescription ? ' · ' + p.locationDescription : ''}</p>
+        <p>${escHtml(p.streetAddress)}${sanitize(p.locationDescription ? ' · ' + p.locationDescription : '')}</p>
         <p style="margin-top:2px;font-size:0.8rem;color:#9ca3af">Added ${fmtDate(p.createdDate)}</p>
       </div>
       <div class="panel-item-actions">
@@ -3549,7 +3560,7 @@ function renderEditGrid(panel) {
       <div id="vp-slot-inner-${br.number}" style="flex:1">
         <textarea class="breaker-input" id="vp-br-${br.number}" rows="2"
           placeholder="Click to describe breaker ${br.number}…"
-          oninput="scheduleAutoSave()">${escHtml(br.description)}</textarea>
+          oninput="scheduleAutoSave()">${sanitize(escHtml(br.description))}</textarea>
         ${linked.length ? `<span class="breaker-link-badge">🔗 Linked: ${linked.slice().sort((a,b)=>a-b).join(', ')}</span>` : ''}
       </div>`;
     grid.appendChild(slot);
@@ -3820,8 +3831,8 @@ function renderHistory(panel) {
       <div class="hist-date">${fmtDate(h.date)}</div>
       <div class="hist-breaker">Breaker #${h.breakerNumber}</div>
       <div class="hist-desc">
-        ${h.previousDescription ? `<span style="color:#9ca3af;text-decoration:line-through">${h.previousDescription}</span> → ` : ''}
-        <strong>${h.newDescription ? escHtml(h.newDescription) : '<em>cleared</em>'}</strong>
+        ${sanitize(h.previousDescription ? `<span style="color:#9ca3af;text-decoration:line-through">${h.previousDescription)}</span> → ` : ''}
+        <strong>${sanitize(h.newDescription ? escHtml(h.newDescription) : '<em>cleared</em>')}</strong>
       </div>
       <div class="hist-contact">By: ${escHtml(h.contactName)} · ${escHtml(h.contactPhone)} · ${escHtml(h.contactEmail)}${h.contactAddress ? ' · ' + h.contactAddress : ''}</div>
     </div>`).join('');
@@ -4090,7 +4101,7 @@ function printPanel() {
 
   const row = br => `<tr>
     <td class="pp-num">${br.number}</td>
-    <td class="pp-desc">${br.description ? escHtml(br.description) : '<span class="pp-empty">—</span>'}</td>
+    <td class="pp-desc">${sanitize(br.description ? escHtml(br.description) : '<span class="pp-empty">—</span>')}</td>
   </tr>`;
 
   document.getElementById('print-preview-content').innerHTML = `
@@ -4099,7 +4110,7 @@ function printPanel() {
         <h2>Panel ID: ${escHtml(panel.panelId)}</h2>
         <div class="pp-meta">
           ${escHtml(panel.streetAddress)}
-          ${panel.locationDescription ? ' &nbsp;·&nbsp; ' + escHtml(panel.locationDescription) : ''}
+          ${sanitize(panel.locationDescription ? ' &nbsp;·&nbsp; ' + escHtml(panel.locationDescription) : '')}
           ${panel.manufacturer ? ' &nbsp;·&nbsp; ' + escHtml(panel.manufacturer) : ''}
           &nbsp;·&nbsp; ${panel.numBreakers} breakers
         </div>
