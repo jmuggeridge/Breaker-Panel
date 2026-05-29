@@ -4031,22 +4031,40 @@ function closeEditBreakerModal() {
 // CONTACT FORM
 // ─────────────────────────────────────
 function submitContact() {
-  const name = document.getElementById('ct-name').value.trim();
-  const email = document.getElementById('ct-email').value.trim();
-  const msg = document.getElementById('ct-message').value.trim();
-  const ctErr = document.getElementById('ct-error');
+  const name    = document.getElementById('ct-name').value.trim();
+  const email   = document.getElementById('ct-email').value.trim();
+  const msg     = document.getElementById('ct-message').value.trim();
+  const ctErr   = document.getElementById('ct-error');
+  const ctOk    = document.getElementById('contact-success');
   ctErr.style.display = 'none';
+  ctOk.style.display  = 'none';
   if (!name || !email || !msg) {
     ctErr.textContent = 'Please fill in all fields.';
     ctErr.style.display = 'block';
     return;
   }
-  const s = document.getElementById('contact-success');
-  s.textContent = 'Thanks, ' + name + '! Your message has been received.';
-  s.style.display = 'block';
-  document.getElementById('ct-name').value = '';
-  document.getElementById('ct-email').value = '';
-  document.getElementById('ct-message').value = '';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0wfa51E0f6TM3MCAQ1KPZglTPZ-cBFDGE7eYzYGJjr4Awe777mxyUbM_jzfh-IO_K/exec';
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ name, email, message: msg })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.status === 'ok') {
+      ctOk.textContent = 'Thanks, ' + name + '! Your message has been sent.';
+      ctOk.style.display = 'block';
+      document.getElementById('ct-name').value    = '';
+      document.getElementById('ct-email').value   = '';
+      document.getElementById('ct-message').value = '';
+    } else {
+      ctErr.textContent = 'Something went wrong. Please try again.';
+      ctErr.style.display = 'block';
+    }
+  })
+  .catch(() => {
+    ctErr.textContent = 'Could not send message. Please try again.';
+    ctErr.style.display = 'block';
+  });
 }
 
 // ─────────────────────────────────────
