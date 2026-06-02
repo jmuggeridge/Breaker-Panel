@@ -3821,7 +3821,7 @@ function renderHistory(panel) {
       <div class="hist-date">${fmtDate(h.date)}</div>
       <div class="hist-breaker">Breaker #${h.breakerNumber}</div>
       <div class="hist-desc">
-        ${h.previousDescription}? `<span style="color:#9ca3af;text-decoration:line-through">${h.previousDescription}</span> → ` : ''}
+        ${h.previousDescription ? `<span style="color:#9ca3af;text-decoration:line-through">${h.previousDescription}</span> → ` : ''}
         <strong>${h.newDescription ? escHtml(h.newDescription) : '<em>cleared</em>'}</strong>
       </div>
       <div class="hist-contact">By: ${escHtml(h.contactName)} · ${escHtml(h.contactPhone)} · ${escHtml(h.contactEmail)}${h.contactAddress ? ' · ' + h.contactAddress : ''}</div>
